@@ -478,3 +478,111 @@ button { color: inherit; }
   .shift-picker button.active::after { top: 4px; right: 4px; width: 15px; height: 15px; }
   .phase-marker { width: 24px; height: 24px; }
 }
+
+/* v5 — safe-area drawers, batch editing and confirmed setting inputs */
+.primary-small { display:inline-flex; align-items:center; justify-content:center; gap:5px; }
+.primary-small .app-icon { width:14px; height:14px; }
+.primary-small:disabled, .primary-button:disabled { opacity:.42; cursor:not-allowed; box-shadow:none; }
+.secondary-small {
+  min-height:39px;
+  padding:0 13px;
+  border:1px solid rgba(255,255,255,.92);
+  border-radius:13px;
+  color:#51719f;
+  background:linear-gradient(145deg,rgba(255,255,255,.9),rgba(229,239,254,.7));
+  box-shadow:inset 0 1px 0 white,0 7px 17px rgba(49,78,125,.07);
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+}
+.calendar-actions { display:flex; align-items:center; gap:8px; }
+.batch-selection-bar {
+  margin:-8px 0 16px;
+  padding:11px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:16px;
+  background:linear-gradient(135deg,rgba(224,238,255,.86),rgba(239,234,255,.68));
+  box-shadow:inset 0 1px 0 white;
+}
+.batch-selection-bar > span { display:flex; flex-direction:column; gap:2px; }
+.batch-selection-bar strong { font-size:11px; color:#376fc8; }.batch-selection-bar small { font-size:8px; color:var(--muted); }
+.calendar-day.batch-selected {
+  z-index:2;
+  border-color:#2d7ef6;
+  background:linear-gradient(145deg,rgba(229,241,255,.98),rgba(235,233,255,.9));
+  box-shadow:inset 0 0 0 2px #2d7ef6,0 9px 22px rgba(42,105,216,.18);
+  transform:translateY(-1px);
+}
+.batch-check { position:absolute; top:5px; right:5px; width:17px; height:17px; display:grid; place-items:center; border:2px solid white; border-radius:50%; color:white; background:linear-gradient(145deg,#2d84ff,#675be9); box-shadow:0 4px 9px rgba(43,94,192,.25); font-size:9px; font-weight:900; }
+
+.setting-number-row {
+  width:100%;
+  min-height:48px;
+  margin-top:12px;
+  padding:0 13px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:14px;
+  color:#60708a;
+  background:linear-gradient(145deg,rgba(255,255,255,.76),rgba(235,243,254,.48));
+  box-shadow:inset 0 1px 0 white,0 6px 18px rgba(51,82,132,.05);
+  font-size:12px;
+  font-weight:750;
+  cursor:pointer;
+}
+.setting-number-row strong { display:flex; align-items:center; gap:5px; color:var(--ink); font-size:14px; }
+.setting-number-row b { color:#8c98aa; font-size:9px; }.setting-number-row i { margin-left:4px; color:#6681aa; font-size:18px; font-style:normal; font-weight:500; }
+.target-number-button {
+  min-height:46px;
+  padding:8px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:14px;
+  color:var(--muted);
+  background:linear-gradient(145deg,rgba(255,255,255,.74),rgba(235,243,254,.48));
+  box-shadow:inset 0 1px 0 white,0 6px 16px rgba(51,82,132,.045);
+  font-size:10px;
+  cursor:pointer;
+}
+.target-number-button strong { color:var(--ink); font-size:12px; }.target-number-button b { margin-left:2px; color:#8c98aa; font-size:8px; }
+
+.modal-backdrop { z-index:200; }
+body:has(.modal-backdrop) { overflow:hidden; }
+.bottom-nav { transition:opacity .18s ease, transform .22s ease; }
+body:has(.modal-backdrop) .bottom-nav { opacity:0; visibility:hidden; pointer-events:none; transform:translate3d(0,calc(100% + 40px),0); }
+.sheet-actions { z-index:5; }
+.batch-date-range { margin:12px 0 0; color:var(--muted); font-size:10px; }
+.batch-hours-field { margin-top:16px; }
+.number-editor-backdrop { align-items:center; }
+.number-editor-card { width:min(410px,100%); padding:25px; border-radius:26px; background:linear-gradient(155deg,rgba(253,254,255,.99),rgba(237,245,255,.98)); }
+.number-editor-input { display:flex; flex-direction:column; gap:8px; margin-top:22px; color:#60708a; font-size:11px; font-weight:800; }
+.number-editor-input > div { min-height:58px; padding:0 13px; display:flex; align-items:center; gap:8px; border:1px solid rgba(57,126,236,.25); border-radius:16px; background:rgba(255,255,255,.78); box-shadow:0 0 0 3px rgba(51,126,241,.07),inset 0 1px 0 white; }
+.number-editor-input input { min-width:0; flex:1; border:0; outline:0; background:transparent; color:var(--ink); font-size:22px; font-weight:850; }
+.number-editor-input b { color:#8290a5; font-size:10px; white-space:nowrap; }.number-editor-input button { min-height:30px; padding:0 9px; border:0; border-radius:9px; color:#bf5a70; background:#fff0f3; font-size:9px; font-weight:800; }
+.number-editor-tip { margin:10px 2px 0; color:#8996a9; font-size:9px; line-height:1.5; }
+
+@media (max-width: 720px) {
+  .content-wrap { padding-top:calc(18px + env(safe-area-inset-top, 0px)); }
+  .calendar-toolbar { align-items:flex-start; }.calendar-actions { gap:5px; }.secondary-small,.calendar-actions .primary-small { min-height:37px; padding:0 9px; font-size:9px; }
+  .batch-selection-bar { margin-top:-5px; }.batch-selection-bar .primary-small { min-height:36px; padding:0 10px; font-size:9px; }
+  .calendar-day.batch-selected { transform:none; }.batch-check { top:3px; right:3px; width:15px; height:15px; border-width:1.5px; }
+  .modal-backdrop { padding:env(safe-area-inset-top, 0px) 0 0; }
+  .bottom-sheet,.dialog-card { max-height:calc(100dvh - env(safe-area-inset-top, 0px) - 6px); overflow-y:auto; overscroll-behavior:contain; }
+  .bottom-sheet { padding-bottom:calc(18px + env(safe-area-inset-bottom, 0px)); }
+  .dialog-card { padding-bottom:calc(18px + env(safe-area-inset-bottom, 0px)); }
+  .sheet-actions { position:sticky; bottom:0; margin-left:-2px; margin-right:-2px; padding:12px 2px 2px; background:linear-gradient(180deg,rgba(244,249,255,0),rgba(244,249,255,.96) 24%,rgba(244,249,255,.99)); backdrop-filter:blur(12px); }
+  .detail-backdrop,.number-editor-backdrop { align-items:center; padding:calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 16px); }
+  .month-detail-card,.number-editor-card { max-height:calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 32px); overflow-y:auto; }
+  .number-editor-card { padding:22px 18px calc(18px + env(safe-area-inset-bottom, 0px)); }
+  .number-editor-card .sheet-actions { position:static; background:transparent; backdrop-filter:none; }
+  .target-grid { grid-template-columns:repeat(3,1fr); }
+}

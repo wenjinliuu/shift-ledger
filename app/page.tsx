@@ -31,6 +31,17 @@ type Settings = {
   targets: Record<string, number>;
 };
 
+type EditableSettingKey = "baseSalary" | "weekdayMultiplier" | "weekendMultiplier" | "holidayMultiplier" | "dayHours" | "nightHours" | "dailyStandard";
+type NumberEditorConfig = {
+  key: EditableSettingKey | string;
+  target?: boolean;
+  title: string;
+  unit: string;
+  value: number;
+  min: number;
+  step: number;
+};
+
 const TARGETS_2026: Record<string, number> = {
   "2026-01": 168,
   "2026-02": 128,
@@ -46,6 +57,14 @@ const TARGETS_2026: Record<string, number> = {
   "2026-12": 184,
 };
 
+const DEFAULT_CYCLE: ShiftType[] = [
+  "day", "day", "day", "day",
+  "rest", "rest",
+  "night", "night", "night", "night",
+  "rest", "rest",
+];
+const LEGACY_DEFAULT_CYCLE: ShiftType[] = ["day", "day", "day", "day", "day", "rest", "rest"];
+
 const DEFAULT_SETTINGS: Settings = {
   workMode: "comprehensive",
   baseSalary: 0,
@@ -57,7 +76,7 @@ const DEFAULT_SETTINGS: Settings = {
   dayHours: 8,
   nightHours: 8,
   cycleStart: "2026-01-01",
-  cycle: ["day", "day", "day", "day", "day", "rest", "rest"],
+  cycle: DEFAULT_CYCLE,
   targets: TARGETS_2026,
 };
 
@@ -106,9 +125,12 @@ function compactHours(value: number) {
 
 function normalizeSettings(value?: Partial<Settings>): Settings {
   const isLegacy = Boolean(value && !Array.isArray(value.cycle));
-  const cycle = Array.isArray(value?.cycle) && value.cycle.length
+  let cycle = Array.isArray(value?.cycle) && value.cycle.length
     ? value.cycle.filter((item): item is ShiftType => item === "day" || item === "night" || item === "rest")
     : DEFAULT_SETTINGS.cycle;
+  if (cycle.length === LEGACY_DEFAULT_CYCLE.length && cycle.every((item, index) => item === LEGACY_DEFAULT_CYCLE[index])) {
+    cycle = DEFAULT_CYCLE;
+  }
   return {
     ...DEFAULT_SETTINGS,
     ...value,
@@ -254,6 +276,9 @@ export default function Home() {
   const [selectedMonth, setSelectedMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [showGenerator, setShowGenerator] = useState(false);
+  const [batchMode, setBatchMode] = useState(false);
+  const [batchDates, setBatchDates] = useState<string[]>([]);
+  const [showBatchEditor, setShowBatchEditor] = useState(false);
   const [ready, setReady] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
 
@@ -314,6 +339,37 @@ export default function Home() {
     setShowGenerator(false);
     setSavedToast(true);
     window.setTimeout(() => setSavedToast(false), 2200);
+  }
+
+  function toggleBatchMode() {
+    setBatchMode((active) => {
+      if (active) setBatchDates([]);
+      return !active;
+    });
+  }
+
+  function toggleBatchDate(key: string) {
+    setBatchDates((items) => items.includes(key) ? items.filter((item) => item !== key) : [...items, key].sort());
+  }
+
+  function updateBatchRecords(change: { shift: ShiftType; hours: number; isHoliday: boolean }) {
+    const selected = new Set(batchDates);
+    const existing = new Map(records.map((item) => [item.date, item]));
+    const updates = batchDates.map((date) => ({
+      ...(existing.get(date) ?? { date, completed: false }),
+      date,
+      shift: change.shift,
+      hours: change.hours,
+      planned: change.shift !== "leave",
+      completed: false,
+      isHoliday: change.isHoliday,
+    }));
+    setRecords((items) => [...items.filter((item) => !selected.has(item.date)), ...updates].sort((a, b) => a.date.localeCompare(b.date)));
+    setShowBatchEditor(false);
+    setBatchMode(false);
+    setBatchDates([]);
+    setSavedToast(true);
+    window.setTimeout(() => setSavedToast(false), 1800);
   }
 
   const navItems: { id: View; label: string; icon: string }[] = [
@@ -380,6 +436,11 @@ export default function Home() {
             projected={projected}
             onOpenDate={openDate}
             onGenerate={() => setShowGenerator(true)}
+            batchMode={batchMode}
+            batchDates={batchDates}
+            onToggleBatchMode={toggleBatchMode}
+            onToggleBatchDate={toggleBatchDate}
+            onEditBatch={() => setShowBatchEditor(true)}
           />
         )}
         {view === "stats" && <StatsView year={year} records={records} settings={settings} selectedMonth={month} />}
@@ -410,6 +471,7 @@ export default function Home() {
         />
       )}
       {showGenerator && <ScheduleGenerator settings={settings} year={year} onClose={() => setShowGenerator(false)} onGenerate={regenerateYear} />}
+      {showBatchEditor && <BatchEditor dates={batchDates} settings={settings} onClose={() => setShowBatchEditor(false)} onSave={updateBatchRecords} />}
       {savedToast && <div className="toast"><Icon name="check" /> 已保存</div>}
     </main>
   );
@@ -488,7 +550,7 @@ function MetricCard({ tone, label, value, detail }: { tone: string; label: strin
   return <article className={`glass-panel metric-card tone-${tone}`}><span className="metric-glow" /><p>{label}</p><strong>{value}</strong><small>{detail}</small></article>;
 }
 
-function CalendarView({ year, month, records, target, actual, projected, onOpenDate, onGenerate }: {
+function CalendarView({ year, month, records, target, actual, projected, onOpenDate, onGenerate, batchMode, batchDates, onToggleBatchMode, onToggleBatchDate, onEditBatch }: {
   year: number;
   month: number;
   records: DayRecord[];
@@ -497,6 +559,11 @@ function CalendarView({ year, month, records, target, actual, projected, onOpenD
   projected: ReturnType<typeof getPay>;
   onOpenDate: (key: string) => void;
   onGenerate: () => void;
+  batchMode: boolean;
+  batchDates: string[];
+  onToggleBatchMode: () => void;
+  onToggleBatchDate: (key: string) => void;
+  onEditBatch: () => void;
 }) {
   const byDate = new Map(records.map((item) => [item.date, item]));
   const days = getCalendarDays(year, month);
@@ -506,8 +573,12 @@ function CalendarView({ year, month, records, target, actual, projected, onOpenD
       <section className="glass-panel calendar-panel">
         <div className="calendar-toolbar">
           <div><span className="soft-badge">{year}</span><h2>{MONTH_LABELS[month]}</h2></div>
-          <button className="primary-small" onClick={onGenerate}><Icon name="spark" /> 批量排班</button>
+          <div className="calendar-actions">
+            <button className="secondary-small" onClick={onToggleBatchMode}>{batchMode ? "退出多选" : "批量修改"}</button>
+            <button className="primary-small" onClick={onGenerate}><Icon name="spark" /> 循环排班</button>
+          </div>
         </div>
+        {batchMode && <div className="batch-selection-bar"><span><strong>已选 {batchDates.length} 天</strong><small>点击日历日期可连续多选</small></span><button className="primary-small" disabled={!batchDates.length} onClick={onEditBatch}>修改所选日期</button></div>}
         <div className="weekday-row">{WEEKDAYS.map((day, index) => <span className={index > 4 ? "weekend" : ""} key={day}>周{day}</span>)}</div>
         <div className="calendar-grid">
           {days.map((day, index) => {
@@ -515,10 +586,12 @@ function CalendarView({ year, month, records, target, actual, projected, onOpenD
             const key = `${year}-${pad(month + 1)}-${pad(day)}`;
             const item = byDate.get(key);
             const meta = item ? SHIFT_META[item.shift] : null;
+            const batchSelected = batchDates.includes(key);
             return (
-              <button key={key} className={`calendar-day ${key === todayKey ? "today" : ""} ${key < todayKey ? "past" : key > todayKey ? "future" : ""}`} onClick={() => onOpenDate(key)}>
+              <button key={key} aria-pressed={batchMode ? batchSelected : undefined} className={`calendar-day ${key === todayKey ? "today" : ""} ${key < todayKey ? "past" : key > todayKey ? "future" : ""} ${batchSelected ? "batch-selected" : ""}`} onClick={() => batchMode ? onToggleBatchDate(key) : onOpenDate(key)}>
                 <span className="day-number">{day}<small>{index % 7 > 4 ? "周末" : ""}</small></span>
                 {item && item.shift !== "rest" ? <span className={`day-shift ${meta?.className}`}><b>{meta?.short}</b><em>{compactHours(item.hours)}h</em></span> : item?.shift === "rest" ? <span className="rest-label">休</span> : <span className="add-day">＋</span>}
+                {batchSelected && <span className="batch-check">✓</span>}
               </button>
             );
           })}
@@ -601,7 +674,19 @@ function StatsView({ year, records, settings, selectedMonth }: { year: number; r
 function SettingsView({ settings, setSettings, records, setRecords, year, monthKey }: { settings: Settings; setSettings: React.Dispatch<React.SetStateAction<Settings>>; records: DayRecord[]; setRecords: React.Dispatch<React.SetStateAction<DayRecord[]>>; year: number; monthKey: string }) {
   const importInput = useRef<HTMLInputElement>(null);
   const [importMessage, setImportMessage] = useState("");
-  const updateNumber = (key: keyof Settings, value: string) => setSettings((item) => ({ ...item, [key]: Number(value) || 0 }));
+  const [numberEditor, setNumberEditor] = useState<NumberEditorConfig | null>(null);
+  function editNumber(key: EditableSettingKey, title: string, unit: string, value: number, min: number, step: number) {
+    setNumberEditor({ key, title, unit, value, min, step });
+  }
+  function saveNumber(value: number) {
+    if (!numberEditor) return;
+    if (numberEditor.target) {
+      setSettings((item) => ({ ...item, targets: { ...item.targets, [numberEditor.key]: value } }));
+    } else {
+      setSettings((item) => ({ ...item, [numberEditor.key]: value }));
+    }
+    setNumberEditor(null);
+  }
   async function importBackup(file?: File) {
     if (!file) return;
     try {
@@ -618,7 +703,7 @@ function SettingsView({ settings, setSettings, records, setRecords, year, monthK
       if (importInput.current) importInput.current.value = "";
     }
   }
-  return (
+  return <>
     <div className="settings-grid">
       <section className="glass-panel setting-card wide">
         <div className="section-heading"><div><p className="eyebrow">计算方式</p><h2>工时制度</h2></div></div>
@@ -629,28 +714,28 @@ function SettingsView({ settings, setSettings, records, setRecords, year, monthK
       </section>
       <section className="glass-panel setting-card">
         <div className="section-heading"><div><p className="eyebrow">工资</p><h2>底薪与时薪</h2></div></div>
-        <label className="field"><span>月基本工资</span><div><input type="number" value={settings.baseSalary} onChange={(event) => updateNumber("baseSalary", event.target.value)} /><b>元</b></div></label>
+        <SettingNumberRow label="月基本工资" value={settings.baseSalary} unit="元" onClick={() => editNumber("baseSalary", "月基本工资", "元", settings.baseSalary, 0, 1)} />
         <div className="calculated-field"><span>本月小时工资</span><strong>¥{money(settings.baseSalary / (settings.targets[monthKey] ?? 168))}</strong><small>自动按底薪 ÷ 基本工时</small></div>
       </section>
       <section className="glass-panel setting-card">
         <div className="section-heading"><div><p className="eyebrow">倍率</p><h2>加班工资</h2></div></div>
-        <MultiplierField key={`weekday-${settings.weekdayMultiplier}`} label="平时加班" value={settings.weekdayMultiplier} onChange={(value) => updateNumber("weekdayMultiplier", value)} />
-        <MultiplierField key={`weekend-${settings.weekendMultiplier}`} label="周末加班" value={settings.weekendMultiplier} onChange={(value) => updateNumber("weekendMultiplier", value)} />
-        <MultiplierField key={`holiday-${settings.holidayMultiplier}`} label="节日加班" value={settings.holidayMultiplier} onChange={(value) => updateNumber("holidayMultiplier", value)} />
+        <SettingNumberRow label="平时加班" value={settings.weekdayMultiplier} unit="倍" onClick={() => editNumber("weekdayMultiplier", "平时加班倍率", "倍", settings.weekdayMultiplier, 0.1, 0.1)} />
+        <SettingNumberRow label="周末加班" value={settings.weekendMultiplier} unit="倍" onClick={() => editNumber("weekendMultiplier", "周末加班倍率", "倍", settings.weekendMultiplier, 0.1, 0.1)} />
+        <SettingNumberRow label="节日加班" value={settings.holidayMultiplier} unit="倍" onClick={() => editNumber("holidayMultiplier", "节日加班倍率", "倍", settings.holidayMultiplier, 0.1, 0.1)} />
         {settings.workMode === "comprehensive" && <label className="switch-row"><span><strong>节假日单独计算</strong><small>关闭时，所有超出基本工时统一按平时倍率</small></span><input type="checkbox" checked={settings.holidaySeparate} onChange={(event) => setSettings((item) => ({ ...item, holidaySeparate: event.target.checked }))} /></label>}
       </section>
       <section className="glass-panel setting-card">
         <div className="section-heading"><div><p className="eyebrow">班次</p><h2>默认时长</h2></div></div>
-        <label className="field"><span>白班</span><div><input type="number" step="0.5" value={settings.dayHours} onChange={(event) => updateNumber("dayHours", event.target.value)} /><b>小时</b></div></label>
-        <label className="field"><span>夜班</span><div><input type="number" step="0.5" value={settings.nightHours} onChange={(event) => updateNumber("nightHours", event.target.value)} /><b>小时</b></div></label>
-        <label className="field"><span>日标准工时</span><div><input type="number" step="0.5" value={settings.dailyStandard} onChange={(event) => updateNumber("dailyStandard", event.target.value)} /><b>小时</b></div></label>
+        <SettingNumberRow label="白班" value={settings.dayHours} unit="小时" onClick={() => editNumber("dayHours", "白班默认时长", "小时", settings.dayHours, 0, 0.5)} />
+        <SettingNumberRow label="夜班" value={settings.nightHours} unit="小时" onClick={() => editNumber("nightHours", "夜班默认时长", "小时", settings.nightHours, 0, 0.5)} />
+        <SettingNumberRow label="日标准工时" value={settings.dailyStandard} unit="小时" onClick={() => editNumber("dailyStandard", "日标准工时", "小时", settings.dailyStandard, 0, 0.5)} />
       </section>
       <section className="glass-panel setting-card wide">
         <div className="section-heading"><div><p className="eyebrow">{year} 年</p><h2>每月基本工时</h2></div><span className="soft-badge">可手动修正</span></div>
         <div className="target-grid">
           {MONTH_LABELS.map((label, index) => {
             const key = `${year}-${pad(index + 1)}`;
-            return <label key={key}><span>{label}</span><div><input type="number" value={settings.targets[key] ?? 168} onChange={(event) => setSettings((item) => ({ ...item, targets: { ...item.targets, [key]: Number(event.target.value) || 0 } }))} /><b>h</b></div></label>;
+            return <button className="target-number-button" key={key} onClick={() => setNumberEditor({ key, target: true, title: `${label}基本工时`, unit: "小时", value: settings.targets[key] ?? 168, min: 0, step: 1 })}><span>{label}</span><strong>{settings.targets[key] ?? 168}<b>h</b></strong></button>;
           })}
         </div>
         <p className="setting-footnote">2026 年已按你提供的基本工时表预置。以后可按年度更新，不会影响已保存的每日记录。</p>
@@ -664,18 +749,26 @@ function SettingsView({ settings, setSettings, records, setRecords, year, monthK
         </div>
       </section>
     </div>
-  );
+    {numberEditor && <NumberEditorModal config={numberEditor} onClose={() => setNumberEditor(null)} onSave={saveNumber} />}
+  </>;
 }
 
-function MultiplierField({ label, value, onChange }: { label: string; value: number; onChange: (value: string) => void }) {
-  const [text, setText] = useState(String(value || 1));
-  function commit() {
-    const parsed = Number(text);
-    const safe = Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
-    setText(String(safe));
-    onChange(String(safe));
-  }
-  return <label className="multiplier-field"><span>{label}</span><div className="number-shell"><input inputMode="decimal" type="number" min="0.1" step="0.1" value={text} onFocus={(event) => event.currentTarget.select()} onChange={(event) => setText(event.target.value)} onBlur={commit} /><b>倍</b></div></label>;
+function SettingNumberRow({ label, value, unit, onClick }: { label: string; value: number; unit: string; onClick: () => void }) {
+  return <button className="setting-number-row" onClick={onClick}><span>{label}</span><strong>{compactHours(value)}<b>{unit}</b><i>›</i></strong></button>;
+}
+
+function NumberEditorModal({ config, onClose, onSave }: { config: NumberEditorConfig; onClose: () => void; onSave: (value: number) => void }) {
+  const [text, setText] = useState(String(config.value));
+  const parsed = Number(text);
+  const valid = text.trim() !== "" && Number.isFinite(parsed) && parsed >= config.min;
+  return <div className="modal-backdrop number-editor-backdrop" onMouseDown={onClose}>
+    <section className="number-editor-card glass-panel" onMouseDown={(event) => event.stopPropagation()}>
+      <div className="sheet-header"><div><p className="eyebrow">修改设置</p><h2>{config.title}</h2></div><button className="close-button" onClick={onClose}>×</button></div>
+      <label className="number-editor-input"><span>输入新数值</span><div><input autoFocus inputMode="decimal" type="text" value={text} onChange={(event) => setText(event.target.value.replace(/[^0-9.]/g, ""))} /><b>{config.unit}</b>{text && <button type="button" onClick={() => setText("")}>清空</button>}</div></label>
+      <p className="number-editor-tip">内容可以完全清空后重新输入；确认后会立即重新计算当前页面。</p>
+      <div className="sheet-actions"><button className="secondary-button" onClick={onClose}>取消</button><button className="primary-button" disabled={!valid} onClick={() => valid && onSave(parsed)}>确定修改</button></div>
+    </section>
+  </div>;
 }
 
 function DayEditor({ date, record, settings, onClose, onSave, onDelete }: { date: string; record?: DayRecord; settings: Settings; onClose: () => void; onSave: (record: DayRecord) => void; onDelete: () => void }) {
@@ -712,6 +805,37 @@ function DayEditor({ date, record, settings, onClose, onSave, onDelete }: { date
   );
 }
 
+function BatchEditor({ dates, settings, onClose, onSave }: { dates: string[]; settings: Settings; onClose: () => void; onSave: (change: { shift: ShiftType; hours: number; isHoliday: boolean }) => void }) {
+  const [shift, setShift] = useState<ShiftType>("day");
+  const [hoursText, setHoursText] = useState(String(settings.dayHours));
+  const [isHoliday, setIsHoliday] = useState(false);
+  const hours = Number(hoursText);
+  const valid = hoursText.trim() !== "" && Number.isFinite(hours) && hours >= 0;
+  function selectShift(next: ShiftType) {
+    setShift(next);
+    if (next === "day") setHoursText(String(settings.dayHours));
+    if (next === "night") setHoursText(String(settings.nightHours));
+    if (next === "rest" || next === "leave") setHoursText("0");
+  }
+  return <div className="modal-backdrop" onMouseDown={onClose}>
+    <section className="bottom-sheet batch-editor-sheet glass-panel" onMouseDown={(event) => event.stopPropagation()}>
+      <div className="sheet-grabber" />
+      <div className="sheet-header"><div><p className="eyebrow">批量修改 · {dates.length} 天</p><h2>统一设置所选日期</h2></div><button className="close-button" onClick={onClose}>×</button></div>
+      <p className="batch-date-range">{dates[0]} 至 {dates[dates.length - 1]}，只修改已选择的日期。</p>
+      <div className="shift-picker">
+        {(Object.keys(SHIFT_META) as ShiftType[]).map((item) => <button key={item} className={`${shift === item ? "active" : ""} ${SHIFT_META[item].className}`} onClick={() => selectShift(item)}><span>{SHIFT_META[item].short}</span>{SHIFT_META[item].label}</button>)}
+      </div>
+      <label className="field batch-hours-field"><span>统一工时</span><div><input inputMode="decimal" type="text" value={hoursText} onChange={(event) => setHoursText(event.target.value.replace(/[^0-9.]/g, ""))} /><b>小时</b></div></label>
+      <div className="quick-hour-group" aria-label="常用工时">
+        {[8, 10, 10.5, 11, 11.5, 12].map((item) => <button key={item} className={hours === item ? "active" : ""} onClick={() => { setHoursText(String(item)); if (shift === "rest" || shift === "leave") setShift("custom"); }}>{item}h</button>)}
+      </div>
+      <label className="switch-row"><span><strong>统一标为法定节假日</strong><small>开启后，所选日期都按节日规则计算</small></span><input type="checkbox" checked={isHoliday} onChange={(event) => setIsHoliday(event.target.checked)} /></label>
+      <div className="warning-note"><Icon name="spark" /><span>本次只覆盖班次、工时和节假日状态，不会影响未选择的日期。</span></div>
+      <div className="sheet-actions"><button className="secondary-button" onClick={onClose}>返回选择</button><button className="primary-button" disabled={!valid} onClick={() => valid && onSave({ shift, hours, isHoliday })}>确认修改 {dates.length} 天</button></div>
+    </section>
+  </div>;
+}
+
 function ScheduleGenerator({ settings, year, onClose, onGenerate }: { settings: Settings; year: number; onClose: () => void; onGenerate: (cycle: ShiftType[], cycleStart: string) => void }) {
   const [cycle, setCycle] = useState<ShiftType[]>(settings.cycle);
   const currentDate = dateKey(new Date());
@@ -730,7 +854,7 @@ function ScheduleGenerator({ settings, year, onClose, onGenerate }: { settings: 
           <button className="shift-night" onClick={() => addShift("night")}><b>＋ 夜</b><span>夜班 {settings.nightHours}h</span></button>
           <button className="shift-rest" onClick={() => addShift("rest")}><b>＋ 休</b><span>休息</span></button>
         </div>
-        <button className="preset-cycle" onClick={() => setCycle(DEFAULT_SETTINGS.cycle)}>恢复「五白两休」通用示例</button>
+        <button className="preset-cycle" onClick={() => setCycle(DEFAULT_CYCLE)}>恢复「四白两休 · 四夜两休」默认循环</button>
         <p className="dialog-copy">按点击顺序组成一个循环。系统只从生效日开始向后覆盖到年底，生效日前已经发生的排班和手动修改全部保留。</p>
         <label className="field"><span>新循环生效日（第 1 天）</span><div><input type="date" min={`${year}-01-01`} max={`${year}-12-31`} value={cycleStart} onChange={(event) => setCycleStart(event.target.value)} /></div></label>
         <div className="warning-note"><Icon name="spark" /><span>{cycleStart} 之前的记录不会改变；当天及之后将按新循环重新生成。</span></div>
