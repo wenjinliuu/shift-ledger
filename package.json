@@ -9,9 +9,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ignore-pattern .next --ignore-pattern out"
+    "lint": "eslint ."
   },
   "dependencies": {
+    "lunar-typescript": "^1.8.6",
     "next": "16.2.6",
     "react": "19.2.6",
     "react-dom": "19.2.6"
