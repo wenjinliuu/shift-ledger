@@ -196,6 +196,21 @@ function isStatutoryHoliday(key: string) {
   return Boolean(statutoryHolidayName(key));
 }
 
+function statutoryHolidayShortName(name: string) {
+  const labels: Record<string, string> = {
+    元旦: "元旦",
+    劳动节: "劳动",
+    国庆节: "国庆",
+    中秋节补假: "中秋补",
+    春节: "春节",
+    除夕: "除夕",
+    清明节: "清明",
+    端午节: "端午",
+    中秋节: "中秋",
+  };
+  return labels[name] ?? name;
+}
+
 function countOvertimeDays(records: DayRecord[], target: number, projected: boolean) {
   const included = records
     .filter((item) => item.hours > 0 && (projected ? item.planned : isAutomaticallyCompleted(item)))
@@ -727,7 +742,7 @@ function CalendarView({ year, month, records, target, actual, projected, onOpenD
               <button key={key} aria-pressed={batchMode ? batchSelected : undefined} className={`calendar-day ${key === todayKey ? "today" : ""} ${key < todayKey ? "past" : key > todayKey ? "future" : ""} ${batchSelected ? "batch-selected" : ""}`} onClick={() => batchMode ? onToggleBatchDate(key) : onOpenDate(key)}>
                 <span className="day-number">{day}<small>{index % 7 > 4 ? "周末" : ""}</small></span>
                 {item && item.shift !== "rest" ? <span className={`day-shift ${meta?.className}`}><b>{meta?.short}</b><em>{compactHours(item.hours)}h</em></span> : item?.shift === "rest" ? <span className="rest-label">休</span> : <span className="add-day">＋</span>}
-                {holidayName && <span className="holiday-flag" title={`${holidayName} · 法定3倍`}>法</span>}
+                {holidayName && <span className="holiday-flag" title={`${holidayName} · 法定3倍`}>法 · {statutoryHolidayShortName(holidayName)}</span>}
                 {item && isAutomaticallyCompleted(item) && <span className="complete-dot" title="已计入实际工时" />}
                 {batchMode && <span className={`batch-check ${batchSelected ? "" : "pending"}`}>✓</span>}
               </button>
@@ -765,20 +780,22 @@ function StatsView({ year, records, settings, selectedMonth, moneyVisible, onTog
   return <>
     <div className="stats-layout">
       <section className="glass-panel annual-hero">
-        <button className="privacy-toggle light annual-privacy" onClick={onToggleMoney} aria-label={moneyVisible ? "隐藏金额" : "显示金额"}><Icon name={moneyVisible ? "eye" : "eyeOff"} /></button>
         <div><p className="eyebrow">{year} 年预测</p><h2>全年预计总收入</h2><strong>{privateMoney(totalIncome, moneyVisible)}</strong><small>其中加班费 {privateMoney(totalPay, moneyVisible)}</small></div>
-        <div className="annual-side"><span>预计加班</span><strong>{compactHours(totalOvertime)}h</strong><small>排班变化后自动重算</small></div>
+        <div className="annual-side"><div className="annual-side-title"><span>预计加班</span><button className="privacy-toggle light" onClick={onToggleMoney} aria-label={moneyVisible ? "隐藏金额" : "显示金额"}><Icon name={moneyVisible ? "eye" : "eyeOff"} /></button></div><strong>{compactHours(totalOvertime)}h</strong><small>排班变化后自动重算</small></div>
       </section>
       <section className="glass-panel chart-card">
-        <div className="section-heading"><div><p className="eyebrow">12个月</p><h2>基本工时与预测加班</h2></div><div className="chart-legend"><span><i className="bar-basic-key" />基本工时</span><span><i className="bar-overtime-key" />加班</span><span><i className="bar-line" />基本线</span></div></div>
+        <div className="section-heading"><div><p className="eyebrow">12个月</p><h2>基本工时与预测加班</h2></div><div className="chart-legend"><span><i className="bar-basic-key" />基本工时</span><span><i className="bar-overtime-key" />加班</span></div></div>
         <div className="bar-chart">
           {monthly.map((item) => {
+            const basicHours = Math.min(Math.max(0, item.totalHours - item.overtimeHours), item.target);
+            const visibleHours = basicHours + item.overtimeHours;
             return <button key={item.label} className={item.month === selectedMonth ? "selected" : ""} onClick={() => setDetailMonth(item.month)} title={`${item.label}：总工时 ${item.totalHours} 小时，加班 ${item.overtimeHours} 小时`}>
               <span className="bar-value">{item.overtimeHours > 0 ? `+${compactHours(item.overtimeHours)}h` : "0h"}</span>
               <span className="bar-track">
-                <i className="bar-basic" style={{ height: `${(Math.min(Math.max(0, item.totalHours - item.overtimeHours), item.target) / maxHours) * 100}%` }} />
-                <i className="bar-overtime" style={{ height: `${(item.overtimeHours / maxHours) * 100}%` }} />
-                <em style={{ bottom: `${(item.target / maxHours) * 100}%` }} />
+                <span className="bar-stack" style={{ height: `${(visibleHours / maxHours) * 100}%` }}>
+                  <i className="bar-overtime" style={{ height: `${visibleHours ? (item.overtimeHours / visibleHours) * 100 : 0}%` }} />
+                  <i className="bar-basic" style={{ height: `${visibleHours ? (basicHours / visibleHours) * 100 : 0}%` }} />
+                </span>
               </span>
               <small>{item.month + 1}月</small>
             </button>;
@@ -815,6 +832,7 @@ function SettingsView({ settings, setSettings, records, setRecords, year, monthK
   const importInput = useRef<HTMLInputElement>(null);
   const [importMessage, setImportMessage] = useState("");
   const [numberEditor, setNumberEditor] = useState<NumberEditorConfig | null>(null);
+  const [shiftSystemOpen, setShiftSystemOpen] = useState(false);
   function editNumber(key: EditableSettingKey, title: string, unit: string, value: number, min: number, step: number) {
     setNumberEditor({ key, title, unit, value, min, step });
   }
@@ -866,8 +884,7 @@ function SettingsView({ settings, setSettings, records, setRecords, year, monthK
         <p className="statutory-note"><span>法</span>每年 13 个法定节假日由日历自动识别并固定按 3 倍计算；这里的节日倍率用于手动标记的其他日期。</p>
       </section>
       <section className="glass-panel setting-card">
-        <div className="section-heading"><div><p className="eyebrow">班次</p><h2>默认时长</h2></div></div>
-        <div className="shift-system-selector"><button className={settings.shiftSystem === "two" ? "active" : ""} onClick={() => setSettings((item) => ({ ...item, shiftSystem: "two" }))}>两班倒<small>白班 / 夜班</small></button><button className={settings.shiftSystem === "three" ? "active" : ""} onClick={() => setSettings((item) => ({ ...item, shiftSystem: "three" }))}>三班倒<small>早班 / 中班 / 晚班</small></button></div>
+        <div className="section-heading shift-card-heading"><div><p className="eyebrow">班次</p><h2>默认时长</h2></div><div className={`shift-system-menu ${shiftSystemOpen ? "open" : ""}`}><button className="shift-system-trigger" aria-expanded={shiftSystemOpen} onClick={() => setShiftSystemOpen((value) => !value)}><span>{settings.shiftSystem === "two" ? "两班倒" : "三班倒"}</span><Icon name="chevron" /></button>{shiftSystemOpen && <div className="shift-system-dropdown"><button className={settings.shiftSystem === "two" ? "active" : ""} onClick={() => { setSettings((item) => ({ ...item, shiftSystem: "two" })); setShiftSystemOpen(false); }}><span><strong>两班倒</strong><small>白班 / 夜班</small></span>{settings.shiftSystem === "two" && <b>✓</b>}</button><button className={settings.shiftSystem === "three" ? "active" : ""} onClick={() => { setSettings((item) => ({ ...item, shiftSystem: "three" })); setShiftSystemOpen(false); }}><span><strong>三班倒</strong><small>早班 / 中班 / 晚班</small></span>{settings.shiftSystem === "three" && <b>✓</b>}</button></div>}</div></div>
         {settings.shiftSystem === "two" ? <>
           <SettingNumberRow label="白班" value={settings.dayHours} unit="小时" onClick={() => editNumber("dayHours", "白班默认时长", "小时", settings.dayHours, 0, 0.5)} />
           <SettingNumberRow label="夜班" value={settings.nightHours} unit="小时" onClick={() => editNumber("nightHours", "夜班默认时长", "小时", settings.nightHours, 0, 0.5)} />
