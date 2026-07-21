@@ -845,3 +845,36 @@ body:has(.modal-backdrop) .bottom-nav { opacity:0; visibility:hidden; pointer-ev
   .day-shift { width:100%; padding-left:2px; padding-right:2px; }
   .rest-label { width:70%; }
 }
+
+/* v8 — keep templates secondary and remove the generator action tray */
+.cycle-template-head.compact { margin:14px 0 7px; align-items:center; }
+.cycle-template-head.compact span { font-size:10px; }
+.cycle-template-head.compact small { font-size:8px; }
+.cycle-template-grid.compact { gap:6px; }
+.cycle-template-grid.compact button {
+  min-height:48px;
+  padding:7px 9px;
+  gap:2px;
+  border-radius:13px;
+}
+.cycle-template-grid.compact button strong { max-width:calc(100% - 13px); overflow:hidden; font-size:9px; text-overflow:ellipsis; white-space:nowrap; }
+.cycle-template-grid.compact button small { max-width:100%; overflow:hidden; font-size:7px; letter-spacing:-.02em; text-overflow:ellipsis; white-space:nowrap; }
+.cycle-template-grid.compact button.active::after { top:6px; right:7px; font-size:9px; }
+.sheet-actions.generator-actions {
+  margin-top:20px;
+  padding:0;
+  overflow:visible;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  backdrop-filter:none;
+}
+
+@media (max-width:720px) {
+  .cycle-template-head.compact { margin-top:12px; }
+  .cycle-template-grid.compact button { min-height:45px; padding:6px 8px; }
+  .cycle-template-grid.compact button strong { font-size:8px; }
+  .cycle-template-grid.compact button small { font-size:6.5px; }
+  .sheet-actions.generator-actions { padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; backdrop-filter:none; }
+}

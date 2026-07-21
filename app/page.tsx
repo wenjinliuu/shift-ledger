@@ -71,10 +71,10 @@ const DEFAULT_CYCLE: ShiftType[] = [
 ];
 const LEGACY_DEFAULT_CYCLE: ShiftType[] = ["day", "day", "day", "day", "day", "rest", "rest"];
 const CYCLE_TEMPLATES: { id: string; name: string; caption: string; cycle: ShiftType[] }[] = [
-  { id: "four-two", name: "四白两休 · 四夜两休", caption: "12 天 · 上四休二", cycle: DEFAULT_CYCLE },
-  { id: "one-one-two", name: "一白一夜 · 休两天", caption: "4 天 · 快速轮换", cycle: ["day", "night", "rest", "rest"] },
-  { id: "two-two", name: "两白两休 · 两夜两休", caption: "8 天 · 两天一换", cycle: ["day", "day", "rest", "rest", "night", "night", "rest", "rest"] },
-  { id: "four-three", name: "四班三倒 · 8 小时", caption: "8 天 · 早早中中晚晚休休", cycle: ["morning", "morning", "middle", "middle", "late", "late", "rest", "rest"] },
+  { id: "four-two", name: "四白两休 · 四夜两休", caption: "白白白白休休 · 夜夜夜夜休休", cycle: DEFAULT_CYCLE },
+  { id: "one-one-two", name: "一白一夜 · 休两天", caption: "白夜休休", cycle: ["day", "night", "rest", "rest"] },
+  { id: "two-two", name: "两白两休 · 两夜两休", caption: "白白休休 · 夜夜休休", cycle: ["day", "day", "rest", "rest", "night", "night", "rest", "rest"] },
+  { id: "four-three", name: "四班三倒 · 8 小时", caption: "早早中中晚晚休休", cycle: ["morning", "morning", "middle", "middle", "late", "late", "rest", "rest"] },
 ];
 
 const DEFAULT_SETTINGS: Settings = {
@@ -741,8 +741,8 @@ function CalendarView({ year, month, records, target, actual, projected, onOpenD
             return (
               <button key={key} aria-pressed={batchMode ? batchSelected : undefined} className={`calendar-day ${key === todayKey ? "today" : ""} ${key < todayKey ? "past" : key > todayKey ? "future" : ""} ${batchSelected ? "batch-selected" : ""}`} onClick={() => batchMode ? onToggleBatchDate(key) : onOpenDate(key)}>
                 <span className="day-number">{day}<small>{index % 7 > 4 ? "周末" : ""}</small></span>
-                {item && item.shift !== "rest" ? <span className={`day-shift ${meta?.className}`}><b>{meta?.short}</b><em>{compactHours(item.hours)}h</em></span> : item?.shift === "rest" ? <span className="rest-label">休</span> : <span className="add-day">＋</span>}
                 {holidayName && <span className="holiday-flag" title={`${holidayName} · 法定3倍`}>法 · {statutoryHolidayShortName(holidayName)}</span>}
+                {item && item.shift !== "rest" ? <span className={`day-shift ${meta?.className}`}><b>{meta?.short}</b><em>{compactHours(item.hours)}h</em></span> : item?.shift === "rest" ? <span className="rest-label">休</span> : <span className="add-day">＋</span>}
                 {item && isAutomaticallyCompleted(item) && <span className="complete-dot" title="已计入实际工时" />}
                 {batchMode && <span className={`batch-check ${batchSelected ? "" : "pending"}`}>✓</span>}
               </button>
@@ -1013,20 +1013,20 @@ function ScheduleGenerator({ settings, year, onClose, onGenerate }: { settings: 
     <div className="modal-backdrop" onMouseDown={onClose}>
       <section className="dialog-card glass-panel" onMouseDown={(event) => event.stopPropagation()}>
         <div className="sheet-header"><div><p className="eyebrow">新循环排班</p><h2>从指定日期向后更新</h2></div><button className="close-button" onClick={onClose}>×</button></div>
-        <div className="cycle-template-head"><span>常用模板</span><small>点击即可替换当前循环</small></div>
-        <div className="cycle-template-grid">{CYCLE_TEMPLATES.map((template) => {
-          const active = cycle.length === template.cycle.length && cycle.every((item, index) => item === template.cycle[index]);
-          return <button key={template.id} className={active ? "active" : ""} onClick={() => setCycle([...template.cycle])}><strong>{template.name}</strong><small>{template.caption}</small>{active && <i>✓</i>}</button>;
-        })}</div>
         <div className="cycle-builder-head"><span>当前循环 · {cycle.length} 天</span><div><button className="builder-action" onClick={() => setCycle((items) => items.slice(0, -1))} disabled={!cycle.length}><b>↶</b>撤销一步</button><button className="builder-action danger" onClick={() => setCycle([])} disabled={!cycle.length}>清空循环</button></div></div>
         <div className="cycle-visual custom-cycle">{cycle.length ? cycle.map((shift, index) => <span key={`${shift}-${index}`} className={shift}><small>{index + 1}</small>{SHIFT_META[shift].short}</span>) : <p>请在下方依次添加班次</p>}</div>
         <div className={`cycle-controls ${settings.shiftSystem === "three" ? "three-cycle-controls" : ""}`}>
           {generatorShifts.map((shift) => <button key={shift} className={SHIFT_META[shift].className} onClick={() => addShift(shift)}><b>＋ {SHIFT_META[shift].short}</b><span>{SHIFT_META[shift].label}{getShiftHours(settings, shift) ? ` ${getShiftHours(settings, shift)}h` : ""}</span></button>)}
         </div>
         <p className="dialog-copy">按点击顺序组成一个循环。系统只从生效日开始向后覆盖到年底，生效日前已经发生的排班和手动修改全部保留。</p>
+        <div className="cycle-template-head compact"><span>常用模板</span><small>快速替换当前循环</small></div>
+        <div className="cycle-template-grid compact">{CYCLE_TEMPLATES.map((template) => {
+          const active = cycle.length === template.cycle.length && cycle.every((item, index) => item === template.cycle[index]);
+          return <button key={template.id} className={active ? "active" : ""} onClick={() => setCycle([...template.cycle])}><strong>{template.name}</strong><small>{template.caption}</small></button>;
+        })}</div>
         <label className="field"><span>新循环生效日（第 1 天）</span><div><input type="date" min={`${year}-01-01`} max={`${year}-12-31`} value={cycleStart} onChange={(event) => setCycleStart(event.target.value)} /></div></label>
         <div className="warning-note"><Icon name="spark" /><span>{cycleStart} 之前的记录不会改变；当天及之后将按新循环重新生成。</span></div>
-        <div className="sheet-actions"><button className="secondary-button" onClick={onClose}>稍后</button><button className="primary-button" disabled={!cycle.length || !cycleStart} onClick={() => onGenerate(cycle, cycleStart)}>从生效日开始生成</button></div>
+        <div className="sheet-actions generator-actions"><button className="secondary-button" onClick={onClose}>稍后</button><button className="primary-button" disabled={!cycle.length || !cycleStart} onClick={() => onGenerate(cycle, cycleStart)}>从生效日开始生成</button></div>
       </section>
     </div>
   );
