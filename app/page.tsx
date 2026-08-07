@@ -501,9 +501,10 @@ function AnnualWorkPie({ forecastBasic, forecastOvertime, completedBasic, comple
   const overtimeAngle = 360 - boundaryAngle;
   const completedBasicAngle = forecastBasic > 0 ? Math.min(boundaryAngle, completedBasic / forecastBasic * boundaryAngle) : 0;
   const completedOvertimeAngle = forecastOvertime > 0 ? Math.min(overtimeAngle, completedOvertime / forecastOvertime * overtimeAngle) : 0;
+  const basicBoundaryAngle = Math.min(359.5, boundaryAngle);
+  const basicStartAngle = Math.max(0, basicBoundaryAngle - completedBasicAngle);
   const overtimeEndAngle = Math.min(359.5, boundaryAngle + completedOvertimeAngle);
-  const basicEndAngle = Math.min(359.5, completedBasicAngle);
-  const progressAngle = completedOvertimeAngle > 0 ? overtimeEndAngle : basicEndAngle;
+  const progressAngle = completedOvertimeAngle > 0 ? overtimeEndAngle : basicStartAngle;
   const basicLabel = polarPoint(cx, cy, 48, Math.max(8, boundaryAngle / 2));
   const overtimeLabel = polarPoint(cx, cy, 52, boundaryAngle + (360 - boundaryAngle) / 2);
   const progressStart = polarPoint(cx, cy, ringRadius, progressAngle);
@@ -525,7 +526,7 @@ function AnnualWorkPie({ forecastBasic, forecastOvertime, completedBasic, comple
         </>}
       </> : <circle cx={cx} cy={cy} r={pieRadius} fill="rgba(128,149,181,.15)"/>}
       <circle cx={cx} cy={cy} r={ringRadius} fill="none" stroke="rgba(125,148,184,.16)" strokeWidth={ringWidth}/>
-      {completedBasicAngle > 0 && <path d={arcPath(cx, cy, ringRadius, 0, basicEndAngle)} fill="none" stroke="url(#ringBasic)" strokeWidth={ringWidth} strokeLinecap="butt"/>}
+      {completedBasicAngle > 0 && <path d={arcPath(cx, cy, ringRadius, basicStartAngle, basicBoundaryAngle)} fill="none" stroke="url(#ringBasic)" strokeWidth={ringWidth} strokeLinecap="butt"/>}
       {completedOvertimeAngle > 0 && <path d={arcPath(cx, cy, ringRadius, boundaryAngle, overtimeEndAngle)} fill="none" stroke="#6ee0b7" strokeWidth={ringWidth} strokeLinecap="butt"/>}
       {forecastOvertime > 0 && <text x={overtimeLabel.x} y={overtimeLabel.y - 3} className="pie-label" textAnchor="middle"><tspan x={overtimeLabel.x}>预测加班</tspan><tspan x={overtimeLabel.x} dy="15">{compactHours(forecastOvertime)}h</tspan></text>}
       {forecastBasic > 0 && <text x={basicLabel.x} y={basicLabel.y - 3} className="pie-label" textAnchor="middle"><tspan x={basicLabel.x}>基本工时</tspan><tspan x={basicLabel.x} dy="15">{compactHours(forecastBasic)}h</tspan></text>}
