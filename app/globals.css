@@ -973,3 +973,43 @@ body:has(.modal-backdrop) .bottom-nav { opacity:0; visibility:hidden; pointer-ev
 @media (max-width:960px) {
   .bottom-nav { grid-template-columns:repeat(3,1fr); }
 }
+
+/* v10 — focused calendar outlook and unified annual dashboard */
+.calendar-layout { grid-template-columns:minmax(0,1fr); }
+.calendar-next-shift { margin:0; border-radius:22px; background:linear-gradient(145deg,rgba(255,255,255,.76),rgba(228,239,255,.54)); box-shadow:0 16px 38px rgba(48,78,126,.09),inset 0 1px 0 white; }
+.next-shift.calendar-next-shift { padding:15px 18px; }
+.empty-schedule-note.calendar-next-shift { margin-top:0; }
+.phase-track .phase-basic,.phase-track .phase-overtime { position:static; inset:auto; flex:0 0 auto; }
+
+.annual-dashboard { align-items:stretch; }
+.annual-progress-card,.annual-composition-card,.annual-count-card { padding:27px; border-radius:28px; }
+.annual-progress-card { grid-column:span 1; }
+.annual-composition-card { grid-column:span 1; }
+.annual-count-card { grid-column:span 2; }
+.annual-progress-numbers { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:22px; }
+.annual-progress-numbers div { min-height:70px; padding:12px; display:flex; flex-direction:column; justify-content:center; gap:4px; border:1px solid rgba(255,255,255,.9); border-radius:15px; background:rgba(255,255,255,.48); }
+.annual-progress-numbers span { color:var(--muted); font-size:8px; }.annual-progress-numbers strong { font-size:16px; }
+.annual-progress-numbers div:nth-child(2) strong { color:#176ee6; }.annual-progress-numbers div:nth-child(3) strong { color:#7659e2; }
+.annual-phase-track { margin-top:25px; }
+.annual-donut-row { min-height:210px; margin-top:12px; display:flex; align-items:center; justify-content:center; gap:34px; }
+.annual-donut { width:154px; height:154px; flex:0 0 154px; padding:14px; display:grid; place-items:center; border-radius:50%; box-shadow:0 16px 34px rgba(53,88,147,.14),inset 0 1px 0 rgba(255,255,255,.7); }
+.annual-donut.empty { background:conic-gradient(rgba(127,151,188,.15) 0 100%); }
+.annual-donut > div { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; border:1px solid rgba(255,255,255,.9); border-radius:50%; background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(237,244,255,.9)); box-shadow:inset 0 1px 0 white; }
+.annual-donut strong { font-size:27px; letter-spacing:-.04em; }.annual-donut span { color:var(--muted); font-size:8px; }
+.donut-legend { display:grid; gap:15px; min-width:120px; }
+.donut-legend > div { display:grid; grid-template-columns:8px 1fr; align-items:center; gap:8px; }
+.donut-legend i { width:8px; height:8px; border-radius:50%; }.donut-legend i.blue { background:#4388f5; }.donut-legend i.violet { background:#8063e8; }.donut-legend i.green { background:#19b987; }
+.donut-legend span { display:flex; flex-direction:column; gap:2px; color:var(--muted); font-size:8px; }.donut-legend strong { color:var(--ink); font-size:12px; }
+.chart-tip { margin:14px 0 0; color:#8b98aa; font-size:8px; text-align:center; }
+
+@media (max-width:720px) {
+  .calendar-next-shift { border-radius:19px; }.next-shift.calendar-next-shift { padding:13px; }
+  .annual-progress-card,.annual-composition-card,.annual-count-card { width:100%; padding:20px 14px; border-radius:24px; }
+  .annual-progress-numbers { gap:5px; margin-top:17px; }.annual-progress-numbers div { min-height:65px; padding:9px 7px; }.annual-progress-numbers strong { font-size:14px; }
+  .annual-donut-row { min-height:180px; gap:23px; }.annual-donut { width:132px; height:132px; flex-basis:132px; padding:12px; }.annual-donut strong { font-size:23px; }.donut-legend { min-width:100px; gap:12px; }
+  .annual-count-card .month-counts { margin-top:15px; }
+}
+
+@media (max-width:380px) {
+  .annual-donut-row { gap:14px; }.annual-donut { width:118px; height:118px; flex-basis:118px; }.donut-legend { min-width:92px; }
+}

@@ -5,7 +5,6 @@ import type { ChangeEvent, Dispatch, ReactNode, SetStateAction, TouchEvent as Re
 import { Solar } from "lunar-typescript";
 
 type View = "calendar" | "stats" | "settings";
-type StatsScope = "month" | "year";
 type ShiftType = "day" | "night" | "morning" | "middle" | "late" | "rest" | "leave" | "custom";
 type ShiftSystem = "two" | "three";
 
@@ -389,10 +388,9 @@ function CalendarView({ year, month, records, target, actual, projected, onOpenD
   const restDays = records.filter((item) => item.shift === "rest").length;
   const leaveDays = records.filter((item) => item.shift === "leave").length;
   const upcoming = records.find((item) => item.date >= dateKey(new Date()) && item.hours > 0);
-  const difference = Math.max(0, target - actual.totalHours);
   const scale = Math.max(target, projected.totalHours, 1);
-  const baseWidth = Math.min(100, (Math.min(projected.totalHours, target) / scale) * 100);
-  const overtimeWidth = Math.min(100 - baseWidth, (projected.overtimeHours / scale) * 100);
+  const baseWidth = Math.min(100, (target / scale) * 100);
+  const overtimeWidth = Math.max(0, 100 - baseWidth);
   const markerLeft = Math.min(98, Math.max(1, (actual.totalHours / scale) * 100));
 
   function handleTouchStart(event: ReactTouchEvent<HTMLElement>) {
@@ -439,34 +437,24 @@ function CalendarView({ year, month, records, target, actual, projected, onOpenD
         <p className="swipe-hint">‹ 左右滑动切换月份 ›</p>
       </section>
 
-      <aside className="month-summary glass-panel">
-        <p className="eyebrow">月度小结</p>
-        <h2>{actual.overtimeHours > 0 ? `已加班 ${compactHours(actual.overtimeHours)} 小时` : `还差 ${compactHours(difference)} 小时`}</h2>
-        <div className="summary-list">
-          <div><span>预计基本工时</span><strong>{compactHours(target)}h</strong></div>
-          <div><span>截至今天</span><strong>{compactHours(actual.totalHours)}h</strong></div>
-          <div><span>月底预测</span><strong>{compactHours(projected.totalHours)}h</strong></div>
-          <div className="accent"><span>预测加班</span><strong>{compactHours(projected.overtimeHours)}h</strong></div>
-        </div>
-        <p className="summary-tip">基本工时为自动推算值；年度调休发布后，可在设置中逐月修正。</p>
-      </aside>
     </div>
+
+    {upcoming ? <button className="next-shift calendar-next-shift glass-panel" onClick={() => onOpenDate(upcoming.date)}><span className={`shift-orb ${SHIFT_META[upcoming.shift].className}`}>{SHIFT_META[upcoming.shift].short}</span><span><strong>下一班 · {SHIFT_META[upcoming.shift].label}</strong><small>{upcoming.date} · {compactHours(upcoming.hours)} 小时</small></span><b>›</b></button> : <div className="empty-schedule-note calendar-next-shift glass-panel"><Icon name="calendar"/><span><strong>本月暂无后续班次</strong><small>可在日历中手动添加，或使用循环排班。</small></span></div>}
 
     <section className="month-outlook glass-panel">
       <div className="section-heading"><div><p className="eyebrow">本月展望</p><h2>排班与累计工时</h2></div><span className="soft-badge">{scheduled.length ? `${scheduled.length} 个班次` : "尚未排班"}</span></div>
       <div className="outlook-metrics">
-        <MetricCard label="已确认工时" value={`${compactHours(actual.totalHours)}h`} detail={`${confirmed.length} 个已到日期班次`} tone="blue"/>
-        <MetricCard label="预计总工时" value={`${compactHours(projected.totalHours)}h`} detail={`${scheduled.length} 个计划班次`} tone="green"/>
-        <MetricCard label="实际加班" value={`${compactHours(actual.overtimeHours)}h`} detail="超过本月基本工时后累计" tone="orange"/>
-        <MetricCard label="预测加班" value={`${compactHours(projected.overtimeHours)}h`} detail="按当前排班推算" tone="violet"/>
+        <MetricCard label="预计总工时" value={`${compactHours(projected.totalHours)}h`} detail={`基本工时 ${compactHours(target)}h · ${scheduled.length} 个计划班次`} tone="blue"/>
+        <MetricCard label="已确认工时" value={`${compactHours(actual.totalHours)}h`} detail={`${confirmed.length} 个已到日期班次`} tone="green"/>
+        <MetricCard label="预测加班" value={`${compactHours(projected.overtimeHours)}h`} detail="按当前排班推算" tone="orange"/>
+        <MetricCard label="实际加班" value={`${compactHours(actual.overtimeHours)}h`} detail="超过本月基本工时后累计" tone="violet"/>
       </div>
       <div className="phase-progress-card">
-        <div className="phase-copy"><span>基本工时 {compactHours(target)}h</span><strong>{Math.round(Math.min(100, actual.totalHours / Math.max(target, 1) * 100))}%</strong><span>预测 {compactHours(projected.totalHours)}h</span></div>
+        <div className="phase-copy"><span>基本工时 {compactHours(target)}h</span><strong>当前 {compactHours(actual.totalHours)}h</strong><span>加班工时 {compactHours(projected.overtimeHours)}h</span></div>
         <div className="phase-track"><i className="phase-basic" style={{ width: `${baseWidth}%` }}/><i className="phase-overtime" style={{ width: `${overtimeWidth}%` }}/><b className="phase-marker" style={{ left: `${markerLeft}%` }}><Icon name="spark"/></b></div>
         <div className="phase-legend"><span><i className="blue"/>基本工时区间</span><span><i className="violet"/>加班区间</span><span><i className="marker"/>实时进度</span></div>
       </div>
       <div className="month-counts"><div><strong>{scheduled.length}</strong><span>上班天数</span></div><div><strong>{restDays}</strong><span>休息天数</span></div><div><strong>{leaveDays}</strong><span>请假天数</span></div><div><strong>{Math.max(0, scheduled.length - confirmed.length)}</strong><span>剩余班次</span></div></div>
-      {upcoming ? <button className="next-shift" onClick={() => onOpenDate(upcoming.date)}><span className={`shift-orb ${SHIFT_META[upcoming.shift].className}`}>{SHIFT_META[upcoming.shift].short}</span><span><strong>下一班 · {SHIFT_META[upcoming.shift].label}</strong><small>{upcoming.date} · {compactHours(upcoming.hours)} 小时</small></span><b>›</b></button> : <div className="empty-schedule-note"><Icon name="calendar"/><span><strong>本月暂无后续班次</strong><small>可在日历中手动添加，或使用循环排班。</small></span></div>}
     </section>
   </div>;
 }
@@ -476,7 +464,6 @@ function MetricCard({ label, value, detail, tone }: { label: string; value: stri
 }
 
 function StatsView({ year, month, records, settings }: { year: number; month: number; records: DayRecord[]; settings: Settings }) {
-  const [scope, setScope] = useState<StatsScope>("month");
   const [detailMonth, setDetailMonth] = useState<number | null>(null);
   const yearly = useMemo(() => MONTH_LABELS.map((label, index) => {
     const monthRecords = records.filter((item) => item.date.startsWith(`${year}-${pad(index + 1)}`));
@@ -491,41 +478,45 @@ function StatsView({ year, month, records, settings }: { year: number; month: nu
       records: monthRecords,
     };
   }), [records, settings, year]);
-  const current = yearly[month];
   const totalProjected = yearly.reduce((sum, item) => sum + item.projected.totalHours, 0);
+  const totalActual = yearly.reduce((sum, item) => sum + item.actual.totalHours, 0);
   const totalTarget = yearly.reduce((sum, item) => sum + item.target, 0);
   const totalOvertime = yearly.reduce((sum, item) => sum + item.projected.overtimeHours, 0);
+  const totalActualOvertime = yearly.reduce((sum, item) => sum + item.actual.overtimeHours, 0);
+  const totalWorkDays = yearly.reduce((sum, item) => sum + item.workDays, 0);
+  const totalRestDays = yearly.reduce((sum, item) => sum + item.restDays, 0);
+  const totalLeaveDays = yearly.reduce((sum, item) => sum + item.leaveDays, 0);
+  const totalConfirmedDays = yearly.reduce((sum, item) => sum + item.records.filter(isAutomaticallyCompleted).length, 0);
   const maxHours = Math.max(1, ...yearly.map((item) => Math.max(item.target, item.projected.totalHours)));
-
-  const shifts = getEditorShifts(settings.shiftSystem).filter((shift) => !["leave", "custom"].includes(shift));
-  const shiftBreakdown = shifts.map((shift) => {
-    const items = current.records.filter((item) => item.shift === shift);
-    return { shift, days: items.length, hours: items.reduce((sum, item) => sum + item.hours, 0) };
-  });
+  const annualScale = Math.max(totalTarget, totalProjected, 1);
+  const annualBasicWidth = Math.min(100, totalTarget / annualScale * 100);
+  const annualOvertimeWidth = Math.max(0, 100 - annualBasicWidth);
+  const annualMarker = Math.min(98, Math.max(1, totalActual / annualScale * 100));
+  const overtimeShare = totalProjected > 0 ? totalOvertime / totalProjected * 100 : 0;
+  const completedShare = totalWorkDays > 0 ? totalConfirmedDays / totalWorkDays * 100 : 0;
 
   return <div className="stats-page">
-    <div className="stats-scope glass-control"><button className={scope === "month" ? "active" : ""} onClick={() => setScope("month")}>月度</button><button className={scope === "year" ? "active" : ""} onClick={() => setScope("year")}>年度</button></div>
-    {scope === "month" ? <div className="stats-layout monthly-stats">
-      <section className="annual-hero month-hero">
-        <div><p className="eyebrow">{year} 年 {month + 1} 月</p><h2>本月累计工时</h2><strong>{compactHours(current.actual.totalHours)}h</strong><small>预计月底 {compactHours(current.projected.totalHours)}h</small></div>
-        <div className="annual-side"><span>预计基本工时</span><strong>{compactHours(current.target)}h</strong><small>{current.projected.overtimeHours > 0 ? `预计加班 ${compactHours(current.projected.overtimeHours)}h` : `还差 ${compactHours(Math.max(0, current.target - current.projected.totalHours))}h`}</small></div>
-      </section>
-      <section className="monthly-metric-grid">
-        <MetricCard label="已确认工时" value={`${compactHours(current.actual.totalHours)}h`} detail="截至今天自动计入" tone="blue"/>
-        <MetricCard label="预计总工时" value={`${compactHours(current.projected.totalHours)}h`} detail="按整月排班推算" tone="green"/>
-        <MetricCard label="实际加班" value={`${compactHours(current.actual.overtimeHours)}h`} detail="超过基本工时后累计" tone="orange"/>
-        <MetricCard label="预测加班" value={`${compactHours(current.projected.overtimeHours)}h`} detail="排班变化后自动更新" tone="violet"/>
-      </section>
-      <section className="glass-panel shift-breakdown-card">
-        <div className="section-heading"><div><p className="eyebrow">班次构成</p><h2>{month + 1} 月排班分布</h2></div><span className="soft-badge">{current.workDays} 天上班</span></div>
-        <div className="shift-breakdown">{shiftBreakdown.map((item) => <div key={item.shift} className={SHIFT_META[item.shift].className}><span>{SHIFT_META[item.shift].label}</span><strong>{item.days} 天</strong><small>{compactHours(item.hours)} 小时</small></div>)}</div>
-        <div className="month-counts compact"><div><strong>{current.workDays}</strong><span>上班</span></div><div><strong>{current.restDays}</strong><span>休息</span></div><div><strong>{current.leaveDays}</strong><span>请假</span></div><div><strong>{current.records.filter(isAutomaticallyCompleted).length}</strong><span>已确认</span></div></div>
-      </section>
-    </div> : <div className="stats-layout">
+    <div className="stats-layout annual-dashboard">
       <section className="annual-hero">
         <div><p className="eyebrow">{year} 年预测</p><h2>全年预计总工时</h2><strong>{compactHours(totalProjected)}h</strong><small>预计基本工时合计 {compactHours(totalTarget)}h</small></div>
         <div className="annual-side"><span>预计加班</span><strong>{compactHours(totalOvertime)}h</strong><small>排班变化后自动重算</small></div>
       </section>
+
+      <section className="annual-progress-card glass-panel">
+        <div className="section-heading"><div><p className="eyebrow">全年进度</p><h2>基本工时 → 加班区间</h2></div><span className="soft-badge">已确认 {compactHours(totalActual)}h</span></div>
+        <div className="annual-progress-numbers"><div><span>基本工时</span><strong>{compactHours(totalTarget)}h</strong></div><div><span>已确认加班</span><strong>{compactHours(totalActualOvertime)}h</strong></div><div><span>预测加班</span><strong>{compactHours(totalOvertime)}h</strong></div></div>
+        <div className="phase-track annual-phase-track"><i className="phase-basic" style={{ width: `${annualBasicWidth}%` }}/><i className="phase-overtime" style={{ width: `${annualOvertimeWidth}%` }}/><b className="phase-marker" style={{ left: `${annualMarker}%` }}><Icon name="spark"/></b></div>
+        <div className="phase-legend"><span><i className="blue"/>全年基本工时</span><span><i className="violet"/>预测加班</span><span><i className="marker"/>已确认进度</span></div>
+      </section>
+
+      <section className="annual-composition-card glass-panel">
+        <div className="section-heading"><div><p className="eyebrow">工时构成</p><h2>全年预测占比</h2></div></div>
+        <div className="annual-donut-row">
+          <div className={`annual-donut ${totalProjected === 0 ? "empty" : ""}`} style={{ background: totalProjected === 0 ? undefined : `conic-gradient(#8063e8 0 ${overtimeShare}%, #4388f5 ${overtimeShare}% 100%)` }}><div><strong>{Math.round(overtimeShare)}%</strong><span>加班占比</span></div></div>
+          <div className="donut-legend"><div><i className="blue"/><span>基本区间<strong>{compactHours(Math.min(totalProjected, totalTarget))}h</strong></span></div><div><i className="violet"/><span>加班区间<strong>{compactHours(totalOvertime)}h</strong></span></div><div><i className="green"/><span>班次完成<strong>{Math.round(completedShare)}%</strong></span></div></div>
+        </div>
+      </section>
+
       <section className="chart-card glass-panel">
         <div className="section-heading"><div><p className="eyebrow">12 个月</p><h2>基本工时与预测加班</h2></div><div className="chart-legend"><span><i className="bar-blue"/>基本工时</span><span><i className="bar-violet"/>加班</span></div></div>
         <div className="bar-chart">{yearly.map((item, index) => {
@@ -539,12 +530,14 @@ function StatsView({ year, month, records, settings }: { year: number; month: nu
             <small>{index + 1}月</small>
           </button>;
         })}</div>
+        <p className="chart-tip">点击任意月份，可查看该月的预计、确认和加班工时。</p>
       </section>
-      <section className="stats-table-card glass-panel">
-        <div className="section-heading"><div><p className="eyebrow">全年明细</p><h2>月度工时清单</h2></div></div>
-        <div className="stats-table"><div className="table-row table-head"><span>月份</span><span>预计 / 基本</span><span>预测加班</span><span>上班 / 休息</span></div>{yearly.map((item, index) => <button className="table-row" key={item.label} onClick={() => setDetailMonth(index)}><strong>{item.label}</strong><span>{compactHours(item.projected.totalHours)} / {compactHours(item.target)}h</span><span className="positive">{compactHours(item.projected.overtimeHours)}h</span><span>{item.workDays} / {item.restDays} 天</span></button>)}</div>
+
+      <section className="annual-count-card glass-panel">
+        <div className="section-heading"><div><p className="eyebrow">全年班次</p><h2>排班日数概览</h2></div><span className="soft-badge">当前月份 {month + 1} 月</span></div>
+        <div className="month-counts"><div><strong>{totalWorkDays}</strong><span>上班天数</span></div><div><strong>{totalRestDays}</strong><span>休息天数</span></div><div><strong>{totalLeaveDays}</strong><span>请假天数</span></div><div><strong>{totalConfirmedDays}</strong><span>已确认班次</span></div></div>
       </section>
-    </div>}
+    </div>
     {detailMonth !== null && <MonthDetail year={year} month={detailMonth} item={yearly[detailMonth]} onClose={() => setDetailMonth(null)}/>} 
   </div>;
 }
