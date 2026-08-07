@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "工时簿 · 综合工时记录",
     short_name: "工时簿",
-    description: "排班、工时与加班费预测工具",
+    description: "排班、工时与加班累计工具",
     start_url: "/",
     display: "standalone",
     background_color: "#edf5ff",
