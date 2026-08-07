@@ -504,7 +504,7 @@ function AnnualWorkPie({ forecastBasic, forecastOvertime, completedBasic, comple
   const basicBoundaryAngle = Math.min(359.5, boundaryAngle);
   const basicStartAngle = Math.max(0, basicBoundaryAngle - completedBasicAngle);
   const overtimeEndAngle = Math.min(359.5, boundaryAngle + completedOvertimeAngle);
-  const progressAngle = completedOvertimeAngle > 0 ? overtimeEndAngle : basicStartAngle;
+  const progressAngle = basicStartAngle;
   const basicLabel = polarPoint(cx, cy, 48, Math.max(8, boundaryAngle / 2));
   const overtimeLabel = polarPoint(cx, cy, 52, boundaryAngle + (360 - boundaryAngle) / 2);
   const progressStart = polarPoint(cx, cy, ringRadius, progressAngle);
@@ -570,12 +570,12 @@ function StatsView({ year, month, records, settings }: { year: number; month: nu
   return <div className="stats-page">
     <div className="stats-layout annual-dashboard">
       <section className="annual-hero">
-        <div><p className="eyebrow">{year} 年预测</p><h2>全年预计总工时</h2><strong>{compactHours(totalProjected)}h</strong><small>预计基本工时合计 {compactHours(totalTarget)}h</small></div>
-        <div className="annual-side"><span>预计加班</span><strong>{compactHours(totalOvertime)}h</strong><small>排班变化后自动重算</small></div>
+        <div className="annual-hero-metric annual-total-metric"><p className="eyebrow">{year} 年预测</p><h2>全年预计总工时</h2><strong>{compactHours(totalProjected)}h</strong><small>预计基本工时合计 {compactHours(totalTarget)}h</small></div>
+        <div className="annual-hero-metric annual-overtime-metric"><p className="eyebrow">加班预测</p><h2>全年预计加班</h2><strong>{compactHours(totalOvertime)}h</strong><small>排班变化后自动重算</small></div>
       </section>
 
       <section className="annual-overview-card glass-panel">
-        <div className="section-heading"><div><p className="eyebrow">全年仪表盘</p><h2>预计构成与实时进度</h2></div><span className="soft-badge">已确认 {compactHours(totalActual)}h</span></div>
+        <div className="section-heading"><div><p className="eyebrow">全年仪表盘</p><h2>预计构成与实时进度</h2></div></div>
         <div className="annual-overview-grid">
           <AnnualWorkPie forecastBasic={forecastBasic} forecastOvertime={forecastOvertime} completedBasic={completedBasic} completedOvertime={completedOvertime}/>
           <div className="annual-overview-detail">

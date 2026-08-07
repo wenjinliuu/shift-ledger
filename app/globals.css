@@ -1100,3 +1100,34 @@ body:has(.modal-backdrop) .bottom-nav { opacity:0; visibility:hidden; pointer-ev
   .annual-pie-visual { max-width:300px; }
   .pie-detail-list strong { font-size:10px; }
 }
+
+/* v14 — aligned annual headline metrics */
+.annual-hero {
+  display:grid;
+  grid-template-columns:minmax(0,1.35fr) minmax(190px,.65fr);
+  align-items:stretch;
+  gap:36px;
+  padding:29px 31px;
+}
+.annual-hero-metric {
+  min-width:0;
+  display:grid;
+  grid-template-rows:15px 28px 52px 16px;
+  align-items:end;
+}
+.annual-hero-metric .eyebrow { margin:0; align-self:start; }
+.annual-hero-metric h2 { margin:0; align-self:end; font-size:18px; line-height:1.2; }
+.annual-hero > .annual-hero-metric > strong { margin:0; align-self:end; font-size:40px; line-height:1; letter-spacing:-.05em; font-variant-numeric:tabular-nums; }
+.annual-hero > .annual-hero-metric > small { margin:0!important; align-self:end; font-size:9px; line-height:1.2; opacity:.74; }
+.annual-overtime-metric { align-items:end; text-align:right; }
+.annual-hero > .annual-overtime-metric > strong { font-size:31px; }
+
+@media (max-width:720px) {
+  .annual-hero { grid-template-columns:minmax(0,1fr) minmax(120px,.72fr); gap:14px; padding:22px 18px; }
+  .annual-hero-metric { grid-template-rows:13px 24px 41px 27px; }
+  .annual-hero-metric h2 { font-size:14px; }
+  .annual-hero > .annual-hero-metric > strong { font-size:30px; }
+  .annual-overtime-metric { max-width:none; }
+  .annual-hero > .annual-overtime-metric > strong { font-size:25px; }
+  .annual-hero > .annual-hero-metric > small { max-width:145px; font-size:7.5px; line-height:1.35; }
+}
