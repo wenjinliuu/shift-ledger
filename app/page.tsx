@@ -482,21 +482,28 @@ function pieSlicePath(cx: number, cy: number, radius: number, startAngle: number
   return `M ${cx} ${cy} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
 }
 
-function AnnualWorkPie({ projected, target, actual }: { projected: number; target: number; actual: number }) {
+function AnnualWorkPie({ forecastBasic, forecastOvertime, completedBasic, completedOvertime }: {
+  forecastBasic: number;
+  forecastOvertime: number;
+  completedBasic: number;
+  completedOvertime: number;
+}) {
   const cx = 160;
   const cy = 165;
   const pieRadius = 88;
-  const ringRadius = 110;
-  const forecastBasic = Math.min(projected, target);
-  const forecastOvertime = Math.max(0, projected - target);
-  const completedBasic = Math.min(actual, target, forecastBasic);
-  const completedOvertime = Math.min(Math.max(0, actual - target), forecastOvertime);
+  const ringRadius = 95;
+  const ringWidth = 14;
+  const projected = forecastBasic + forecastOvertime;
+  const actual = completedBasic + completedOvertime;
   const basicShare = projected > 0 ? forecastBasic / projected : 0;
-  const completedBasicShare = projected > 0 ? completedBasic / projected : 0;
-  const completedOvertimeShare = projected > 0 ? completedOvertime / projected : 0;
   const completedShare = projected > 0 ? Math.min(1, actual / projected) : 0;
   const boundaryAngle = basicShare * 360;
-  const progressAngle = Math.min(359.5, completedShare * 360);
+  const overtimeAngle = 360 - boundaryAngle;
+  const completedBasicAngle = forecastBasic > 0 ? Math.min(boundaryAngle, completedBasic / forecastBasic * boundaryAngle) : 0;
+  const completedOvertimeAngle = forecastOvertime > 0 ? Math.min(overtimeAngle, completedOvertime / forecastOvertime * overtimeAngle) : 0;
+  const overtimeEndAngle = Math.min(359.5, boundaryAngle + completedOvertimeAngle);
+  const basicEndAngle = Math.min(359.5, completedBasicAngle);
+  const progressAngle = completedOvertimeAngle > 0 ? overtimeEndAngle : basicEndAngle;
   const basicLabel = polarPoint(cx, cy, 48, Math.max(8, boundaryAngle / 2));
   const overtimeLabel = polarPoint(cx, cy, 52, boundaryAngle + (360 - boundaryAngle) / 2);
   const progressStart = polarPoint(cx, cy, ringRadius, progressAngle);
@@ -517,13 +524,10 @@ function AnnualWorkPie({ projected, target, actual }: { projected: number; targe
           <path d={pieSlicePath(cx, cy, pieRadius, boundaryAngle, 360)} fill="url(#pieOvertime)"/>
         </>}
       </> : <circle cx={cx} cy={cy} r={pieRadius} fill="rgba(128,149,181,.15)"/>}
-      <circle cx={cx} cy={cy} r={ringRadius} fill="none" stroke="rgba(125,148,184,.16)" strokeWidth="13"/>
-      {completedBasicShare > 0 && <path d={arcPath(cx, cy, ringRadius, 0, Math.min(359.5, completedBasicShare * 360))} fill="none" stroke="url(#ringBasic)" strokeWidth="13" strokeLinecap="round"/>}
-      {completedOvertimeShare > 0 && <path d={arcPath(cx, cy, ringRadius, boundaryAngle, Math.min(359.5, boundaryAngle + completedOvertimeShare * 360))} fill="none" stroke="#6ee0b7" strokeWidth="13" strokeLinecap="round"/>}
-      {forecastOvertime > 0 && <>
-        <line x1={polarPoint(cx, cy, pieRadius - 2, boundaryAngle).x} y1={polarPoint(cx, cy, pieRadius - 2, boundaryAngle).y} x2={polarPoint(cx, cy, ringRadius + 8, boundaryAngle).x} y2={polarPoint(cx, cy, ringRadius + 8, boundaryAngle).y} stroke="rgba(255,255,255,.96)" strokeWidth="2.5" strokeLinecap="round"/>
-        <text x={overtimeLabel.x} y={overtimeLabel.y - 3} className="pie-label" textAnchor="middle"><tspan x={overtimeLabel.x}>预测加班</tspan><tspan x={overtimeLabel.x} dy="15">{compactHours(forecastOvertime)}h</tspan></text>
-      </>}
+      <circle cx={cx} cy={cy} r={ringRadius} fill="none" stroke="rgba(125,148,184,.16)" strokeWidth={ringWidth}/>
+      {completedBasicAngle > 0 && <path d={arcPath(cx, cy, ringRadius, 0, basicEndAngle)} fill="none" stroke="url(#ringBasic)" strokeWidth={ringWidth} strokeLinecap="butt"/>}
+      {completedOvertimeAngle > 0 && <path d={arcPath(cx, cy, ringRadius, boundaryAngle, overtimeEndAngle)} fill="none" stroke="#6ee0b7" strokeWidth={ringWidth} strokeLinecap="butt"/>}
+      {forecastOvertime > 0 && <text x={overtimeLabel.x} y={overtimeLabel.y - 3} className="pie-label" textAnchor="middle"><tspan x={overtimeLabel.x}>预测加班</tspan><tspan x={overtimeLabel.x} dy="15">{compactHours(forecastOvertime)}h</tspan></text>}
       {forecastBasic > 0 && <text x={basicLabel.x} y={basicLabel.y - 3} className="pie-label" textAnchor="middle"><tspan x={basicLabel.x}>基本工时</tspan><tspan x={basicLabel.x} dy="15">{compactHours(forecastBasic)}h</tspan></text>}
       {projected === 0 && <text x={cx} y={cy - 2} className="pie-empty" textAnchor="middle"><tspan x={cx}>暂无排班</tspan><tspan x={cx} dy="16">0h</tspan></text>}
       <circle cx={progressStart.x} cy={progressStart.y} r="4" fill="#0fa979" stroke="white" strokeWidth="2"/>
@@ -557,11 +561,10 @@ function StatsView({ year, month, records, settings }: { year: number; month: nu
   const totalLeaveDays = yearly.reduce((sum, item) => sum + item.leaveDays, 0);
   const totalConfirmedDays = yearly.reduce((sum, item) => sum + item.records.filter(isAutomaticallyCompleted).length, 0);
   const maxHours = Math.max(1, ...yearly.map((item) => Math.max(item.target, item.projected.totalHours)));
-  const completedShare = totalProjected > 0 ? Math.min(100, totalActual / totalProjected * 100) : 0;
-  const forecastBasic = Math.min(totalProjected, totalTarget);
-  const forecastOvertime = Math.max(0, totalProjected - totalTarget);
-  const completedBasic = Math.min(totalActual, totalTarget, forecastBasic);
-  const completedOvertime = Math.min(Math.max(0, totalActual - totalTarget), forecastOvertime);
+  const forecastOvertime = yearly.reduce((sum, item) => sum + item.projected.overtimeHours, 0);
+  const forecastBasic = yearly.reduce((sum, item) => sum + item.projected.totalHours - item.projected.overtimeHours, 0);
+  const completedOvertime = yearly.reduce((sum, item) => sum + item.actual.overtimeHours, 0);
+  const completedBasic = yearly.reduce((sum, item) => sum + item.actual.totalHours - item.actual.overtimeHours, 0);
 
   return <div className="stats-page">
     <div className="stats-layout annual-dashboard">
@@ -573,15 +576,15 @@ function StatsView({ year, month, records, settings }: { year: number; month: nu
       <section className="annual-overview-card glass-panel">
         <div className="section-heading"><div><p className="eyebrow">全年仪表盘</p><h2>预计构成与实时进度</h2></div><span className="soft-badge">已确认 {compactHours(totalActual)}h</span></div>
         <div className="annual-overview-grid">
-          <AnnualWorkPie projected={totalProjected} target={totalTarget} actual={totalActual}/>
+          <AnnualWorkPie forecastBasic={forecastBasic} forecastOvertime={forecastOvertime} completedBasic={completedBasic} completedOvertime={completedOvertime}/>
           <div className="annual-overview-detail">
             <div className="pie-detail-list">
               <div className="gray"><i/><span>全年预计总工时<small>基本工时与预测加班合计</small></span><strong>{compactHours(totalProjected)}h</strong></div>
               <div className="blue"><i/><span>预计基本工时<small>预测值中的基本区间</small></span><strong>{compactHours(forecastBasic)}h</strong></div>
               <div className="violet"><i/><span>预计加班工时<small>超过全年基本工时部分</small></span><strong>{compactHours(forecastOvertime)}h</strong></div>
-              <div className="green"><i/><span>已完成总工时<small>当前进度 {Math.round(completedShare)}%</small></span><strong>{compactHours(totalActual)}h</strong></div>
-              <div className="green-dark"><i/><span>已完成基本工时</span><strong>{compactHours(completedBasic)}h</strong></div>
-              <div className="green-light"><i/><span>已完成加班工时</span><strong>{compactHours(completedOvertime)}h</strong></div>
+              <div className="green"><i/><span>已完成总工时<small>基本 {compactHours(completedBasic)}h + 加班 {compactHours(completedOvertime)}h</small></span><strong>{compactHours(totalActual)}h</strong></div>
+              <div className="green-dark"><i/><span>已完成基本工时<small>逐月基本工时累计</small></span><strong>{compactHours(completedBasic)}h</strong></div>
+              <div className="green-light"><i/><span>已完成加班工时<small>逐月实际加班累计</small></span><strong>{compactHours(completedOvertime)}h</strong></div>
             </div>
           </div>
         </div>
