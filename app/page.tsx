@@ -492,8 +492,9 @@ function StatsView({ year, month, records, settings }: { year: number; month: nu
   const annualBasicWidth = Math.min(100, totalTarget / annualScale * 100);
   const annualOvertimeWidth = Math.max(0, 100 - annualBasicWidth);
   const annualMarker = Math.min(98, Math.max(1, totalActual / annualScale * 100));
-  const overtimeShare = totalProjected > 0 ? totalOvertime / totalProjected * 100 : 0;
-  const completedShare = totalWorkDays > 0 ? totalConfirmedDays / totalWorkDays * 100 : 0;
+  const annualConfirmedWidth = Math.min(100, totalActual / annualScale * 100);
+  const basicShare = totalProjected > 0 ? Math.min(totalProjected, totalTarget) / totalProjected * 100 : 0;
+  const completedShare = totalProjected > 0 ? Math.min(100, totalActual / totalProjected * 100) : 0;
 
   return <div className="stats-page">
     <div className="stats-layout annual-dashboard">
@@ -502,18 +503,23 @@ function StatsView({ year, month, records, settings }: { year: number; month: nu
         <div className="annual-side"><span>预计加班</span><strong>{compactHours(totalOvertime)}h</strong><small>排班变化后自动重算</small></div>
       </section>
 
-      <section className="annual-progress-card glass-panel">
-        <div className="section-heading"><div><p className="eyebrow">全年进度</p><h2>基本工时 → 加班区间</h2></div><span className="soft-badge">已确认 {compactHours(totalActual)}h</span></div>
-        <div className="annual-progress-numbers"><div><span>基本工时</span><strong>{compactHours(totalTarget)}h</strong></div><div><span>已确认加班</span><strong>{compactHours(totalActualOvertime)}h</strong></div><div><span>预测加班</span><strong>{compactHours(totalOvertime)}h</strong></div></div>
-        <div className="phase-track annual-phase-track"><i className="phase-basic" style={{ width: `${annualBasicWidth}%` }}/><i className="phase-overtime" style={{ width: `${annualOvertimeWidth}%` }}/><b className="phase-marker" style={{ left: `${annualMarker}%` }}><Icon name="spark"/></b></div>
-        <div className="phase-legend"><span><i className="blue"/>全年基本工时</span><span><i className="violet"/>预测加班</span><span><i className="marker"/>已确认进度</span></div>
-      </section>
-
-      <section className="annual-composition-card glass-panel">
-        <div className="section-heading"><div><p className="eyebrow">工时构成</p><h2>全年预测占比</h2></div></div>
-        <div className="annual-donut-row">
-          <div className={`annual-donut ${totalProjected === 0 ? "empty" : ""}`} style={{ background: totalProjected === 0 ? undefined : `conic-gradient(#8063e8 0 ${overtimeShare}%, #4388f5 ${overtimeShare}% 100%)` }}><div><strong>{Math.round(overtimeShare)}%</strong><span>加班占比</span></div></div>
-          <div className="donut-legend"><div><i className="blue"/><span>基本区间<strong>{compactHours(Math.min(totalProjected, totalTarget))}h</strong></span></div><div><i className="violet"/><span>加班区间<strong>{compactHours(totalOvertime)}h</strong></span></div><div><i className="green"/><span>班次完成<strong>{Math.round(completedShare)}%</strong></span></div></div>
+      <section className="annual-overview-card glass-panel">
+        <div className="section-heading"><div><p className="eyebrow">全年仪表盘</p><h2>预计构成与实时进度</h2></div><span className="soft-badge">已确认 {compactHours(totalActual)}h</span></div>
+        <div className="annual-overview-grid">
+          <div className={`annual-donut ${totalProjected === 0 ? "empty" : ""}`} style={{ background: totalProjected === 0 ? undefined : `conic-gradient(#4388f5 0 ${basicShare}%, #8063e8 ${basicShare}% 100%)` }}>
+            <div className="annual-inner-progress" style={{ background: `conic-gradient(#19b987 0 ${completedShare}%, rgba(255,255,255,.34) ${completedShare}% 100%)` }}>
+              <div className="annual-donut-center"><strong>{Math.round(completedShare)}%</strong><span>已确认 {compactHours(totalActual)}h</span></div>
+            </div>
+          </div>
+          <div className="annual-overview-detail">
+            <div className="donut-legend"><div><i className="blue"/><span>基本工时区间<strong>{compactHours(Math.min(totalProjected, totalTarget))}h</strong></span></div><div><i className="violet"/><span>预测加班区间<strong>{compactHours(totalOvertime)}h</strong></span></div><div><i className="green"/><span>实时完成进度<strong>{compactHours(totalActual)}h · {Math.round(completedShare)}%</strong></span></div></div>
+            <div className="annual-progress-numbers"><div><span>全年基本工时</span><strong>{compactHours(totalTarget)}h</strong></div><div><span>已确认加班</span><strong>{compactHours(totalActualOvertime)}h</strong></div><div><span>全年预计工时</span><strong>{compactHours(totalProjected)}h</strong></div></div>
+          </div>
+        </div>
+        <div className="annual-phase-wrap">
+          <div className="phase-copy"><span>基本工时 {compactHours(totalTarget)}h</span><strong>已完成 {Math.round(completedShare)}%</strong><span>加班工时 {compactHours(totalOvertime)}h</span></div>
+          <div className="phase-track annual-phase-track"><i className="phase-basic" style={{ width: `${annualBasicWidth}%` }}/><i className="phase-overtime" style={{ width: `${annualOvertimeWidth}%` }}/><span className="phase-confirmed-fill" style={{ width: `${annualConfirmedWidth}%` }}/><b className="phase-marker" style={{ left: `${annualMarker}%` }}><Icon name="spark"/></b></div>
+          <div className="phase-legend"><span><i className="blue"/>全年基本工时</span><span><i className="violet"/>预测加班</span><span><i className="green"/>已确认工时</span></div>
         </div>
       </section>
 

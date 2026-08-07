@@ -1013,3 +1013,54 @@ body:has(.modal-backdrop) .bottom-nav { opacity:0; visibility:hidden; pointer-ev
 @media (max-width:380px) {
   .annual-donut-row { gap:14px; }.annual-donut { width:118px; height:118px; flex-basis:118px; }.donut-legend { min-width:92px; }
 }
+
+/* v11 — concentric annual progress and compact monthly bars */
+.annual-overview-card { grid-column:span 2; padding:28px; border-radius:28px; }
+.annual-overview-grid { margin-top:20px; display:grid; grid-template-columns:220px minmax(0,1fr); align-items:center; gap:34px; }
+.annual-overview-grid .annual-donut { width:190px; height:190px; padding:13px; justify-self:center; }
+.annual-donut > .annual-inner-progress {
+  width:100%;
+  height:100%;
+  padding:13px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(255,255,255,.82);
+  border-radius:50%;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 8px 18px rgba(31,117,91,.1);
+}
+.annual-donut-center { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; border:1px solid rgba(255,255,255,.94); border-radius:50%; background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(237,245,255,.94)); box-shadow:inset 0 1px 0 white,0 7px 18px rgba(42,73,120,.1); }
+.annual-donut-center strong { font-size:29px; letter-spacing:-.05em; }.annual-donut-center span { color:#697a94; font-size:8px; font-weight:750; }
+.annual-overview-detail { min-width:0; display:grid; gap:17px; }
+.annual-overview-detail .donut-legend { grid-template-columns:repeat(3,minmax(0,1fr)); min-width:0; gap:8px; }
+.annual-overview-detail .donut-legend > div { min-height:64px; padding:11px; border:1px solid rgba(255,255,255,.88); border-radius:15px; background:rgba(255,255,255,.44); }
+.annual-overview-detail .donut-legend span { font-size:8px; }.annual-overview-detail .donut-legend strong { margin-top:2px; font-size:13px; }
+.annual-overview-detail .annual-progress-numbers { margin-top:0; }
+.annual-phase-wrap { margin-top:22px; padding:17px 17px 13px; border:1px solid rgba(255,255,255,.88); border-radius:19px; background:linear-gradient(145deg,rgba(255,255,255,.52),rgba(228,240,255,.38)); }
+.annual-phase-wrap .phase-track { height:14px; }
+.annual-phase-wrap .phase-basic,.annual-phase-wrap .phase-overtime { opacity:.72; }
+.phase-confirmed-fill { position:absolute; z-index:2; left:0; top:50%; height:6px; transform:translateY(-50%); border-radius:999px; background:linear-gradient(90deg,#12ad78,#2dd39a); box-shadow:0 0 0 1px rgba(255,255,255,.58),0 3px 9px rgba(16,158,111,.24); }
+.phase-legend i.green { background:#19b987; }
+.chart-card .bar-chart { padding-top:12px; }
+.bar-chart button { grid-template-rows:14px 1fr 20px; gap:2px; }
+.bar-value { align-self:end; line-height:1; }
+
+@media (max-width:720px) {
+  .annual-overview-card { width:100%; padding:20px 14px; border-radius:24px; }
+  .annual-overview-grid { grid-template-columns:1fr; gap:20px; margin-top:17px; }
+  .annual-overview-grid .annual-donut { width:174px; height:174px; justify-self:center; }
+  .annual-donut-center strong { font-size:26px; }
+  .annual-overview-detail .donut-legend { grid-template-columns:1fr 1fr 1fr; gap:5px; }
+  .annual-overview-detail .donut-legend > div { min-height:62px; padding:8px 6px; grid-template-columns:7px 1fr; gap:5px; }
+  .annual-overview-detail .donut-legend strong { font-size:10px; }
+  .annual-overview-detail .annual-progress-numbers { grid-template-columns:repeat(3,1fr); }
+  .annual-phase-wrap { margin-top:17px; padding:14px 9px 10px; }
+  .annual-phase-wrap .phase-copy { padding:0 3px; }
+  .chart-card .bar-chart { padding-top:7px; }
+  .bar-chart button { grid-template-rows:12px 1fr 18px; gap:1px; }
+}
+
+@media (max-width:380px) {
+  .annual-overview-grid .annual-donut { width:158px; height:158px; }
+  .annual-donut > .annual-inner-progress { padding:11px; }
+  .annual-overview-detail .donut-legend > div { min-height:58px; }
+}
