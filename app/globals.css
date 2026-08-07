@@ -914,4 +914,190 @@ body:has(.modal-backdrop) .bottom-nav { opacity:0; visibility:hidden; pointer-ev
 
 .stats-scope { width:max-content; padding:4px; display:grid; grid-template-columns:1fr 1fr; border-radius:15px; }
 .stats-scope button { min-width:86px; min-height:37px; padding:0 17px; border:0; border-radius:11px; color:#78869b; background:transparent; font-size:11px; font-weight:850; cursor:pointer; }
-.stats-scope button.active { color:#176ee6; background:rgba(255,255,255,.84); box-shuÛ¾m¢G§²ÚîÆ­yÒÆ–vâÖ—FV×3¦6VçFW#²§W7F–g’Ö6öçFVçC§76RÖ&WGvVVã²v£'ƒ²6öÆ÷#¢3V#s“²föçB×6—¦S£ƒ²föçB×vV–v‡C£ƒS²Ð¢ævVæW&F÷"×7—7FVÒâF—b²F—7Æ“¦w&–C²w&–B×FV×ÆFRÖ6öÇVÖç3£g"g#²v£Wƒ²FF–æs£Gƒ²&÷&FW#£‚6öÆ–B&v&ƒ#SRÃ#SRÃ#SRÂã’“²&÷&FW"×&F—W3£Gƒ²&6¶w&÷VæC§&v&ƒ#SRÃ#SRÃ#SRÂãC‚“²Ð¢ævVæW&F÷"×7—7FVÒ'WGFöâ²Ö–â×v–GFƒ£“ƒ²Ö–âÖ†V–v‡C£Cƒ²FF–æs£W‚ƒ²F—7Æ“¦fÆWƒ²fÆW‚ÖF—&V7F–öã¦6öÇVÖã²Æ–vâÖ—FV×3¦6VçFW#²§W7F–g’Ö6öçFVçC¦6VçFW#²v£ƒ²&÷&FW#£²&÷&FW"×&F—W3£ƒ²6öÆ÷#¢3scƒc–C²&6¶w&÷VæC§G&ç7&VçC²föçB×6—¦S£ƒ²föçB×vV–v‡C£ƒS²7W'6÷#§ö–çFW#²ÒævVæW&F÷"×7—7FVÒ'WGFöâ6ÖÆÂ²föçB×6—¦S£wƒ²föçB×vV–v‡C£cS²ÒævVæW&F÷"×7—7FVÒ'WGFöâæ7F—fR²6öÆ÷#¢3#ƒs6S²&6¶w&÷VæC¦Æ–æV"Öw&F–VçBƒCVFVrÇ&v&ƒ#SRÃ#SRÃ#SRÂã“b’Ç&v&ƒ##’Ã#CÃ#SRÂã‚’“²&÷‚×6†F÷s£g‚W‚&v&ƒCRÃƒ"ÃC2Âã‚“²Ð¢ç6†–gB×–6¶W"ç6†–gBÖÖ÷&æ–ær²Ò×6†–gBÖ6öÆ÷#¢3†3v3²Òç6†–gB×–6¶W"ç6†–gBÖÖ–FFÆR²Ò×6†–gBÖ6öÆ÷#¢6#v#c²Òç6†–gB×–6¶W"ç6†–gBÖÆFR²Ò×6†–gBÖ6öÆ÷#¢3s#S†Cc²Ð¢ç6†–gBÖÖ÷&æ–ær²6öÆ÷#¢3†3v3²&6¶w&÷VæC¦Æ–æV"Öw&F–VçBƒCVFVrÂ6S–f&crÂ6FfcVc"“²Òç6†–gBÖÖ–FFÆR²6öÆ÷#¢6#v#c²&6¶w&÷VæC¦Æ–æV"Öw&F–VçBƒCVFVrÂ6ffc†SrÂ6ffc6b“²Òç6†–gBÖÆFR²6öÆ÷#¢3s#S†Cc²&6¶w&÷VæC¦Æ–æV"Öw&F–VçBƒCVFVrÂ6c&VffbÂ6S†S6fb“²Ð ¤ÖVF–†Ö‚×v–GFƒ£s#‚’°¢æ&÷GFöÒÖæb²w&–B×FV×ÆFRÖ6öÇVÖç3§&WVBƒ2Ãg"“²Ð¢æ6öçFVçB×w&²FF–ærÖ&÷GFöÓ¦6Æ2ƒ‡‚²Vçb‡6fRÖ&VÖ–ç6WBÖ&÷GFöÒÃ‚’“²Ð¢æÖöçF‚Ö÷WFÆöö²²FF–æs£#‚7ƒ²&÷&FW"×&F—W3£#Gƒ²Ð¢æ÷WFÆöö²ÖÖWG&–72ÂæÖöçF†Ç’ÖÖWG&–2Öw&–B²w&–B×FV×ÆFRÖ6öÇVÖç3£g"g#²v£—ƒ²Ð¢æ÷WFÆöö²ÖÖWG&–72æÖWG&–2Ö6&BÂæÖöçF†Ç’ÖÖWG&–2Öw&–BæÖWG&–2Ö6&B²Ö–âÖ†V–v‡C£Wƒ²FF–æs£gƒ²&÷&FW"×&F—W3£#ƒ²Ð¢æ÷WFÆöö²ÖÖWG&–72æÖWG&–2Ö6&B7G&öærÂæÖöçF†Ç’ÖÖWG&–2Öw&–BæÖWG&–2Ö6&B7G&öær²föçB×6—¦S£#ƒ²Ð¢ç†6R×&öw&W72Ö6&B²FF–æs£W‚ƒ²Òç†6RÖ6÷’²föçB×6—¦S£‡ƒ²Òç†6RÖÆVvVæB²v£—ƒ²föçB×6—¦S£rãWƒ²Ð¢æÖöçF‚Ö6÷VçG2F—b²Ö–âÖ†V–v‡C£cƒ²ÒæÖöçF‚Ö6÷VçG27G&öær²föçB×6—¦S£wƒ²Ð¢ç7FG2×66÷R²v–GFƒ£S²Òç7FG2×66÷R'WGFöâ²Ö–â×v–GFƒ£²Ð¢æÖöçF†Ç’ÖÖWG&–2Öw&–B²v–GFƒ£S²Ð¢ç6†–gBÖ'&V¶F÷vâÖ6&B²FF–æs£#‚Gƒ²Òç6†–gBÖ'&V¶F÷vâ²w&–B×FV×ÆFRÖ6öÇVÖç3£g"g#²v£‡ƒ²Òç6†–gBÖ'&V¶F÷vââF—b²Ö–âÖ†V–v‡C£ƒƒ²FF–æs£'ƒ²Ð¢ææçVÂÖ†W&ò²v£'ƒ²ÒææçVÂ×6–FR²Ö‚×v–GFƒ£C2S²ÒææçVÂ×6–FR7G&öær²föçB×6—¦S£—ƒ²Ð¢æ6†'BÖ6&Bç6V7F–öâÖ†VF–ær²Æ–vâÖ—FV×3¦fÆW‚×7F'C²Òæ6†'BÖÆVvVæB²Ö&v–â×F÷£7ƒ²v£wƒ²föçB×6—¦S£‡ƒ²Ð¢ç7FG2×F&ÆRÖ6&B²÷fW&fÆ÷s¦†–FFVã²Òç7FG2×F&ÆR²÷fW&fÆ÷r×ƒ¦WFó²ÒçF&ÆR×&÷r²Ö–â×v–GFƒ£Cƒƒ²w&–B×FV×ÆFRÖ6öÇVÖç3¢ãsVg"ãFg"g"ãVg#²Ð¢ç6WGF–ær×&÷rÖw&–B²w&–B×FV×ÆFRÖ6öÇVÖç3£g#²v£²Ð¢çF&vWBÖW‡Æ÷&W"ç6V7F–öâÖ†VF–ær²Æ–vâÖ—FV×3¦6VçFW#²ÒçF&vWBÖw&–B²w&–B×FV×ÆFRÖ6öÇVÖç3§&WVBƒ2Ãg"“²v£wƒ²Ð¢çF&vWBÖçVÖ&W"Ö'WGFöâ²Ö–âÖ†V–v‡C£S'ƒ²FF–æs£wƒ²Ð¢æFFÖ6&B²Æ–vâÖ—FV×3¦fÆW‚×7F'C²ÒæFFÖ7F–öç2²v–GFƒ£S²F—7Æ“¦w&–C²w&–B×FV×ÆFRÖ6öÇVÖç3£g"g#²ÒæFFÖ7F–öç2'WGFöâ²FF–æs£ƒ²Ð¢ævVæW&F÷"×7—7FVÒ²Æ–vâÖ—FV×3¦fÆW‚×7F'C²ÒævVæW&F÷"×7—7FVÒâF—b²v–GFƒ£cRS²ÒævVæW&F÷"×7—7FVÒ'WGFöâ²Ö–â×v–GFƒ£²Ð¢æ6ÆVæF"×æVÂ²÷fW&fÆ÷s§f—6–&ÆS²Òæ6ÆVæF"ÖF’²&6¶w&÷VæC¦Æ–æV"Öw&F–VçBƒSFVrÇ&v&ƒ#SRÃ#SRÃ#SRÂãs‚’Ç&v&ƒ##RÃ#3rÃ#SRÂãCR’“²&÷‚×6†F÷s¦–ç6WB‚v†—FRÃG‚‚&v&ƒSÃƒ"Ã3"Âãb“²Ð¢ç7v—RÖ†–çB²Ö&v–â×F÷£—ƒ²Ð§Ð ¤ÖVF–†Ö‚×v–GFƒ£“c‚’°¢æ&÷GFöÒÖæb²w&–B×FV×ÆFRÖ6öÇVÖç3§&WVBƒ2Ãg"“²Ð§Ð ¢ò¢c(	Bfö7W6VB6ÆVæF"÷WFÆöö²æBVæ–f–VBæçVÂF6†&ö&B¢ð¢æ6ÆVæF"ÖÆ–÷WB²w&–B×FV×ÆFRÖ6öÇVÖç3¦Ö–æÖ‚ƒÃg"“²Ð¢æ6ÆVæF"ÖæW‡B×6†–gB²Ö&v–ã£²&÷&FW"×&F—W3£#'ƒ²&6¶w&÷VæC¦Æ–æV"Öw&F–VçBƒCVFVrÇ&v&ƒ#SRÃ#SRÃ#SRÂãsb’Ç&v&ƒ##‚Ã#3’Ã#SRÂãSB’“²&÷‚×6†F÷s£g‚3‡‚&v&ƒC‚Ãs‚Ã#bÂã’’Æ–ç6WB‚v†—FS²Ð¢ææW‡B×6†–gBæ6ÆVæF"ÖæW‡B×6†–gB²FF–æs£W‚‡ƒ²Ð¢æV×G’×66†VGVÆRÖæ÷FRæ6ÆVæF"ÖæW‡B×6†–gB²Ö&v–â×F÷£²Ð¢ç†6R×G&6²ç†6RÖ&6–2Âç†6R×G&6²ç†6RÖ÷fW'F–ÖR²÷6—F–öã§7FF–3²–ç6WC¦WFó²fÆWƒ£WFó²Ð ¢ææçVÂÖF6†&ö&B²Æ–vâÖ—FV×3§7G&WF6ƒ²Ð¢ææçVÂ×&öw&W72Ö6&BÂææçVÂÖ6ö×÷6—F–öâÖ6&BÂææçVÂÖ6÷VçBÖ6&B²FF–æs£#wƒ²&÷&FW"×&F—W3£#‡ƒ²Ð¢ææçVÂ×&öw&W72Ö6&B²w&–BÖ6öÇVÖã§7â²Ð¢ææçVÂÖ6ö×÷6—F–öâÖ6&B²w&–BÖ6öÇVÖã§7â²Ð¢ææçVÂÖ6÷VçBÖ6&B²w&–BÖ6öÇVÖã§7â#²Ð¢ææçVÂ×&öw&W72ÖçVÖ&W'2²F—7Æ“¦w&–C²w&–B×FV×ÆFRÖ6öÇVÖç3§&WVBƒ2Ãg"“²v£‡ƒ²Ö&v–â×F÷£#'ƒ²Ð¢ææçVÂ×&öw&W72ÖçVÖ&W'2F—b²Ö–âÖ†V–v‡C£sƒ²FF–æs£'ƒ²F—7Æ“¦fÆWƒ²fÆW‚ÖF—&V7F–öã¦6öÇVÖã²§W7F–g’Ö6öçFVçC¦6VçFW#²v£Gƒ²&÷&FW#£‚6öÆ–B&v&ƒ#SRÃ#SRÃ#SRÂã’“²&÷&FW"×&F—W3£Wƒ²&6¶w&÷VæC§&v&ƒ#SRÃ#SRÃ#SRÂãC‚“²Ð¢ææçVÂ×&öw&W72ÖçVÖ&W'27â²6öÆ÷#§f"‚ÒÖ×WFVB“²föçB×6—¦S£‡ƒ²ÒææçVÂ×&öw&W72ÖçVÖ&W'27G&öær²föçB×6—¦S£gƒ²Ð¢ææçVÂ×&öw&W72ÖçVÖ&W'2F—c¦çF‚Ö6†–ÆBƒ"’7G&öær²6öÆ÷#¢3sfVSc²ÒææçVÂ×&öw&W72ÖçVÖ&W'2F—c¦çF‚Ö6†–ÆBƒ2’7G&öær²6öÆ÷#¢3scS–S#²Ð¢ææçVÂ×†6R×G&6²²Ö&v–â×F÷£#Wƒ²Ð¢ææçVÂÖFöçWB×&÷r²Ö–âÖ†V–v‡C£#ƒ²Ö&v–â×F÷£'ƒ²F—7Æ“¦fÆWƒ²Æ–vâÖ—FV×3¦6VçFW#²§W7F–g’Ö6öçFVçC¦6VçFW#²v£3Gƒ²Ð¢ææçVÂÖFöçWB²v–GFƒ£SGƒ²†V–v‡C£SGƒ²fÆWƒ£SGƒ²FF–æs£Gƒ²F—7Æ“¦w&–C²Æ6RÖ—FV×3¦6VçFW#²&÷&FW"×&F—W3£SS²&÷‚×6†F÷s£g‚3G‚&v&ƒS2Ãƒ‚ÃCrÂãB’Æ–ç6WB‚&v&ƒ#SRÃ#SRÃ#SRÂãr“²Ð¢ææçVÂÖFöçWBæV×G’²&6¶w&÷VæC¦6öæ–2Öw&F–VçB‡&v&ƒ#rÃSÃƒ‚ÂãR’R“²Ð¢ææçVÂÖFöçWBâF—b²v–GFƒ£S²†V–v‡C£S²F—7Æ“¦fÆWƒ²fÆW‚ÖF—&V7F–öã¦6öÇVÖã²Æ–vâÖ—FV×3¦6VçFW#²§W7F–g’Ö6öçFVçC¦6VçFW#²v£7ƒ²&÷&FW#£‚6öÆ–B&v&ƒ#SRÃ#SRÃ#SRÂã’“²&÷&FW"×&F—W3£SS²&6¶w&÷VæC¦Æ–æV"Öw&F–VçBƒCVFVrÇ&v&ƒ#SRÃ#SRÃ#SRÂã“b’Ç&v&ƒ#3rÃ#CBÃ#SRÂã’’“²&÷‚×6†F÷s¦–ç6WB‚v†—FS²Ð¢ææçVÂÖFöçWB7G&öær²föçB×6—¦S£#wƒ²ÆWGFW"×76–æs¢ÒãFVÓ²ÒææçVÂÖFöçWB7â²6öÆ÷#§f"‚ÒÖ×WFVB“²föçB×6—¦S£‡ƒ²Ð¢æFöçWBÖÆVvVæB²F—7Æ“¦w&–C²v£Wƒ²Ö–â×v–GFƒ£#ƒ²Ð¢æFöçWBÖÆVvVæBâF—b²F—7Æ“¦w&–C²w&–B×FV×ÆFRÖ6öÇVÖç3£‡‚g#²Æ–vâÖ—FV×3¦6VçFW#²v£‡ƒ²Ð¢æFöçWBÖÆVvVæB’²v–GFƒ£‡ƒ²†V–v‡C£‡ƒ²&÷&FW"×&F—W3£SS²ÒæFöçWBÖÆVvVæB’æ&ÇVR²&6¶w&÷VæC¢3C3ƒ†cS²ÒæFöçWBÖÆVvVæB’çf–öÆWB²&6¶w&÷VæC¢3ƒc6Sƒ²ÒæFöçWBÖÆVvVæB’æw&VVâ²&6¶w&÷VæC¢3–#“ƒs²Ð¢æFöçWBÖÆVvVæB7â²F—7Æ“¦fÆWƒ²fÆW‚ÖF—&V7F–öã¦6öÇVÖã²v£'ƒ²6öÆ÷#§f"‚ÒÖ×WFVB“²föçB×6—¦S£‡ƒ²ÒæFöçWBÖÆVvVæB7G&öær²6öÆ÷#§f"‚ÒÖ–æ²“²föçB×6—¦S£'ƒ²Ð¢æ6†'B×F—²Ö&v–ã£G‚²6öÆ÷#¢3†#“†²föçB×6—¦S£‡ƒ²FW‡BÖÆ–vã¦6VçFW#²Ð ¤ÖVF–†Ö‚×v–GFƒ£s#‚’°¢æ6ÆVæF"ÖæW‡B×6†–gB²&÷&FW"×&F—W3£—ƒ²ÒææW‡B×6†–gBæ6ÆVæF"ÖæW‡B×6†–gB²FF–æs£7ƒ²Ð¢ææçVÂ×&öw&W72Ö6&BÂææçVÂÖ6ö×÷6—F–öâÖ6&BÂææçVÂÖ6÷VçBÖ6&B²v–GFƒ£S²FF–æs£#‚Gƒ²&÷&FW"×&F—W3£#Gƒ²Ð¢ææçVÂ×&öw&W72ÖçVÖ&W'2²v£Wƒ²Ö&v–â×F÷£wƒ²ÒææçVÂ×&öw&W72ÖçVÖ&W'2F—b²Ö–âÖ†V–v‡C£cWƒ²FF–æs£—‚wƒ²ÒææçVÂ×&öw&W72ÖçVÖ&W'27G&öær²föçB×6—¦S£Gƒ²Ð¢ææçVÂÖFöçWB×&÷r²Ö–âÖ†V–v‡C£ƒƒ²v£#7ƒ²ÒææçVÂÖFöçWB²v–GFƒ£3'ƒ²†V–v‡C£3'ƒ²fÆW‚Ö&6—3£3'ƒ²FF–æs£'ƒ²ÒææçVÂÖFöçWB7G&öær²föçB×6—¦S£#7ƒ²ÒæFöçWBÖÆVvVæB²Ö–â×v–GFƒ£ƒ²v£'ƒ²Ð¢ææçVÂÖ6÷VçBÖ6&BæÖöçF‚Ö6÷VçG2²Ö&v–â×F÷£Wƒ²Ð§Ð ¤ÖVF–†Ö‚×v–GFƒ£3ƒ‚’°¢ææçVÂÖFöçWB×&÷r²v£Gƒ²ÒææçVÂÖFöçWB²v–GFƒ£‡ƒ²†V–v‡C£‡ƒ²fÆW‚Ö&6—3£‡ƒ²ÒæFöçWBÖÆVvVæB²Ö–â×v–GFƒ£“'ƒ²Ð§Ð ¢ò¢c(	B6öæ6VçG&–2æçVÂ&öw&W72æB6ö×7BÖöçF†Ç’&'2¢ð¢ææçVÂÖ÷fW'f–WrÖ6&B²w&–BÖ6öÇVÖã§7â#²FF–æs£#‡ƒ²&÷&FW"×&F—W3£#‡ƒ²Ð¢ææçVÂÖ÷fW'f–WrÖw&–B²Ö&v–â×F÷£#ƒ²F—7Æ“¦w&–C²w&–B×FV×ÆFRÖ6öÇVÖç3£##‚Ö–æÖ‚ƒÃg"“²Æ–vâÖ—FV×3¦6VçFW#²v£3Gƒ²Ð¢ææçVÂÖ÷fW'f–WrÖw&–BææçVÂÖFöçWB²v–GFƒ£“ƒ²†V–v‡C£“ƒ²FF–æs£7ƒ²§W7F–g’×6VÆc¦6VçFW#²Ð¢ææçVÂÖFöçWBâææçVÂÖ–ææW"×&öw&W72°¢v–GFƒ£S°¢†V–v‡C£S°¢FF–æs£7ƒ°¢F—7Æ“¦w&–C°¢Æ6RÖ—FV×3¦6VçFW#°¢&÷&FW#£‚6öÆ–B&v&ƒ#SRÃ#SRÃ#SRÂãƒ"“°¢&÷&FW"×&F—W3£SS°¢&÷‚×6†F÷s¦–ç6WB‚&v&ƒ#SRÃ#SRÃ#SRÂãr’Ã‡‚‡‚&v&ƒ3ÃrÃ“Âã“°§Ð¢ææçVÂÖFöçWBÖ6VçFW"²v–GFƒ£S²†V–v‡C£S²F—7Æ“¦fÆWƒ²fÆW‚ÖF—&V7F–öã¦6öÇVÖã²Æ–vâÖ—FV×3¦6VçFW#²§W7F–g’Ö6öçFVçC¦6VçFW#²v£Gƒ²&÷&FW#£‚6öÆ–B&v&ƒ#SRÃ#SRÃ#SRÂã“B“²&÷&FW"×&F—W3£SS²&6¶w&÷VæC¦Æ–æV"Öw&F–VçBƒCVFVrÇ&v&ƒ#SRÃ#SRÃ#SRÂã“‚’Ç&v&ƒ#3rÃ#CRÃ#SRÂã“B’“²&÷‚×6†F÷s¦–ç6WB‚v†—FRÃw‚‡‚&v&ƒC"Ãs2Ã#Âã“²Ð¢ææçVÂÖFöçWBÖ6VçFW"7G&öær²föçB×6—¦S£#—ƒ²ÆWGFW"×76–æs¢ÒãVVÓ²ÒææçVÂÖFöçWBÖ6VçFW"7â²6öÆ÷#¢3c“v“C²föçB×6—¦S£‡ƒ²föçB×vV–v‡C£sS²Ð¢ææçVÂÖ÷fW'f–WrÖFWF–Â²Ö–â×v–GFƒ£²F—7Æ“¦w&–C²v£wƒ²Ð¢ææçVÂÖ÷fW'f–WrÖFWF–ÂæFöçWBÖÆVvVæB²w&–B×FV×ÆFRÖ6öÇVÖç3§&WVBƒ2ÆÖ–æÖ‚ƒÃg"’“²Ö–â×v–GFƒ£²v£‡ƒ²Ð¢ææçVÂÖ÷fW'f–WrÖFWF–ÂæFöçWBÖÆVvVæBâF—b²Ö–âÖ†V–v‡C£cGƒ²FF–æs£ƒ²&÷&FW#£‚6öÆ–B&v&ƒ#SRÃ#SRÃ#SRÂãƒ‚“²&÷&FW"×&F—W3£Wƒ²&6¶w&÷VæC§&v&ƒ#SRÃ#SRÃ#SRÂãCB“²Ð¢ææçVÂÖ÷fW'f–WrÖFWF–ÂæFöçWBÖÆVvVæB7â²föçB×6—¦S£‡ƒ²ÒææçVÂÖ÷fW'f–WrÖFWF–ÂæFöçWBÖÆVvVæB7G&öær²Ö&v–â×F÷£'ƒ²föçB×6—¦S£7ƒ²Ð¢ææçVÂÖ÷fW'f–WrÖFWF–ÂææçVÂ×&öw&W72ÖçVÖ&W'2²Ö&v–â×F÷£²Ð¢ææçVÂ×†6R×w&²Ö&v–â×F÷£#'ƒ²FF–æs£w‚w‚7ƒ²&÷&FW#£‚6öÆ–B&v&ƒ#SRÃ#SRÃ#SRÂãƒ‚“²&÷&FW"×&F—W3£—ƒ²&6¶w&÷VæC¦Æ–æV"Öw&F–VçBƒCVFVrÇ&v&ƒ#SRÃ#SRÃ#SRÂãS"’Ç&v&ƒ##‚Ã#CÃ#SRÂã3‚’“²Ð¢ææçVÂ×†6R×w&ç†6R×G&6²²†V–v‡C£Gƒ²Ð¢ææçVÂ×†6R×w&ç†6RÖ&6–2ÂææçVÂ×†6R×w&ç†6RÖ÷fW'F–ÖR²÷6—G“¢ãs#²Ð¢ç†6RÖ6öæf—&ÖVBÖf–ÆÂ²÷6—F–öã¦'6öÇWFS²¢Ö–æFWƒ£#²ÆVgC£²F÷£SS²†V–v‡C£gƒ²G&ç6f÷&Ó§G&ç6ÆFU’‚ÓSR“²&÷&FW"×&F—W3£““—ƒ²&6¶w&÷VæC¦Æ–æV"Öw&F–VçBƒ“FVrÂ3&Cs‚Â3&FC3–“²&÷‚×6†F÷s£‚&v&ƒ#SRÃ#SRÃ#SRÂãS‚’Ã7‚—‚&v&ƒbÃS‚ÃÂã#B“²Ð¢ç†6RÖÆVvVæB’æw&VVâ²&6¶w&÷VæC¢3–#“ƒs²Ð¢æ6†'BÖ6&Bæ&"Ö6†'B²FF–ær×F÷£'ƒ²Ð¢æ&"Ö6†'B'WGFöâ²w&–B×FV×ÆFR×&÷w3£G‚g"#ƒ²v£'ƒ²Ð¢æ&"×fÇVR²Æ–vâ×6VÆc¦VæC²Æ–æRÖ†V–v‡C£²Ð ¤ÖVF–†Ö‚×v–GFƒ£s#‚’°¢ææçVÂÖ÷fW'f–WrÖ6&B²v–GFƒ£S²FF–æs£#‚Gƒ²&÷&FW"×&F—W3£#Gƒ²Ð¢ææçVÂÖ÷fW'f–WrÖw&–B²w&–B×FV×ÆFRÖ6öÇVÖç3£g#²v£#ƒ²Ö&v–â×F÷£wƒ²Ð¢ææçVÂÖ÷fW'f–WrÖw&–BææçVÂÖFöçWB²v–GFƒ£sGƒ²†V–v‡C£sGƒ²§W7F–g’×6VÆc¦6VçFW#²Ð¢ææçVÂÖFöçWBÖ6VçFW"7G&öær²föçB×6—¦S£#gƒ²Ð¢ææçVÂÖ÷fW'f–WrÖFWF–ÂæFöçWBÖÆVvVæB²w&–B×FV×ÆFRÖ6öÇVÖç3£g"g"g#²v£Wƒ²Ð¢ææçVÂÖ÷fW'f–WrÖFWF–ÂæFöçWBÖÆVvVæBâF—b²Ö–âÖ†V–v‡C£c'ƒ²FF–æs£‡‚gƒ²w&–B×FV×ÆFRÖ6öÇVÖç3£w‚g#²v£Wƒ²Ð¢ææçVÂÖ÷fW'f–WrÖFWF–ÂæFöçWBÖÆVvVæB7G&öær²föçB×6—¦S£ƒ²Ð¢ææçVÂÖ÷fW'f–WrÖFWF–ÂææçVÂ×&öw&W72ÖçVÖ&W'2²w&–B×FV×ÆFRÖ6öÇVÖç3§&WVBƒ2Ãg"“²Ð¢ææçVÂ×†6R×w&²Ö&v–â×F÷£wƒ²FF–æs£G‚—‚ƒ²Ð¢ææçVÂ×†6R×w&ç†6RÖ6÷’²FF–æs£7ƒ²Ð¢æ6†'BÖ6&Bæ&"Ö6†'B²FF–ær×F÷£wƒ²Ð¢æ&"Ö6†'B'WGFöâ²w&–B×FV×ÆFR×&÷w3£'‚g"‡ƒ²v£ƒ²Ð§Ð ¤ÖVF–†Ö‚×v–GFƒ£3ƒ‚’°¢ææçVÂÖ÷fW'f–WrÖw&–BææçVÂÖFöçWB²v–GFƒ£S‡ƒ²†V–v‡C£S‡ƒ²Ð¢ææçVÂÖFöçWBâææçVÂÖ–ææW"×&öw&W72²FF–æs£ƒ²Ð¢ææçVÂÖ÷fW'f–WrÖFWF–ÂæFöçWBÖÆVvVæBâF—b²Ö–âÖ†V–v‡C£S‡ƒ²Ð§Ð ¢ò¢c"(	B6öÆ–Bf÷&V67B–Rv—F‚âW‡FW&æÂ6ö×ÆWFVBÖ†÷W'2&–ær¢ð¢ææçVÂÖ÷fW'f–WrÖw&–B²w&–B×FV×ÆFRÖ6öÇVÖç3¦Ö–æÖ‚ƒ3#‚Ã3“‚’Ö–æÖ‚ƒÃg"“²v£#gƒ²Ð¢ææçVÂ×–R×f—7VÂ²v–GFƒ£S²Ö‚×v–GFƒ£3ƒƒ²§W7F–g’×6VÆc¦6VçFW#²Ð¢ææçVÂ×–R×f—7VÂ7fr²v–GFƒ£S²†V–v‡C¦WFó²F—7Æ“¦&Æö6³²÷fW&fÆ÷s§f—6–&ÆS²f–ÇFW#¦G&÷×6†F÷rƒW‚#G‚&v&ƒC‚Ãs‚Ã3Âã"’“²Ð¢ææçVÂ×–R×f—7VÂç–RÖÆ&VÂ²f–ÆÃ§v†—FS²föçB×6—¦S£—ƒ²föçB×vV–v‡C£ƒS²–çBÖ÷&FW#§7G&ö¶S²7G&ö¶S§&v&ƒC‚ÃsRÃ#RÂã2“²7G&ö¶R×v–GFƒ£'ƒ²7G&ö¶RÖÆ–æV¦ö–ã§&÷VæC²Ð¢ææçVÂ×–R×f—7VÂç–RÖÆ&VÂG7ã¦Æ7BÖ6†–ÆB²föçB×6—¦S£'ƒ²Ð¢ææçVÂ×–R×f—7VÂç–RÖV×G’²f–ÆÃ¢3vS†6²föçB×6—¦S£ƒ²föçB×vV–v‡C£ƒ²Ð¢ææçVÂ×–R×f—7VÂç–RÖ6ÆÆ÷WB²f–ÆÃ¢3#ƒccC²föçB×6—¦S£—ƒ²föçB×vV–v‡C£“²Ð¢ææçVÂ×–R×f—7VÂç–RÖ6ÆÆ÷WBG7ã¦f—'7BÖ6†–ÆB²föçB×6—¦S£'ƒ²Ð¢ææçVÂÖ÷fW'f–WrÖFWF–Â²Æ–vâ×6VÆc§7G&WF6ƒ²F—7Æ“¦fÆWƒ²Æ–vâÖ—FV×3¦6VçFW#²Ð¢ç–RÖFWF–ÂÖÆ—7B²v–GFƒ£S²F—7Æ“¦w&–C²w&–B×FV×ÆFRÖ6öÇVÖç3£g"g#²v£‡ƒ²Ð¢ç–RÖFWF–ÂÖÆ—7BâF—b²Ö–âÖ†V–v‡C£cwƒ²FF–æs£‚'ƒ²F—7Æ“¦w&–C²w&–B×FV×ÆFRÖ6öÇVÖç3£—‚Ö–æÖ‚ƒÃg"’WFó²Æ–vâÖ—FV×3¦6VçFW#²v£‡ƒ²÷fW&fÆ÷s¦†–FFVã²&÷&FW#£‚6öÆ–B&v&ƒ#SRÃ#SRÃ#SRÂã’“²&÷&FW"×&F—W3£Wƒ²&6¶w&÷VæC¦Æ–æV"Öw&F–VçBƒCVFVrÇ&v&ƒ#SRÃ#SRÃ#SRÂãcB’Ç&v&ƒ#3Ã#CÃ#SRÂãB’“²&÷‚×6†F÷s¦–ç6WB‚v†—FS²Ð¢ç–RÖFWF–ÂÖÆ—7B’²v–GFƒ£‡ƒ²†V–v‡C£‡ƒ²&÷&FW"×&F—W3£SS²&6¶w&÷VæC¢3–f#s²&÷‚×6†F÷s£7‚&v&ƒSBÃcbÃƒ2Âã“²Ð¢ç–RÖFWF–ÂÖÆ—7B7â²Ö–â×v–GFƒ£²F—7Æ“¦fÆWƒ²fÆW‚ÖF—&V7F–öã¦6öÇVÖã²v£'ƒ²6öÆ÷#¢3c#s#†#²föçB×6—¦S£—ƒ²föçB×vV–v‡C£ƒ²Ð¢ç–RÖFWF–ÂÖÆ—7B6ÖÆÂ²÷fW&fÆ÷s¦†–FFVã²6öÆ÷#¢3“#–FC²föçB×6—¦S£wƒ²föçB×vV–v‡C£c²FW‡BÖ÷fW&fÆ÷s¦VÆÆ—6—3²v†—FR×76S¦æ÷w&²Ð¢ç–RÖFWF–ÂÖÆ—7B7G&öær²6öÆ÷#§f"‚ÒÖ–æ²“²föçB×6—¦S£7ƒ²v†—FR×76S¦æ÷w&²Ð¢ç–RÖFWF–ÂÖÆ—7Bæ&ÇVR’²&6¶w&÷VæC¢3C3ƒ†cS²&÷‚×6†F÷s£7‚&v&ƒcrÃ3bÃ#CRÂã“²Òç–RÖFWF–ÂÖÆ—7Bæ&ÇVR7G&öær²6öÆ÷#¢3#ƒs6S#²Ð¢ç–RÖFWF–ÂÖÆ—7Bçf–öÆWB’²&6¶w&÷VæC¢3ƒc6Sƒ²&÷‚×6†F÷s£7‚&v&ƒ#‚Ã“’Ã#3"Âã“²Òç–RÖFWF–ÂÖÆ—7Bçf–öÆWB7G&öær²6öÆ÷#¢3sCS†F3²Ð¢ç–RÖFWF–ÂÖÆ—7Bæw&VVâ’²&6¶w&÷VæC¢3–#“ƒs²&÷‚×6†F÷s£7‚&v&ƒ#RÃƒRÃ3RÂã“²Òç–RÖFWF–ÂÖÆ—7Bæw&VVâ7G&öær²6öÆ÷#¢3“SfC²Ð¢ç–RÖFWF–ÂÖÆ—7Bæw&VVâÖF&²’²&6¶w&÷VæC¢3VƒsS²&÷‚×6†F÷s£7‚&v&ƒBÃc‚ÃrÂã“²Òç–RÖFWF–ÂÖÆ—7Bæw&VVâÖF&²7G&öær²6öÆ÷#¢3†cc²Ð¢ç–RÖFWF–ÂÖÆ—7Bæw&VVâÖÆ–v‡B’²&6¶w&÷VæC¢3fVS#s²&÷‚×6†F÷s£7‚&v&ƒÃ##BÃƒ2Âã2“²Òç–RÖFWF–ÂÖÆ—7Bæw&VVâÖÆ–v‡B7G&öær²6öÆ÷#¢3&“ƒ#²Ð ¤ÖVF–†Ö‚×v–GFƒ£s#‚’°¢ææçVÂÖ÷fW'f–WrÖw&–B²w&–B×FV×ÆFRÖ6öÇVÖç3£g#²v£‡ƒ²Ð¢ææçVÂ×–R×f—7VÂ²Ö‚×v–GFƒ£33ƒ²Ö&v–ã£WFó²Ð¢ææçVÂÖ÷fW'f–WrÖFWF–Â²F—7Æ“¦&Æö6³²Ð¢ç–RÖFWF–ÂÖÆ—7B²w&–B×FV×ÆFRÖ6öÇVÖç3£g"g#²v£gƒ²Ð¢ç–RÖFWF–ÂÖÆ—7BâF—b²Ö–âÖ†V–v‡C£cƒ²FF–æs£—‚‡ƒ²w&–B×FV×ÆFRÖ6öÇVÖç3£‡‚Ö–æÖ‚ƒÃg"’WFó²v£gƒ²Ð¢ç–RÖFWF–ÂÖÆ—7B7â²föçB×6—¦S£‡ƒ²Òç–RÖFWF–ÂÖÆ—7B7G&öær²föçB×6—¦S£ƒ²Òç–RÖFWF–ÂÖÆ—7B6ÖÆÂ²föçB×6—¦S£bãWƒ²Ð§Ð ¤ÖVF–†Ö‚×v–GFƒ£3ƒ‚’°¢ææçVÂ×–R×f—7VÂ²Ö‚×v–GFƒ£3ƒ²Ð¢ç–RÖFWF–ÂÖÆ—7BâF—b²FF–ærÖÆVgC£wƒ²FF–ær×&–v‡C£wƒ²Ð¢ç–RÖFWF–ÂÖÆ—7B7G&öær²föçB×6—¦S£ƒ²Ð§Ð
+.stats-scope button.active { color:#176ee6; background:rgba(255,255,255,.84); box-shadow:0 7px 18px rgba(43,79,137,.09),inset 0 1px 0 white; }
+.monthly-stats .month-hero { grid-column:span 2; }
+.month-hero > div > small,.annual-hero > div > small { display:block; margin-top:7px; font-size:10px; opacity:.74; }
+.monthly-metric-grid { grid-column:span 2; margin-top:0; }
+.shift-breakdown-card { grid-column:span 2; padding:27px; border-radius:28px; }
+.shift-breakdown { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-top:18px; }
+.shift-breakdown > div { min-height:92px; padding:14px; display:flex; flex-direction:column; justify-content:center; gap:5px; border:1px solid rgba(255,255,255,.92); border-radius:17px; box-shadow:inset 0 1px 0 white; }
+.shift-breakdown span { font-size:10px; font-weight:750; }.shift-breakdown strong { font-size:18px; }.shift-breakdown small { opacity:.65; font-size:8px; }
+.chart-legend .bar-violet { width:9px; height:9px; border-radius:3px; background:#8063e8; }
+.bar-track em { display:none; }
+.bar-chart button.selected .bar-stack { outline:2px solid rgba(239,132,67,.92); outline-offset:3px; }
+.bar-chart button.selected > small { color:#d96d2f; background:#fff0e3; }
+.detail-summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:18px; }
+.detail-summary-grid div { min-height:78px; padding:14px; display:flex; flex-direction:column; justify-content:center; gap:5px; border:1px solid rgba(255,255,255,.92); border-radius:16px; background:rgba(255,255,255,.55); }
+.detail-summary-grid span { color:var(--muted); font-size:9px; }.detail-summary-grid strong { font-size:19px; }.detail-close { width:100%; min-height:46px; margin-top:16px; border-radius:15px; }
+
+.setting-intro { margin:10px 0 0; color:var(--muted); font-size:10px; line-height:1.55; }
+.setting-row-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.target-year-switch { min-height:38px; padding:3px; display:flex; align-items:center; gap:5px; border:1px solid rgba(255,255,255,.92); border-radius:13px; background:rgba(255,255,255,.55); }
+.target-year-switch button { width:32px; height:30px; border:0; border-radius:9px; color:#56739e; background:transparent; font-size:20px; cursor:pointer; }.target-year-switch button:disabled { opacity:.25; }.target-year-switch strong { min-width:42px; text-align:center; font-size:11px; }
+.target-number-button > span { display:flex; flex-direction:column; align-items:flex-start; gap:2px; }.target-number-button small { color:#9ba6b5; font-size:7px; }.target-number-button.overridden { border-color:rgba(117,87,232,.3); background:linear-gradient(145deg,rgba(245,242,255,.9),rgba(229,239,255,.6)); }.target-number-button.overridden small { color:#775ee0; }
+.target-explainer { margin-top:14px; padding:14px; display:flex; align-items:flex-start; gap:10px; border-radius:17px; color:#55719a; background:linear-gradient(135deg,rgba(223,238,255,.78),rgba(239,234,255,.62)); }
+.target-explainer .app-icon { width:18px; height:18px; flex:0 0 auto; }.target-explainer span { display:flex; flex-direction:column; gap:4px; }.target-explainer strong { font-size:10px; }.target-explainer small { color:#71819a; font-size:9px; line-height:1.55; }
+.reset-targets { margin-top:12px; }
+.holiday-info { margin:14px 0 2px; padding:12px 14px; display:flex; align-items:center; gap:10px; border:1px solid rgba(255,255,255,.9); border-radius:16px; background:linear-gradient(135deg,rgba(255,239,229,.76),rgba(255,249,244,.58)); }
+.holiday-info > span { width:31px; height:31px; display:grid; place-items:center; border-radius:10px; color:#df664c; background:#ffe8dd; font-size:12px; font-weight:900; }.holiday-info div { display:flex; flex-direction:column; gap:3px; }.holiday-info strong { font-size:11px; }.holiday-info small { color:#9a7c77; font-size:8px; }
+.generator-system { margin:14px 0; display:flex; align-items:center; justify-content:space-between; gap:12px; color:#5b7091; font-size:10px; font-weight:850; }
+.generator-system > div { display:grid; grid-template-columns:1fr 1fr; gap:5px; padding:4px; border:1px solid rgba(255,255,255,.9); border-radius:14px; background:rgba(255,255,255,.48); }
+.generator-system button { min-width:90px; min-height:40px; padding:5px 10px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; border:0; border-radius:10px; color:#76869d; background:transparent; font-size:10px; font-weight:850; cursor:pointer; }.generator-system button small { font-size:7px; font-weight:650; }.generator-system button.active { color:#2873e0; background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(229,240,255,.8)); box-shadow:0 6px 15px rgba(45,82,143,.08); }
+.shift-picker .shift-morning { --shift-color:#118c7c; }.shift-picker .shift-middle { --shift-color:#b17b16; }.shift-picker .shift-late { --shift-color:#7258d6; }
+.shift-morning { color:#118c7c; background:linear-gradient(145deg,#e9fbf7,#dff5f2); }.shift-middle { color:#b17b16; background:linear-gradient(145deg,#fff8e7,#fff0cf); }.shift-late { color:#7258d6; background:linear-gradient(145deg,#f2efff,#e8e3ff); }
+
+@media (max-width:720px) {
+  .bottom-nav { grid-template-columns:repeat(3,1fr); }
+  .content-wrap { padding-bottom:calc(108px + env(safe-area-inset-bottom,0px)); }
+  .month-outlook { padding:20px 13px; border-radius:24px; }
+  .outlook-metrics,.monthly-metric-grid { grid-template-columns:1fr 1fr; gap:9px; }
+  .outlook-metrics .metric-card,.monthly-metric-grid .metric-card { min-height:105px; padding:16px; border-radius:20px; }
+  .outlook-metrics .metric-card strong,.monthly-metric-grid .metric-card strong { font-size:21px; }
+  .phase-progress-card { padding:15px 11px; }.phase-copy { font-size:8px; }.phase-legend { gap:9px; font-size:7.5px; }
+  .month-counts div { min-height:61px; }.month-counts strong { font-size:17px; }
+  .stats-scope { width:100%; }.stats-scope button { min-width:0; }
+  .monthly-metric-grid { width:100%; }
+  .shift-breakdown-card { padding:20px 14px; }.shift-breakdown { grid-template-columns:1fr 1fr; gap:8px; }.shift-breakdown > div { min-height:80px; padding:12px; }
+  .annual-hero { gap:12px; }.annual-side { max-width:43%; }.annual-side strong { font-size:19px; }
+  .chart-card .section-heading { align-items:flex-start; }.chart-legend { margin-top:3px; gap:7px; font-size:8px; }
+  .stats-table-card { overflow:hidden; }.stats-table { overflow-x:auto; }.table-row { min-width:480px; grid-template-columns:.75fr 1.4fr 1fr 1.15fr; }
+  .setting-row-grid { grid-template-columns:1fr; gap:0; }
+  .target-explorer .section-heading { align-items:center; }.target-grid { grid-template-columns:repeat(3,1fr); gap:7px; }
+  .target-number-button { min-height:52px; padding:7px; }
+  .data-card { align-items:flex-start; }.data-actions { width:100%; display:grid; grid-template-columns:1fr 1fr; }.data-actions button { padding:0 10px; }
+  .generator-system { align-items:flex-start; }.generator-system > div { width:65%; }.generator-system button { min-width:0; }
+  .calendar-panel { overflow:visible; }.calendar-day { background:linear-gradient(150deg,rgba(255,255,255,.78),rgba(225,237,255,.45)); box-shadow:inset 0 1px 0 white,0 4px 10px rgba(51,82,132,.06); }
+  .swipe-hint { margin-top:9px; }
+}
+
+@media (max-width:960px) {
+  .bottom-nav { grid-template-columns:repeat(3,1fr); }
+}
+
+/* v10 â€” focused calendar outlook and unified annual dashboard */
+.calendar-layout { grid-template-columns:minmax(0,1fr); }
+.calendar-next-shift { margin:0; border-radius:22px; background:linear-gradient(145deg,rgba(255,255,255,.76),rgba(228,239,255,.54)); box-shadow:0 16px 38px rgba(48,78,126,.09),inset 0 1px 0 white; }
+.next-shift.calendar-next-shift { padding:15px 18px; }
+.empty-schedule-note.calendar-next-shift { margin-top:0; }
+.phase-track .phase-basic,.phase-track .phase-overtime { position:static; inset:auto; flex:0 0 auto; }
+
+.annual-dashboard { align-items:stretch; }
+.annual-progress-card,.annual-composition-card,.annual-count-card { padding:27px; border-radius:28px; }
+.annual-progress-card { grid-column:span 1; }
+.annual-composition-card { grid-column:span 1; }
+.annual-count-card { grid-column:span 2; }
+.annual-progress-numbers { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:22px; }
+.annual-progress-numbers div { min-height:70px; padding:12px; display:flex; flex-direction:column; justify-content:center; gap:4px; border:1px solid rgba(255,255,255,.9); border-radius:15px; background:rgba(255,255,255,.48); }
+.annual-progress-numbers span { color:var(--muted); font-size:8px; }.annual-progress-numbers strong { font-size:16px; }
+.annual-progress-numbers div:nth-child(2) strong { color:#176ee6; }.annual-progress-numbers div:nth-child(3) strong { color:#7659e2; }
+.annual-phase-track { margin-top:25px; }
+.annual-donut-row { min-height:210px; margin-top:12px; display:flex; align-items:center; justify-content:center; gap:34px; }
+.annual-donut { width:154px; height:154px; flex:0 0 154px; padding:14px; display:grid; place-items:center; border-radius:50%; box-shadow:0 16px 34px rgba(53,88,147,.14),inset 0 1px 0 rgba(255,255,255,.7); }
+.annual-donut.empty { background:conic-gradient(rgba(127,151,188,.15) 0 100%); }
+.annual-donut > div { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; border:1px solid rgba(255,255,255,.9); border-radius:50%; background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(237,244,255,.9)); box-shadow:inset 0 1px 0 white; }
+.annual-donut strong { font-size:27px; letter-spacing:-.04em; }.annual-donut span { color:var(--muted); font-size:8px; }
+.donut-legend { display:grid; gap:15px; min-width:120px; }
+.donut-legend > div { display:grid; grid-template-columns:8px 1fr; align-items:center; gap:8px; }
+.donut-legend i { width:8px; height:8px; border-radius:50%; }.donut-legend i.blue { background:#4388f5; }.donut-legend i.violet { background:#8063e8; }.donut-legend i.green { background:#19b987; }
+.donut-legend span { display:flex; flex-direction:column; gap:2px; color:var(--muted); font-size:8px; }.donut-legend strong { color:var(--ink); font-size:12px; }
+.chart-tip { margin:14px 0 0; color:#8b98aa; font-size:8px; text-align:center; }
+
+@media (max-width:720px) {
+  .calendar-next-shift { border-radius:19px; }.next-shift.calendar-next-shift { padding:13px; }
+  .annual-progress-card,.annual-composition-card,.annual-count-card { width:100%; padding:20px 14px; border-radius:24px; }
+  .annual-progress-numbers { gap:5px; margin-top:17px; }.annual-progress-numbers div { min-height:65px; padding:9px 7px; }.annual-progress-numbers strong { font-size:14px; }
+  .annual-donut-row { min-height:180px; gap:23px; }.annual-donut { width:132px; height:132px; flex-basis:132px; padding:12px; }.annual-donut strong { font-size:23px; }.donut-legend { min-width:100px; gap:12px; }
+  .annual-count-card .month-counts { margin-top:15px; }
+}
+
+@media (max-width:380px) {
+  .annual-donut-row { gap:14px; }.annual-donut { width:118px; height:118px; flex-basis:118px; }.donut-legend { min-width:92px; }
+}
+
+/* v11 â€” concentric annual progress and compact monthly bars */
+.annual-overview-card { grid-column:span 2; padding:28px; border-radius:28px; }
+.annual-overview-grid { margin-top:20px; display:grid; grid-template-columns:220px minmax(0,1fr); align-items:center; gap:34px; }
+.annual-overview-grid .annual-donut { width:190px; height:190px; padding:13px; justify-self:center; }
+.annual-donut > .annual-inner-progress {
+  width:100%;
+  height:100%;
+  padding:13px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(255,255,255,.82);
+  border-radius:50%;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 8px 18px rgba(31,117,91,.1);
+}
+.annual-donut-center { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; border:1px solid rgba(255,255,255,.94); border-radius:50%; background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(237,245,255,.94)); box-shadow:inset 0 1px 0 white,0 7px 18px rgba(42,73,120,.1); }
+.annual-donut-center strong { font-size:29px; letter-spacing:-.05em; }.annual-donut-center span { color:#697a94; font-size:8px; font-weight:750; }
+.annual-overview-detail { min-width:0; display:grid; gap:17px; }
+.annual-overview-detail .donut-legend { grid-template-columns:repeat(3,minmax(0,1fr)); min-width:0; gap:8px; }
+.annual-overview-detail .donut-legend > div { min-height:64px; padding:11px; border:1px solid rgba(255,255,255,.88); border-radius:15px; background:rgba(255,255,255,.44); }
+.annual-overview-detail .donut-legend span { font-size:8px; }.annual-overview-detail .donut-legend strong { margin-top:2px; font-size:13px; }
+.annual-overview-detail .annual-progress-numbers { margin-top:0; }
+.annual-phase-wrap { margin-top:22px; padding:17px 17px 13px; border:1px solid rgba(255,255,255,.88); border-radius:19px; background:linear-gradient(145deg,rgba(255,255,255,.52),rgba(228,240,255,.38)); }
+.annual-phase-wrap .phase-track { height:14px; }
+.annual-phase-wrap .phase-basic,.annual-phase-wrap .phase-overtime { opacity:.72; }
+.phase-confirmed-fill { position:absolute; z-index:2; left:0; top:50%; height:6px; transform:translateY(-50%); border-radius:999px; background:linear-gradient(90deg,#12ad78,#2dd39a); box-shadow:0 0 0 1px rgba(255,255,255,.58),0 3px 9px rgba(16,158,111,.24); }
+.phase-legend i.green { background:#19b987; }
+.chart-card .bar-chart { padding-top:12px; }
+.bar-chart button { grid-template-rows:14px 1fr 20px; gap:2px; }
+.bar-value { align-self:end; line-height:1; }
+
+@media (max-width:720px) {
+  .annual-overview-card { width:100%; padding:20px 14px; border-radius:24px; }
+  .annual-overview-grid { grid-template-columns:1fr; gap:20px; margin-top:17px; }
+  .annual-overview-grid .annual-donut { width:174px; height:174px; justify-self:center; }
+  .annual-donut-center strong { font-size:26px; }
+  .annual-overview-detail .donut-legend { grid-template-columns:1fr 1fr 1fr; gap:5px; }
+  .annual-overview-detail .donut-legend > div { min-height:62px; padding:8px 6px; grid-template-columns:7px 1fr; gap:5px; }
+  .annual-overview-detail .donut-legend strong { font-size:10px; }
+  .annual-overview-detail .annual-progress-numbers { grid-template-columns:repeat(3,1fr); }
+  .annual-phase-wrap { margin-top:17px; padding:14px 9px 10px; }
+  .annual-phase-wrap .phase-copy { padding:0 3px; }
+  .chart-card .bar-chart { padding-top:7px; }
+  .bar-chart button { grid-template-rows:12px 1fr 18px; gap:1px; }
+}
+
+@media (max-width:380px) {
+  .annual-overview-grid .annual-donut { width:158px; height:158px; }
+  .annual-donut > .annual-inner-progress { padding:11px; }
+  .annual-overview-detail .donut-legend > div { min-height:58px; }
+}
+
+/* v12 â€” solid forecast pie with an external completed-hours ring */
+.annual-overview-grid { grid-template-columns:minmax(320px,390px) minmax(0,1fr); gap:26px; }
+.annual-pie-visual { width:100%; max-width:380px; justify-self:center; }
+.annual-pie-visual svg { width:100%; height:auto; display:block; overflow:visible; filter:drop-shadow(0 15px 24px rgba(48,78,130,.12)); }
+.annual-pie-visual .pie-label { fill:white; font-size:9px; font-weight:850; paint-order:stroke; stroke:rgba(48,75,125,.13); stroke-width:2px; stroke-linejoin:round; }
+.annual-pie-visual .pie-label tspan:last-child { font-size:12px; }
+.annual-pie-visual .pie-empty { fill:#7e8ca1; font-size:10px; font-weight:800; }
+.annual-pie-visual .pie-callout { fill:#128664; font-size:9px; font-weight:900; }
+.annual-pie-visual .pie-callout tspan:first-child { font-size:12px; }
+.annual-overview-detail { align-self:stretch; display:flex; align-items:center; }
+.pie-detail-list { width:100%; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.pie-detail-list > div { min-height:67px; padding:11px 12px; display:grid; grid-template-columns:9px minmax(0,1fr) auto; align-items:center; gap:8px; overflow:hidden; border:1px solid rgba(255,255,255,.9); border-radius:15px; background:linear-gradient(145deg,rgba(255,255,255,.64),rgba(231,241,255,.4)); box-shadow:inset 0 1px 0 white; }
+.pie-detail-list i { width:8px; height:8px; border-radius:50%; background:#9aa6b7; box-shadow:0 0 0 3px rgba(154,166,183,.1); }
+.pie-detail-list span { min-width:0; display:flex; flex-direction:column; gap:2px; color:#62728b; font-size:9px; font-weight:800; }
+.pie-detail-list small { overflow:hidden; color:#929dad; font-size:7px; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
+.pie-detail-list strong { color:var(--ink); font-size:13px; white-space:nowrap; }
+.pie-detail-list .blue i { background:#4388f5; box-shadow:0 0 0 3px rgba(67,136,245,.1); }.pie-detail-list .blue strong { color:#2873e2; }
+.pie-detail-list .violet i { background:#8063e8; box-shadow:0 0 0 3px rgba(128,99,232,.1); }.pie-detail-list .violet strong { color:#7458dc; }
+.pie-detail-list .green i { background:#19b987; box-shadow:0 0 0 3px rgba(25,185,135,.1); }.pie-detail-list .green strong { color:#10956d; }
+.pie-detail-list .green-dark i { background:#0ea875; box-shadow:0 0 0 3px rgba(14,168,117,.1); }.pie-detail-list .green-dark strong { color:#108a66; }
+.pie-detail-list .green-light i { background:#6ee0b7; box-shadow:0 0 0 3px rgba(110,224,183,.13); }.pie-detail-list .green-light strong { color:#2aa982; }
+
+@media (max-width:720px) {
+  .annual-overview-grid { grid-template-columns:1fr; gap:8px; }
+  .annual-pie-visual { max-width:330px; margin:0 auto; }
+  .annual-overview-detail { display:block; }
+  .pie-detail-list { grid-template-columns:1fr 1fr; gap:6px; }
+  .pie-detail-list > div { min-height:61px; padding:9px 8px; grid-template-columns:8px minmax(0,1fr) auto; gap:6px; }
+  .pie-detail-list span { font-size:8px; }.pie-detail-list strong { font-size:11px; }.pie-detail-list small { font-size:6.5px; }
+}
+
+@media (max-width:380px) {
+  .annual-pie-visual { max-width:300px; }
+  .pie-detail-list > div { padding-left:7px; padding-right:7px; }
+  .pie-detail-list strong { font-size:10px; }
+}
