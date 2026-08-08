@@ -113,6 +113,10 @@ function compactShiftRange(shift: Shift) {
   const endAs24 = !shift.crossesMidnight && shift.startTime !== "00:00";
   return `${compactClock(shift.startTime)}~${compactClock(shift.endTime, endAs24)}`;
 }
+function fullShiftRange(shift: Shift) {
+  if (!shift.startTime || !shift.endTime) return "";
+  return `${shift.startTime}–${shift.endTime}${shift.crossesMidnight ? " 跨天" : ""}`;
+}
 function orderedShifts(shifts: Shift[]) {
   const order = [
     "shift-day",
@@ -944,7 +948,7 @@ function CalendarView({
                     shift?.countsAsWork &&
                     (record.completed || key < todayKey),
                 );
-                const timeRange = shift ? compactShiftRange(shift) : "";
+                const timeRange = shift ? fullShiftRange(shift) : "";
                 const hasVisibleAssignment = Boolean(
                   shift &&
                     (data.display.showShift ||
@@ -996,32 +1000,23 @@ function CalendarView({
                     )}
                     {shift && hasVisibleAssignment ? (
                       <>
-                        {(data.display.showTags && visibleTags.length > 0) ||
-                        (data.display.showShiftTime && timeRange) ? (
-                          <span className="calendar-info-line">
-                            {data.display.showTags &&
-                              visibleTags.length > 0 && (
-                                <span className="calendar-tag-line">
-                                  {visibleTags.slice(0, 2).map((tag) => (
-                                    <em
-                                      key={tag.id}
-                                      style={{ color: tag.color }}
-                                    >
-                                      {tag.shortName}
-                                    </em>
-                                  ))}
-                                  {visibleTags.length > 2 && (
-                                    <em>+{visibleTags.length - 2}</em>
-                                  )}
-                                </span>
-                              )}
-                            {data.display.showShiftTime && timeRange && (
-                              <small className="calendar-time-label">
-                                {timeRange}
-                              </small>
+                        {data.display.showTags && visibleTags.length > 0 && (
+                          <span className="calendar-tag-grid">
+                            {visibleTags.slice(0, 2).map((tag) => (
+                              <em key={tag.id} style={colorStyle(tag.color)}>
+                                {tag.shortName}
+                              </em>
+                            ))}
+                            {visibleTags.length > 2 && (
+                              <em>+{visibleTags.length - 2}</em>
                             )}
                           </span>
-                        ) : null}
+                        )}
+                        {data.display.showShiftTime && timeRange && (
+                          <small className="calendar-time-row">
+                            {timeRange}
+                          </small>
+                        )}
                         <span
                           className={`calendar-assignment ${shift.isRest ? "is-rest" : ""}`}
                           style={colorStyle(shift.color)}
@@ -1716,7 +1711,7 @@ function ShiftBreakdown({
 function CalendarDisplayPreview({ data }: { data: AppData }) {
   const shift = data.shifts.find((item) => item.countsAsWork) ?? data.shifts[0];
   const tag = data.tags[0];
-  const timeRange = shift ? compactShiftRange(shift) : "";
+  const timeRange = shift ? fullShiftRange(shift) : "";
   return (
     <div className="calendar-display-preview">
       <p>日历单元格预览</p>
@@ -1732,19 +1727,14 @@ function CalendarDisplayPreview({ data }: { data: AppData }) {
         </span>
         {shift && (
           <>
-            {(data.display.showTags && tag) ||
-            (data.display.showShiftTime && timeRange) ? (
-              <span className="calendar-info-line">
-                {data.display.showTags && tag && (
-                  <span className="calendar-tag-line">
-                    <em style={{ color: tag.color }}>{tag.shortName}</em>
-                  </span>
-                )}
-                {data.display.showShiftTime && timeRange && (
-                  <small className="calendar-time-label">{timeRange}</small>
-                )}
+            {data.display.showTags && tag && (
+              <span className="calendar-tag-grid">
+                <em style={colorStyle(tag.color)}>{tag.shortName}</em>
               </span>
-            ) : null}
+            )}
+            {data.display.showShiftTime && timeRange && (
+              <small className="calendar-time-row">{timeRange}</small>
+            )}
             <span
               className={`calendar-assignment ${shift.isRest ? "is-rest" : ""}`}
               style={colorStyle(shift.color)}
