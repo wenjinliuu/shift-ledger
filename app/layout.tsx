@@ -9,13 +9,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "工时簿｜综合工时与排班记录",
-  description: "为综合工时制设计的个人排班与工时累计工具。",
-  applicationName: "工时簿",
+  title: "循环班表｜不按星期工作的个人班表",
+  description: "为轮班、倒班和值守人群设计的个人循环班表，支持自定义班次、职责标签、工时与加班统计。",
+  applicationName: "循环班表",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    title: "工时簿",
+    title: "循环班表",
     statusBarStyle: "default",
   },
   icons: {

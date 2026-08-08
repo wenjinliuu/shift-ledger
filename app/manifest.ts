@@ -4,9 +4,9 @@ export const dynamic = "force-static";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "工时簿 · 综合工时记录",
-    short_name: "工时簿",
-    description: "排班、工时与加班累计工具",
+    name: "循环班表",
+    short_name: "循环班表",
+    description: "不按星期工作的个人循环班表",
     start_url: "/",
     display: "standalone",
     background_color: "#edf5ff",
