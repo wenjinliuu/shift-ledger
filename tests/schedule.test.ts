@@ -144,6 +144,15 @@ test("关闭工时统计时规范化数据会同步关闭加班统计", () => {
   assert.equal(normalized.work.trackOvertime, false);
 });
 
+test("旧数据只开启工时统计时会迁移为工时与加班同步开启", () => {
+  const raw = createDefaultData();
+  raw.work.trackHours = true;
+  raw.work.trackOvertime = false;
+  const normalized = normalizeAppData(raw);
+  assert.equal(normalized.work.trackHours, true);
+  assert.equal(normalized.work.trackOvertime, true);
+});
+
 test("标准工时下 10 小时相对每日 8 小时记录 2 小时额外工时", () => {
   const data = createDefaultData();
   const record: DayRecord = {

@@ -694,8 +694,7 @@ export function normalizeAppData(raw: unknown): AppData {
     },
     work: {
       trackHours: rawWork.trackHours !== false,
-      trackOvertime:
-        rawWork.trackHours !== false && rawWork.trackOvertime !== false,
+      trackOvertime: rawWork.trackHours !== false,
       system:
         rawWork.system === "standard" ||
         rawWork.system === "irregular" ||

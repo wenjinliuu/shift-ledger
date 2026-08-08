@@ -8399,3 +8399,551 @@ input:focus-visible {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* v18 — compact calendar cells, interactive annual chart and unified controls */
+.calendar-layout {
+  overflow: visible;
+  border-radius: 30px;
+  background: transparent;
+}
+.calendar-panel {
+  overflow: hidden;
+  border-radius: 30px;
+  isolation: isolate;
+  background: rgba(250, 251, 253, 0.98);
+  box-shadow:
+    0 12px 32px rgba(42, 57, 78, 0.07),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.94);
+}
+.calendar-month-stage {
+  border-radius: 18px;
+  background: transparent;
+}
+.calendar-day {
+  min-height: 108px;
+  background: linear-gradient(
+    152deg,
+    color-mix(in srgb, var(--entity-color, #86a6d8) 15%, white),
+    color-mix(in srgb, var(--entity-color, #86a6d8) 8%, #f7f9fc)
+  );
+  box-shadow:
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--entity-color, #86a6d8) 9%, white),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86);
+}
+.calendar-shift-stack {
+  width: 100%;
+  min-width: 0;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.calendar-time-row {
+  padding: 0 1px;
+  color: #64758c;
+}
+.calendar-tag-grid em {
+  border-color: color-mix(
+    in srgb,
+    var(--entity-color, #6a62de) 29%,
+    transparent
+  );
+  color: color-mix(in srgb, var(--entity-color, #6a62de) 92%, #253752);
+  background: color-mix(
+    in srgb,
+    var(--entity-color, #6a62de) 18%,
+    white
+  );
+}
+.calendar-assignment {
+  min-height: 31px;
+  margin-top: 0;
+  padding: 0 6px;
+  border: 1px solid
+    color-mix(in srgb, var(--entity-color, #4b82d5) 26%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--entity-color, #4b82d5) 27%,
+    white
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
+}
+.calendar-assignment-main {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+}
+.calendar-assignment-main > b {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 7px 0;
+  color: color-mix(in srgb, var(--entity-color, #356ec8) 92%, #163153);
+  font-weight: 950;
+  text-align: left;
+}
+.calendar-assignment-main:not(:has(.calendar-hours-label)) > b {
+  text-align: center;
+}
+.calendar-hours-label {
+  flex: 0 0 auto;
+  width: auto;
+  margin-left: auto;
+  padding: 7px 0;
+  border: 0;
+  color: color-mix(in srgb, var(--entity-color, #356ec8) 88%, #314765);
+  text-align: right;
+}
+.preview-calendar-cell {
+  min-height: 148px;
+  background: linear-gradient(
+    152deg,
+    color-mix(in srgb, var(--entity-color, #86a6d8) 14%, white),
+    #f7f9fc
+  );
+}
+
+.stats-page {
+  background: transparent;
+}
+.stats-layout.annual-dashboard {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.stats-layout.annual-dashboard::before,
+.stats-layout.annual-dashboard::after {
+  content: none;
+}
+.annual-overview-card,
+.stats-rule-note,
+.chart-card,
+.shift-statistics-card {
+  overflow: hidden;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.76);
+}
+.annual-overview-grid {
+  display: block;
+}
+.annual-ring-wrap {
+  padding: 8px 0 2px;
+  overflow: visible;
+}
+.annual-ring {
+  width: 248px;
+  height: 248px;
+  max-width: none;
+  margin: 0 auto;
+  overflow: visible;
+  outline: none;
+}
+.annual-ring svg {
+  filter: none;
+}
+.annual-pie-core {
+  position: relative;
+  z-index: 1;
+  width: 75%;
+  height: 75%;
+  overflow: visible;
+  border-radius: 50%;
+  background: none;
+  box-shadow: 0 10px 28px rgba(54, 85, 140, 0.14);
+}
+.annual-pie-segments {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.annual-pie-segments circle {
+  cursor: pointer;
+  stroke-width: 50;
+  stroke-linecap: butt;
+  transform: rotate(-90deg);
+  transform-origin: 50px 50px;
+  transition:
+    filter 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+.annual-pie-basic {
+  stroke: #3f84ee;
+}
+.annual-pie-overtime {
+  stroke: #8063e8;
+}
+.annual-progress-ring {
+  z-index: 3;
+}
+.annual-progress-ring circle {
+  cursor: pointer;
+  pointer-events: stroke;
+  stroke-linecap: butt;
+  transition:
+    stroke-width 180ms ease,
+    filter 180ms ease,
+    opacity 180ms ease;
+}
+.annual-ring .ring-progress-track {
+  stroke: #dce2ea;
+  stroke-width: 8;
+}
+.annual-ring .ring-progress-basic,
+.annual-ring .ring-progress-overtime {
+  stroke: #18b77d;
+  stroke-width: 8;
+}
+.annual-ring .ring-overtime-outline {
+  stroke: #8063e8;
+  stroke-width: 12;
+}
+.annual-ring.selected-basic .annual-pie-overtime,
+.annual-ring.selected-overtime .annual-pie-basic {
+  opacity: 0.78;
+}
+.annual-ring.selected-basic .annual-pie-basic,
+.annual-ring.selected-overtime .annual-pie-overtime {
+  filter: drop-shadow(0 0 4px rgba(26, 54, 99, 0.5));
+}
+.annual-ring.selected-total .ring-progress-track {
+  stroke-width: 10;
+  filter: drop-shadow(0 3px 5px rgba(95, 112, 139, 0.28));
+}
+.annual-ring.selected-completed .ring-progress-basic {
+  stroke-width: 11;
+  filter: drop-shadow(0 3px 5px rgba(24, 183, 125, 0.34));
+}
+.annual-ring.selected-completedOvertime .ring-overtime-outline {
+  stroke-width: 15;
+  filter: drop-shadow(0 3px 5px rgba(128, 99, 232, 0.34));
+}
+.pie-progress-callout {
+  pointer-events: none;
+}
+.pie-progress-callout rect {
+  display: none;
+}
+.pie-progress-callout line {
+  stroke: #139f74;
+  stroke-width: 1.25;
+}
+.pie-progress-callout text,
+.pie-progress-callout .callout-hours {
+  fill: #10946d;
+  font-size: 6.1px;
+  font-weight: 950;
+  text-anchor: middle;
+  dominant-baseline: auto;
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.94);
+  stroke-width: 2.2px;
+  stroke-linejoin: round;
+}
+.pie-progress-callout .callout-hours {
+  font-size: 5.6px;
+  opacity: 1;
+}
+.annual-ring-legend {
+  width: min(100%, 540px);
+  margin: 18px auto 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+}
+.annual-ring-legend button {
+  min-width: 0;
+  min-height: 51px;
+  padding: 8px 5px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: center;
+  align-items: center;
+  gap: 2px 5px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: #6a7890;
+  background: transparent;
+  text-align: left;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+.annual-ring-legend button.active {
+  transform: translateY(-2px);
+  border-color: rgba(76, 111, 168, 0.2);
+  background: rgba(246, 249, 253, 0.92);
+  box-shadow: 0 5px 13px rgba(49, 71, 105, 0.08);
+}
+.annual-ring-legend button > i {
+  grid-row: 1 / span 2;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.annual-ring-legend button > span {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 7.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.annual-ring-legend button > b {
+  color: #25354e;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+.annual-ring-legend .legend-basic > i {
+  background: #3f84ee;
+}
+.annual-ring-legend .legend-overtime > i {
+  background: #8063e8;
+}
+.annual-ring-legend .legend-completed > i {
+  background: #18b77d;
+}
+.annual-ring-legend .legend-completedOvertime > i {
+  border: 2px solid #8063e8;
+  background: #18b77d;
+  box-shadow: 0 0 0 1px #fff inset;
+}
+.annual-ring-legend .legend-total > i {
+  background: #cbd3de;
+}
+
+.bar-target,
+.chart-legend .bar-target-key {
+  display: none !important;
+}
+.bar-track {
+  overflow: hidden;
+  background: #e8edf3;
+}
+.bar-stack,
+.chart-month.selected .bar-stack {
+  width: 72%;
+  height: 100% !important;
+  min-height: 100%;
+  outline: none !important;
+  border-radius: 7px 7px 3px 3px;
+}
+.chart-month.selected .bar-track {
+  box-shadow: inset 0 0 0 1px rgba(57, 121, 222, 0.18);
+}
+
+.select-setting {
+  min-height: 78px;
+  padding: 12px 0;
+  align-items: center;
+  gap: 18px;
+}
+.select-setting > span:first-child {
+  color: #34445c;
+  font-weight: 850;
+}
+.select-control {
+  position: relative;
+  width: min(390px, 68%);
+  min-width: 220px;
+}
+.select-setting .select-control select,
+.setting-card .select-control select,
+.dialog-card .select-control select {
+  width: 100%;
+  min-height: 54px;
+  padding: 0 48px 0 17px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(137, 153, 178, 0.22);
+  border-radius: 17px;
+  color: #263750;
+  background: linear-gradient(180deg, #fff, #f5f8fc);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 6px 18px rgba(45, 66, 97, 0.07);
+  font-size: 12px;
+  font-weight: 800;
+}
+.select-control > i {
+  position: absolute;
+  top: 50%;
+  right: 17px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  transform: translateY(-50%);
+  border-radius: 8px;
+  color: #52709b;
+  background: #eaf1fb;
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+}
+.target-grid button {
+  position: relative;
+  min-height: 96px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 7px 8px;
+  border: 1px solid rgba(132, 151, 180, 0.18);
+  background: linear-gradient(150deg, #fff, #f4f7fb);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 6px 16px rgba(48, 69, 102, 0.055);
+  text-align: left;
+}
+.target-grid button.overridden {
+  border-color: rgba(82, 126, 211, 0.3);
+  background: linear-gradient(150deg, #f7faff, #edf3ff);
+}
+.target-month-copy {
+  min-width: 0;
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start !important;
+  gap: 3px !important;
+}
+.target-month-copy > b {
+  color: #273850;
+  font-size: 11px;
+}
+.target-month-copy > small {
+  color: #8a97aa;
+  font-size: 6.8px;
+  line-height: 1.3;
+}
+.target-grid button > strong {
+  color: #2e6dce;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+.target-grid button > strong b {
+  margin-left: 2px;
+  font-size: 8px;
+}
+.target-grid button > em {
+  grid-column: 1 / -1;
+  color: #708098;
+  font-size: 7px;
+  font-style: normal;
+}
+
+@media (max-width: 720px) {
+  .calendar-panel {
+    border-radius: 26px;
+  }
+  .calendar-day {
+    min-height: 94px;
+    padding: 4px 3px 4px;
+    gap: 2px;
+  }
+  .calendar-shift-stack {
+    gap: 2px;
+  }
+  .calendar-time-row {
+    padding: 0;
+    font-size: 5px;
+  }
+  .calendar-tag-grid em {
+    padding: 2px 1px;
+    font-size: 5.5px;
+  }
+  .calendar-assignment {
+    min-height: 27px;
+    padding: 0 3px;
+    border-radius: 7px;
+  }
+  .calendar-assignment-main > b,
+  .calendar-hours-label {
+    padding: 6px 0;
+  }
+  .calendar-assignment-main > b {
+    font-size: 7.2px;
+  }
+  .calendar-hours-label {
+    font-size: 5.8px;
+  }
+  .preview-calendar-cell {
+    width: 126px;
+    min-height: 146px;
+  }
+
+  .annual-overview-card,
+  .chart-card,
+  .shift-statistics-card {
+    border-radius: 25px;
+  }
+  .annual-ring {
+    width: 218px;
+    height: 218px;
+  }
+  .annual-pie-core {
+    width: 75%;
+    height: 75%;
+  }
+  .annual-ring-legend {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+  }
+  .annual-ring-legend button:last-child {
+    grid-column: 1 / -1;
+  }
+  .annual-ring-legend button {
+    min-height: 43px;
+    padding: 6px 8px;
+  }
+  .bar-chart {
+    height: 196px;
+  }
+  .bar-stack,
+  .chart-month.selected .bar-stack {
+    width: 76%;
+  }
+  .select-setting {
+    align-items: stretch;
+  }
+  .select-control {
+    width: 100%;
+    min-width: 0;
+  }
+  .select-setting .select-control select,
+  .setting-card .select-control select,
+  .dialog-card .select-control select {
+    min-height: 54px;
+  }
+  .target-grid button {
+    min-height: 89px;
+    padding: 10px 9px;
+  }
+  .target-month-copy > small {
+    font-size: 6.3px;
+  }
+}
+
+@media (max-width: 380px) {
+  .calendar-day {
+    min-height: 91px;
+  }
+  .annual-ring {
+    width: 208px;
+    height: 208px;
+  }
+  .target-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

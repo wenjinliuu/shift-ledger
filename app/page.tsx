@@ -115,7 +115,7 @@ function compactShiftRange(shift: Shift) {
 }
 function fullShiftRange(shift: Shift) {
   if (!shift.startTime || !shift.endTime) return "";
-  return `${shift.startTime}–${shift.endTime}${shift.crossesMidnight ? " 跨天" : ""}`;
+  return `${shift.startTime}–${shift.endTime}`;
 }
 function orderedShifts(shifts: Shift[]) {
   const order = [
@@ -217,7 +217,11 @@ function getMonthlyTarget(data: AppData, year: number, month: number) {
   const override = data.targets[key];
   return Number.isFinite(override)
     ? override
-    : estimateMonthlyTarget(year, month, data.work.dailyStandard);
+    : estimateMonthlyTarget(
+        year,
+        month,
+        data.work.system === "comprehensive" ? 8 : data.work.dailyStandard,
+      );
 }
 function getAnnualTarget(data: AppData, year: number) {
   return MONTH_LABELS.reduce(
@@ -837,6 +841,7 @@ function CalendarView({
     0,
   );
   const actualHours = completed.reduce((sum, record) => sum + record.hours, 0);
+  const monthlyBasicHours = getMonthlyTarget(data, year, month);
   const yearWorkRecords = data.records.filter(
     (record) =>
       record.date.startsWith(`${year}-`) &&
@@ -967,6 +972,7 @@ function CalendarView({
                     aria-label={ariaParts.join("，")}
                     key={key}
                     className={`calendar-day ${key === todayKey ? "today" : ""} ${selected ? "batch-selected" : ""}`}
+                    style={shift ? colorStyle(shift.color) : undefined}
                     onClick={() =>
                       batchMode ? onToggleBatchDate(key) : onOpenDate(key)
                     }
@@ -999,7 +1005,12 @@ function CalendarView({
                       </span>
                     )}
                     {shift && hasVisibleAssignment ? (
-                      <>
+                      <span className="calendar-shift-stack">
+                        {data.display.showShiftTime && timeRange && (
+                          <small className="calendar-time-row">
+                            {timeRange}
+                          </small>
+                        )}
                         {data.display.showTags && visibleTags.length > 0 && (
                           <span className="calendar-tag-grid">
                             {visibleTags.slice(0, 2).map((tag) => (
@@ -1011,11 +1022,6 @@ function CalendarView({
                               <em>+{visibleTags.length - 2}</em>
                             )}
                           </span>
-                        )}
-                        {data.display.showShiftTime && timeRange && (
-                          <small className="calendar-time-row">
-                            {timeRange}
-                          </small>
                         )}
                         <span
                           className={`calendar-assignment ${shift.isRest ? "is-rest" : ""}`}
@@ -1032,7 +1038,7 @@ function CalendarView({
                               )}
                           </span>
                         </span>
-                      </>
+                      </span>
                     ) : record ? (
                       <span
                         className="calendar-record-dot"
@@ -1105,7 +1111,7 @@ function CalendarView({
             <MetricCard
               label="本月计划工时"
               value={`${compactHours(projectedHours)}h`}
-              detail={`截至今日 ${compactHours(actualHours)}h`}
+              detail={`基本工时 ${compactHours(monthlyBasicHours)}h · 已完成 ${compactHours(actualHours)}h`}
               tone="violet"
             />
           )}
@@ -1159,8 +1165,16 @@ function AnnualRing({
   overtime: number;
   actualOvertime: number;
 }) {
+  type AnnualSelection =
+    | "basic"
+    | "overtime"
+    | "completed"
+    | "completedOvertime"
+    | "total";
+  const [selection, setSelection] = useState<AnnualSelection>("total");
   const chartTotal = Math.max(1, target + overtime);
   const targetShare = (target / chartTotal) * 100;
+  const overtimeShare = Math.max(0, 100 - targetShare);
   const confirmedOvertime = Math.min(overtime, actualOvertime);
   const confirmedBasic = Math.min(
     target,
@@ -1168,92 +1182,138 @@ function AnnualRing({
   );
   const basicProgress = (confirmedBasic / chartTotal) * 100;
   const overtimeProgress = (confirmedOvertime / chartTotal) * 100;
-  const basicCompletion = target
-    ? Math.min(100, (confirmedBasic / target) * 100)
-    : 0;
+  const completedPercent = Math.min(100, (actual / chartTotal) * 100);
   const markerAngle =
-    ((targetShare - basicProgress) / 100) * Math.PI * 2 - Math.PI / 2;
-  const markerX = 80 + Math.cos(markerAngle) * 69;
-  const markerY = 80 + Math.sin(markerAngle) * 69;
-  const calloutX = Math.max(10, Math.min(102, markerX - 28));
-  const calloutY = Math.max(8, Math.min(127, markerY - 18));
-  const pieStyle = { "--target-share": `${targetShare}%` } as CSSProperties;
+    (basicProgress / 100) * Math.PI * 2 - Math.PI / 2;
+  const markerX = 80 + Math.cos(markerAngle) * 64;
+  const markerY = 80 + Math.sin(markerAngle) * 64;
+  const calloutX = Math.max(24, Math.min(136, markerX + (markerX < 80 ? -26 : 26)));
+  const calloutY = Math.max(15, Math.min(145, markerY - 10));
+  const legends: {
+    id: AnnualSelection;
+    label: string;
+    value: number;
+  }[] = [
+    { id: "basic", label: "基本工时", value: target },
+    { id: "overtime", label: "预计加班", value: overtime },
+    { id: "completed", label: "已完成", value: actual },
+    {
+      id: "completedOvertime",
+      label: "已完成加班",
+      value: confirmedOvertime,
+    },
+    { id: "total", label: "预计总工时", value: target + overtime },
+  ];
   return (
     <div className="annual-ring-wrap">
       <div
-        className="annual-ring"
+        className={`annual-ring selected-${selection}`}
         role="img"
         aria-label={`标准工时 ${compactHours(target)} 小时，预计额外工时 ${compactHours(overtime)} 小时，已完成 ${compactHours(actual)} 小时`}
       >
-        <div className="annual-pie-core" style={pieStyle}>
-          <small>预计总工时</small>
-          <strong>{compactHours(target + overtime)}h</strong>
-          <span>已完成 {compactHours(actual)}h</span>
+        <div className="annual-pie-core">
+          <svg className="annual-pie-segments" viewBox="0 0 100 100" aria-label="基本工时与预计加班组成">
+            <circle
+              className="annual-pie-basic"
+              cx="50"
+              cy="50"
+              r="25"
+              pathLength="100"
+              strokeDasharray={`${targetShare} ${100 - targetShare}`}
+              onClick={() => setSelection("basic")}
+            />
+            {overtimeShare > 0 && (
+              <circle
+                className="annual-pie-overtime"
+                cx="50"
+                cy="50"
+                r="25"
+                pathLength="100"
+                strokeDasharray={`${overtimeShare} ${100 - overtimeShare}`}
+                strokeDashoffset={-targetShare}
+                onClick={() => setSelection("overtime")}
+              />
+            )}
+          </svg>
         </div>
-        <svg viewBox="0 0 160 160" aria-hidden="true">
+        <svg className="annual-progress-ring" viewBox="0 0 160 160" aria-label="全年已完成进度">
           <circle
             className="ring-progress-track"
             cx="80"
             cy="80"
-            r="69"
+            r="64"
             pathLength="100"
+            onClick={() => setSelection("total")}
           />
           <circle
             className="ring-progress ring-progress-basic"
             cx="80"
             cy="80"
-            r="69"
+            r="64"
             pathLength="100"
             strokeDasharray={`${basicProgress} ${100 - basicProgress}`}
-            strokeDashoffset={-(targetShare - basicProgress)}
+            strokeDashoffset={0}
+            onClick={() => setSelection("completed")}
           />
           {overtimeProgress > 0 && (
-            <circle
-              className="ring-progress ring-progress-overtime"
-              cx="80"
-              cy="80"
-              r="69"
-              pathLength="100"
-              strokeDasharray={`${overtimeProgress} ${100 - overtimeProgress}`}
-              strokeDashoffset={-targetShare}
-            />
+            <>
+              <circle
+                className="ring-overtime-outline"
+                cx="80"
+                cy="80"
+                r="64"
+                pathLength="100"
+                strokeDasharray={`${overtimeProgress} ${100 - overtimeProgress}`}
+                strokeDashoffset={-targetShare}
+                onClick={() => setSelection("completedOvertime")}
+              />
+              <circle
+                className="ring-progress ring-progress-overtime"
+                cx="80"
+                cy="80"
+                r="64"
+                pathLength="100"
+                strokeDasharray={`${overtimeProgress} ${100 - overtimeProgress}`}
+                strokeDashoffset={-targetShare}
+                onClick={() => setSelection("completedOvertime")}
+              />
+            </>
           )}
           {basicProgress > 0 && (
             <g className="pie-progress-callout">
               <line
                 x1={markerX}
                 y1={markerY}
-                x2={calloutX + 28}
-                y2={calloutY + 18}
+                x2={calloutX}
+                y2={calloutY}
               />
-              <rect x={calloutX} y={calloutY} width="56" height="24" rx="9" />
-              <text x={calloutX + 28} y={calloutY + 10}>
-                {Math.round(basicCompletion)}%
+              <text x={calloutX} y={calloutY - 3}>
+                已完成 {Math.round(completedPercent)}%
               </text>
               <text
                 className="callout-hours"
-                x={calloutX + 28}
-                y={calloutY + 19}
+                x={calloutX}
+                y={calloutY + 7}
               >
-                {compactHours(confirmedBasic)}h
+                {compactHours(actual)}h
               </text>
             </g>
           )}
         </svg>
       </div>
-      <div className="ring-legend">
-        <span>
-          <i className="blue" />
-          基本工时 {compactHours(target)}h
-        </span>
-        <span>
-          <i className="violet" />
-          预计加班 {compactHours(overtime)}h
-        </span>
-        <span>
-          <i className="green" />
-          已完成 {compactHours(actual)}h
-        </span>
+      <div className="ring-legend annual-ring-legend">
+        {legends.map((item) => (
+          <button
+            type="button"
+            key={item.id}
+            className={`${item.id === selection ? "active" : ""} legend-${item.id}`}
+            onClick={() => setSelection(item.id)}
+          >
+            <i />
+            <span>{item.label}</span>
+            <b>{compactHours(item.value)}h</b>
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -1305,7 +1365,6 @@ function MonthlyHoursChart({
   monthly,
   activeMonth,
   showOvertime,
-  showTarget,
 }: {
   monthly: {
     label: string;
@@ -1316,23 +1375,12 @@ function MonthlyHoursChart({
   }[];
   activeMonth: number;
   showOvertime: boolean;
-  showTarget: boolean;
 }) {
-  const maxHours = Math.max(
-    1,
-    ...monthly.map((item) =>
-      Math.max(item.hours, showTarget ? item.target : 0),
-    ),
-  );
   return (
     <div className="bar-chart" role="img" aria-label="全年每月工作时长柱状图">
       {monthly.map((item, index) => {
         const overtime = showOvertime ? Math.min(item.hours, item.overtime) : 0;
         const base = Math.max(0, item.hours - overtime);
-        const totalHeight = Math.max(
-          item.hours > 0 ? 3 : 0,
-          (item.hours / maxHours) * 100,
-        );
         const baseShare = item.hours > 0 ? (base / item.hours) * 100 : 0;
         return (
           <div
@@ -1345,17 +1393,7 @@ function MonthlyHoursChart({
             </span>
             <span className="bar-value">{compactHours(item.hours)}h</span>
             <span className="bar-track">
-              {showTarget && (
-                <i
-                  className="bar-target"
-                  style={{
-                    bottom: `${Math.min(100, (item.target / maxHours) * 100)}%`,
-                  }}
-                >
-                  <span>{compactHours(item.target)}h</span>
-                </i>
-              )}
-              <span className="bar-stack" style={{ height: `${totalHeight}%` }}>
+              <span className="bar-stack" style={{ height: item.hours > 0 ? "100%" : "0" }}>
                 {overtime > 0 && (
                   <i
                     className="bar-overtime"
@@ -1449,7 +1487,7 @@ function StatsView({
   });
   const systemNote =
     data.work.system === "comprehensive"
-      ? `综合工时按${PERIOD_LABELS[data.work.period]}周期累计；不会把单日超过 ${compactHours(data.work.dailyStandard)}h 直接认定为额外工时。`
+      ? `综合工时按${PERIOD_LABELS[data.work.period]}周期累计；月度基本工时按每日 8h 推算，不会把单日超过 8h 直接认定为额外工时。`
       : data.work.system === "standard"
         ? "标准工时按已开启的每日 / 每周阈值统计，日与周结果取较高值，避免重复累计。"
         : data.work.system === "custom"
@@ -1550,39 +1588,6 @@ function StatsView({
                 overtime={annualOvertime}
                 actualOvertime={actualOvertime}
               />
-              <div className="pie-detail-list compact-list">
-                <div className="blue">
-                  <i />
-                  <span>
-                    全年标准工时<small>按月度标准工时合计</small>
-                  </span>
-                  <strong>{compactHours(annualTarget)}h</strong>
-                </div>
-                <div className="green">
-                  <i />
-                  <span>
-                    已完成总工时<small>截至今日已确认的工作班次</small>
-                  </span>
-                  <strong>{compactHours(actualHours)}h</strong>
-                </div>
-                <div className="violet">
-                  <i />
-                  <span>
-                    预计额外工时
-                    <small>
-                      按{PERIOD_LABELS[data.work.period]}周期分别累计
-                    </small>
-                  </span>
-                  <strong>{compactHours(annualOvertime)}h</strong>
-                </div>
-                <div className="green-light">
-                  <i />
-                  <span>
-                    已确认额外工时<small>过去日期或手动确认</small>
-                  </span>
-                  <strong>{compactHours(actualOvertime)}h</strong>
-                </div>
-              </div>
             </div>
           </section>
         )}
@@ -1622,13 +1627,6 @@ function StatsView({
                   额外工时
                 </span>
               )}
-              {data.work.trackOvertime &&
-                data.work.system === "comprehensive" && (
-                  <span>
-                    <i className="bar-target-key" />
-                    月标准线
-                  </span>
-                )}
             </div>
           </div>
           {!monthlyOvertime &&
@@ -1643,9 +1641,6 @@ function StatsView({
             monthly={monthly}
             activeMonth={month}
             showOvertime={monthlyOvertime}
-            showTarget={
-              data.work.trackOvertime && data.work.system === "comprehensive"
-            }
           />
         </section>
         <ShiftBreakdown items={shiftBreakdown} showHours />
@@ -1719,21 +1714,20 @@ function CalendarDisplayPreview({ data }: { data: AppData }) {
         <span className="calendar-date-row">
           <span className="day-number">8</span>
           <span className="calendar-day-badges">
-            <i className="complete-dot" />
             {data.display.showHolidays && (
               <small className="holiday-flag">法·国庆</small>
             )}
           </span>
         </span>
         {shift && (
-          <>
+          <span className="calendar-shift-stack">
+            {data.display.showShiftTime && timeRange && (
+              <small className="calendar-time-row">{timeRange}</small>
+            )}
             {data.display.showTags && tag && (
               <span className="calendar-tag-grid">
                 <em style={colorStyle(tag.color)}>{tag.shortName}</em>
               </span>
-            )}
-            {data.display.showShiftTime && timeRange && (
-              <small className="calendar-time-row">{timeRange}</small>
             )}
             <span
               className={`calendar-assignment ${shift.isRest ? "is-rest" : ""}`}
@@ -1748,7 +1742,7 @@ function CalendarDisplayPreview({ data }: { data: AppData }) {
                 )}
               </span>
             </span>
-          </>
+          </span>
         )}
       </div>
       <small>
@@ -1781,12 +1775,15 @@ function SettingsView({
   const importInput = useRef<HTMLInputElement>(null);
   const orderedShiftItems = orderedShifts(data.shifts);
   function updateWork(patch: Partial<AppData["work"]>) {
+    const linkedValue = patch.trackHours ?? patch.trackOvertime;
     setData((current) => ({
       ...current,
       work: {
         ...current.work,
         ...patch,
-        ...(patch.trackHours === false ? { trackOvertime: false } : {}),
+        ...(typeof linkedValue === "boolean"
+          ? { trackHours: linkedValue, trackOvertime: linkedValue }
+          : {}),
       },
     }));
   }
@@ -1956,7 +1953,6 @@ function SettingsView({
               <p className="eyebrow">日历显示</p>
               <h2>选择单元格中显示的信息</h2>
             </div>
-            <span className="soft-badge">法定节假日默认开启</span>
           </div>
           <div className="calendar-display-layout">
             <div className="calendar-display-options">
@@ -2133,21 +2129,13 @@ function SettingsView({
             </div>
           </div>
           <ToggleRow
-            label="统计工作时长"
-            detail="关闭后仍可正常使用班表，只隐藏所有小时数"
+            label="统计工时与加班"
+            detail="关闭后仍可正常排班；开启后同时统计工作时长与加班"
             checked={data.work.trackHours}
             onChange={(checked) => updateWork({ trackHours: checked })}
           />
           {data.work.trackHours && (
-            <>
-              <ToggleRow
-                label="统计加班"
-                detail="关闭后只累计工时，不计算或展示任何额外工时"
-                checked={data.work.trackOvertime}
-                onChange={(checked) => updateWork({ trackOvertime: checked })}
-              />
-              {data.work.trackOvertime && (
-                <div className="conditional-settings">
+            <div className="conditional-settings">
                   <SelectSetting
                     label="工时制度"
                     value={data.work.system}
@@ -2157,24 +2145,14 @@ function SettingsView({
                     options={Object.entries(SYSTEM_LABELS)}
                   />
                   {data.work.system === "comprehensive" && (
-                    <>
-                      <SelectSetting
-                        label="统计周期"
-                        value={data.work.period}
-                        onChange={(value) =>
-                          updateWork({ period: value as StatisticsPeriod })
-                        }
-                        options={Object.entries(PERIOD_LABELS)}
-                      />
-                      <NumberSetting
-                        label="标准日工时（用于自动推算）"
-                        value={data.work.dailyStandard}
-                        unit="h"
-                        onChange={(value) =>
-                          updateWork({ dailyStandard: value })
-                        }
-                      />
-                    </>
+                    <SelectSetting
+                      label="统计周期"
+                      value={data.work.period}
+                      onChange={(value) =>
+                        updateWork({ period: value as StatisticsPeriod })
+                      }
+                      options={Object.entries(PERIOD_LABELS)}
+                    />
                   )}
                   {data.work.system === "standard" && (
                     <>
@@ -2266,9 +2244,7 @@ function SettingsView({
                       ["none", "暂不统计收入"],
                     ]}
                   />
-                </div>
-              )}
-            </>
+            </div>
           )}
         </section>
         {data.work.trackHours &&
@@ -2308,23 +2284,19 @@ function SettingsView({
                       key={key}
                       onClick={() => setTargetEdit({ key, value })}
                     >
-                      <span>
-                        {label}
-                        {Number.isFinite(data.targets[key]) ? (
-                          <small>已修正</small>
-                        ) : (
-                          <i
-                            className="auto-target-hint"
-                            title="按工作日自动推算"
-                          >
-                            ·
-                          </i>
-                        )}
+                      <span className="target-month-copy">
+                        <b>{label}</b>
+                        <small>
+                          {Number.isFinite(data.targets[key])
+                            ? "已手动修正"
+                            : "按工作日自动推算"}
+                        </small>
                       </span>
                       <strong>
                         {compactHours(value)}
                         <b>h</b>
                       </strong>
+                      <em>点击修改</em>
                     </button>
                   );
                 })}
@@ -2442,13 +2414,19 @@ function SelectSetting({
   return (
     <label className="select-setting">
       <span>{label}</span>
-      <select value={value} onChange={(event) => onChange(event.target.value)}>
-        {options.map(([id, name]) => (
-          <option key={id} value={id}>
-            {name}
-          </option>
-        ))}
-      </select>
+      <span className="select-control">
+        <select
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        >
+          {options.map(([id, name]) => (
+            <option key={id} value={id}>
+              {name}
+            </option>
+          ))}
+        </select>
+        <i aria-hidden="true">⌄</i>
+      </span>
     </label>
   );
 }
