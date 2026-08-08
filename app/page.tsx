@@ -541,6 +541,12 @@ export default function Home() {
     setData((current) => materializeCycleYear(current, next.getFullYear()));
     setSelectedMonth(next);
   }
+  function changeView(nextView: View) {
+    setView(nextView);
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    });
+  }
   function saveRecord(record: DayRecord) {
     setData((current) => ({
       ...current,
@@ -659,7 +665,7 @@ export default function Home() {
             <button
               key={item.id}
               className={view === item.id ? "active" : ""}
-              onClick={() => setView(item.id)}
+              onClick={() => changeView(item.id)}
             >
               <span className="nav-icon">
                 <Icon name={item.icon} />
@@ -746,7 +752,7 @@ export default function Home() {
           <button
             key={item.id}
             className={view === item.id ? "active" : ""}
-            onClick={() => setView(item.id)}
+            onClick={() => changeView(item.id)}
           >
             <span>
               <Icon name={item.icon} />
@@ -979,6 +985,7 @@ function CalendarView({
                     aria-label={ariaParts.join("，")}
                     key={key}
                     className={`calendar-day ${key === todayKey ? "today" : ""} ${selected ? "batch-selected" : ""}`}
+                    style={shift ? colorStyle(shift.color) : undefined}
                     onClick={() =>
                       batchMode ? onToggleBatchDate(key) : onOpenDate(key)
                     }
@@ -1736,14 +1743,14 @@ function CalendarDisplayPreview({ data }: { data: AppData }) {
   const timeRange = shift ? fullShiftRange(shift) : "";
   return (
     <div className="calendar-display-preview">
-      <span className="calendar-preview-copy">
-        <strong>单元格效果预览</strong>
-        <small>随上方显示选项实时同步</small>
-      </span>
-      <div className="calendar-day preview-calendar-cell">
+      <div
+        className="calendar-day preview-calendar-cell"
+        style={shift ? colorStyle(shift.color) : undefined}
+      >
         <span className="calendar-date-row">
           <span className="day-number">8</span>
           <span className="calendar-day-badges">
+            <i className="complete-dot" title="已自动计入" />
             {data.display.showHolidays && (
               <small className="holiday-flag">法·国庆</small>
             )}
@@ -1776,9 +1783,15 @@ function CalendarDisplayPreview({ data }: { data: AppData }) {
           </span>
         )}
       </div>
-      <small>
-        实际日历会根据屏幕宽度自动压缩文字，详细时间与备注仍放在当天详情中。
-      </small>
+      <span className="calendar-preview-guidance">
+        <span className="calendar-preview-copy">
+          <strong>单元格效果预览</strong>
+          <small>左侧预览会随上方显示选项实时同步</small>
+        </span>
+        <small>
+          绿点表示班次已完成；法定节假日显示在日期右侧。实际日历会根据屏幕宽度自动压缩文字。
+        </small>
+      </span>
     </div>
   );
 }
@@ -2100,20 +2113,35 @@ function SettingsView({
           <p className="setting-intro">
             标签可叠加在每天的主班次上，不参与循环工时计算。
           </p>
-          <div className="tag-list">
+          <div className="tag-card-grid">
             {data.tags.length ? (
               data.tags.map((tag) => (
-                <span key={tag.id} style={colorStyle(tag.color)}>
-                  <i />
-                  {tag.name}
-                  <small>{tag.shortName}</small>
-                  <button
-                    onClick={() => setEditor({ type: "tag", value: tag })}
-                  >
-                    编辑
-                  </button>
-                  <button onClick={() => deleteTag(tag)}>×</button>
-                </span>
+                <article
+                  key={tag.id}
+                  className="tag-library-item"
+                  style={colorStyle(tag.color)}
+                >
+                  <div className="tag-library-top">
+                    <i>{tag.shortName}</i>
+                    <span>
+                      <button
+                        aria-label={`编辑${tag.name}`}
+                        onClick={() => setEditor({ type: "tag", value: tag })}
+                      >
+                        <Icon name="edit" />
+                      </button>
+                      <button
+                        aria-label={`删除${tag.name}`}
+                        className="mini-delete"
+                        onClick={() => deleteTag(tag)}
+                      >
+                        <Icon name="trash" />
+                      </button>
+                    </span>
+                  </div>
+                  <strong>{tag.name}</strong>
+                  <small>日历简称 · {tag.shortName}</small>
+                </article>
               ))
             ) : (
               <p className="empty-copy">
