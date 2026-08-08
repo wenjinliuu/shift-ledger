@@ -1386,14 +1386,16 @@ function MonthlyHoursChart({
           <div
             title={`${item.label}：计划 ${compactHours(item.hours)}h，已完成 ${compactHours(item.completedHours)}h${showOvertime ? `，额外 ${compactHours(overtime)}h` : ""}`}
             key={item.label}
-            className={`chart-month ${index === activeMonth ? "selected" : ""}`}
+            className={`chart-month ${item.hours > 0 ? "has-hours" : ""} ${
+              index === activeMonth ? "selected" : ""
+            }`}
           >
             <span className="bar-overtime-value">
               {overtime > 0 ? `+${compactHours(overtime)}h` : ""}
             </span>
             <span className="bar-value">{compactHours(item.hours)}h</span>
             <span className="bar-track">
-              <span className="bar-stack" style={{ height: item.hours > 0 ? "100%" : "0" }}>
+              <span className="bar-stack">
                 {overtime > 0 && (
                   <i
                     className="bar-overtime"

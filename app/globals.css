@@ -8489,12 +8489,13 @@ input:focus-visible {
 .calendar-assignment-main:not(:has(.calendar-hours-label)) > b {
   text-align: center;
 }
-.calendar-hours-label {
+.calendar-assignment .calendar-hours-label {
   flex: 0 0 auto;
   width: auto;
   margin-left: auto;
   padding: 7px 0;
   border: 0;
+  border-left: 0;
   color: color-mix(in srgb, var(--entity-color, #356ec8) 88%, #314765);
   text-align: right;
 }
@@ -8731,10 +8732,15 @@ input:focus-visible {
 .bar-stack,
 .chart-month.selected .bar-stack {
   width: 72%;
-  height: 100% !important;
-  min-height: 100%;
+  height: 0 !important;
+  min-height: 0;
   outline: none !important;
   border-radius: 7px 7px 3px 3px;
+}
+.chart-month.has-hours .bar-stack,
+.chart-month.has-hours.selected .bar-stack {
+  height: 100% !important;
+  min-height: 100%;
 }
 .chart-month.selected .bar-track {
   box-shadow: inset 0 0 0 1px rgba(57, 121, 222, 0.18);
@@ -8875,7 +8881,7 @@ input:focus-visible {
   .calendar-assignment-main > b {
     font-size: 7.2px;
   }
-  .calendar-hours-label {
+  .calendar-assignment .calendar-hours-label {
     font-size: 5.8px;
   }
   .preview-calendar-cell {
