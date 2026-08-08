@@ -959,7 +959,10 @@ function CalendarView({
                     (data.display.showShift ||
                       data.display.showTags ||
                       data.display.showShiftTime ||
-                      (data.display.showHours && data.work.trackHours)),
+                      (data.display.showHours &&
+                        data.work.trackHours &&
+                        shift.countsAsWork &&
+                        !shift.isRest)),
                 );
                 const ariaParts = [
                   `${month + 1}月${day}日`,
@@ -972,7 +975,6 @@ function CalendarView({
                     aria-label={ariaParts.join("，")}
                     key={key}
                     className={`calendar-day ${key === todayKey ? "today" : ""} ${selected ? "batch-selected" : ""}`}
-                    style={shift ? colorStyle(shift.color) : undefined}
                     onClick={() =>
                       batchMode ? onToggleBatchDate(key) : onOpenDate(key)
                     }
@@ -1005,14 +1007,14 @@ function CalendarView({
                       </span>
                     )}
                     {shift && hasVisibleAssignment ? (
-                      <span className="calendar-shift-stack">
+                      <span className="schedule-cell-content">
                         {data.display.showShiftTime && timeRange && (
-                          <small className="calendar-time-row">
+                          <small className="schedule-cell-time">
                             {timeRange}
                           </small>
                         )}
                         {data.display.showTags && visibleTags.length > 0 && (
-                          <span className="calendar-tag-grid">
+                          <span className="schedule-cell-tags">
                             {visibleTags.slice(0, 2).map((tag) => (
                               <em key={tag.id} style={colorStyle(tag.color)}>
                                 {tag.shortName}
@@ -1024,19 +1026,17 @@ function CalendarView({
                           </span>
                         )}
                         <span
-                          className={`calendar-assignment ${shift.isRest ? "is-rest" : ""}`}
+                          className={`schedule-cell-shift ${shift.isRest ? "is-rest" : ""}`}
                           style={colorStyle(shift.color)}
                         >
-                          <span className="calendar-assignment-main">
-                            {data.display.showShift && <b>{shift.shortName}</b>}
-                            {data.display.showHours &&
-                              data.work.trackHours &&
-                              record && (
-                                <em className="calendar-hours-label">
-                                  {compactHours(record.hours)}h
-                                </em>
-                              )}
-                          </span>
+                          {data.display.showShift && <b>{shift.shortName}</b>}
+                          {data.display.showHours &&
+                            data.work.trackHours &&
+                            shift.countsAsWork &&
+                            !shift.isRest &&
+                            record && (
+                              <em>{compactHours(record.hours)}h</em>
+                            )}
                         </span>
                       </span>
                     ) : record ? (
@@ -1165,13 +1165,6 @@ function AnnualRing({
   overtime: number;
   actualOvertime: number;
 }) {
-  type AnnualSelection =
-    | "basic"
-    | "overtime"
-    | "completed"
-    | "completedOvertime"
-    | "total";
-  const [selection, setSelection] = useState<AnnualSelection>("total");
   const chartTotal = Math.max(1, target + overtime);
   const targetShare = (target / chartTotal) * 100;
   const overtimeShare = Math.max(0, 100 - targetShare);
@@ -1184,19 +1177,19 @@ function AnnualRing({
   const overtimeProgress = (confirmedOvertime / chartTotal) * 100;
   const completedPercent = Math.min(100, (actual / chartTotal) * 100);
   const markerAngle =
-    (basicProgress / 100) * Math.PI * 2 - Math.PI / 2;
+    ((targetShare - basicProgress) / 100) * Math.PI * 2 - Math.PI / 2;
   const markerX = 80 + Math.cos(markerAngle) * 64;
   const markerY = 80 + Math.sin(markerAngle) * 64;
-  const calloutX = Math.max(24, Math.min(136, markerX + (markerX < 80 ? -26 : 26)));
-  const calloutY = Math.max(15, Math.min(145, markerY - 10));
+  const calloutX = 132;
+  const calloutY = Math.max(28, Math.min(132, markerY));
   const legends: {
-    id: AnnualSelection;
+    id: string;
     label: string;
     value: number;
   }[] = [
     { id: "basic", label: "基本工时", value: target },
     { id: "overtime", label: "预计加班", value: overtime },
-    { id: "completed", label: "已完成", value: actual },
+    { id: "completed", label: "已完成基本", value: confirmedBasic },
     {
       id: "completedOvertime",
       label: "已完成加班",
@@ -1207,7 +1200,7 @@ function AnnualRing({
   return (
     <div className="annual-ring-wrap">
       <div
-        className={`annual-ring selected-${selection}`}
+        className="annual-ring"
         role="img"
         aria-label={`标准工时 ${compactHours(target)} 小时，预计额外工时 ${compactHours(overtime)} 小时，已完成 ${compactHours(actual)} 小时`}
       >
@@ -1220,7 +1213,6 @@ function AnnualRing({
               r="25"
               pathLength="100"
               strokeDasharray={`${targetShare} ${100 - targetShare}`}
-              onClick={() => setSelection("basic")}
             />
             {overtimeShare > 0 && (
               <circle
@@ -1231,7 +1223,6 @@ function AnnualRing({
                 pathLength="100"
                 strokeDasharray={`${overtimeShare} ${100 - overtimeShare}`}
                 strokeDashoffset={-targetShare}
-                onClick={() => setSelection("overtime")}
               />
             )}
           </svg>
@@ -1243,7 +1234,6 @@ function AnnualRing({
             cy="80"
             r="64"
             pathLength="100"
-            onClick={() => setSelection("total")}
           />
           <circle
             className="ring-progress ring-progress-basic"
@@ -1252,8 +1242,7 @@ function AnnualRing({
             r="64"
             pathLength="100"
             strokeDasharray={`${basicProgress} ${100 - basicProgress}`}
-            strokeDashoffset={0}
-            onClick={() => setSelection("completed")}
+            strokeDashoffset={-(targetShare - basicProgress)}
           />
           {overtimeProgress > 0 && (
             <>
@@ -1261,11 +1250,10 @@ function AnnualRing({
                 className="ring-overtime-outline"
                 cx="80"
                 cy="80"
-                r="64"
+                r="69"
                 pathLength="100"
                 strokeDasharray={`${overtimeProgress} ${100 - overtimeProgress}`}
                 strokeDashoffset={-targetShare}
-                onClick={() => setSelection("completedOvertime")}
               />
               <circle
                 className="ring-progress ring-progress-overtime"
@@ -1275,17 +1263,13 @@ function AnnualRing({
                 pathLength="100"
                 strokeDasharray={`${overtimeProgress} ${100 - overtimeProgress}`}
                 strokeDashoffset={-targetShare}
-                onClick={() => setSelection("completedOvertime")}
               />
             </>
           )}
           {basicProgress > 0 && (
             <g className="pie-progress-callout">
-              <line
-                x1={markerX}
-                y1={markerY}
-                x2={calloutX}
-                y2={calloutY}
+              <polyline
+                points={`${markerX},${markerY} 119,${calloutY} ${calloutX},${calloutY}`}
               />
               <text x={calloutX} y={calloutY - 3}>
                 已完成 {Math.round(completedPercent)}%
@@ -1303,16 +1287,13 @@ function AnnualRing({
       </div>
       <div className="ring-legend annual-ring-legend">
         {legends.map((item) => (
-          <button
-            type="button"
-            key={item.id}
-            className={`${item.id === selection ? "active" : ""} legend-${item.id}`}
-            onClick={() => setSelection(item.id)}
-          >
+          <span key={item.id} className={`legend-${item.id}`}>
             <i />
-            <span>{item.label}</span>
-            <b>{compactHours(item.value)}h</b>
-          </button>
+            <span>
+              {item.label}
+              <b>{compactHours(item.value)}h</b>
+            </span>
+          </span>
         ))}
       </div>
     </div>
@@ -1377,39 +1358,49 @@ function MonthlyHoursChart({
   showOvertime: boolean;
 }) {
   return (
-    <div className="bar-chart" role="img" aria-label="全年每月工作时长柱状图">
+    <figure
+      className="monthly-bars"
+      role="img"
+      aria-label="全年每月工作时长柱状图"
+    >
       {monthly.map((item, index) => {
         const overtime = showOvertime ? Math.min(item.hours, item.overtime) : 0;
         const base = Math.max(0, item.hours - overtime);
         const baseShare = item.hours > 0 ? (base / item.hours) * 100 : 0;
+        const overtimeShare = item.hours > 0 ? 100 - baseShare : 0;
         return (
           <div
             title={`${item.label}：计划 ${compactHours(item.hours)}h，已完成 ${compactHours(item.completedHours)}h${showOvertime ? `，额外 ${compactHours(overtime)}h` : ""}`}
             key={item.label}
-            className={`chart-month ${item.hours > 0 ? "has-hours" : ""} ${
-              index === activeMonth ? "selected" : ""
-            }`}
+            className={`monthly-bar-item ${index === activeMonth ? "is-current" : ""}`}
           >
-            <span className="bar-overtime-value">
+            <span className="monthly-bar-overtime-value">
               {overtime > 0 ? `+${compactHours(overtime)}h` : ""}
             </span>
-            <span className="bar-value">{compactHours(item.hours)}h</span>
-            <span className="bar-track">
-              <span className="bar-stack">
+            <span className="monthly-bar-total">
+              {compactHours(item.hours)}h
+            </span>
+            <span className="monthly-bar-track">
+              {item.hours > 0 && (
+                <span className="monthly-bar-fill">
                 {overtime > 0 && (
                   <i
-                    className="bar-overtime"
-                    style={{ height: `${100 - baseShare}%` }}
+                    className="monthly-bar-overtime"
+                    style={{ height: `${overtimeShare}%` }}
                   />
                 )}
-                <i className="bar-basic" style={{ height: `${baseShare}%` }} />
-              </span>
+                  <i
+                    className="monthly-bar-basic"
+                    style={{ height: `${baseShare}%` }}
+                  />
+                </span>
+              )}
             </span>
             <small>{index + 1}月</small>
           </div>
         );
       })}
-    </div>
+    </figure>
   );
 }
 
@@ -1722,27 +1713,24 @@ function CalendarDisplayPreview({ data }: { data: AppData }) {
           </span>
         </span>
         {shift && (
-          <span className="calendar-shift-stack">
+          <span className="schedule-cell-content">
             {data.display.showShiftTime && timeRange && (
-              <small className="calendar-time-row">{timeRange}</small>
+              <small className="schedule-cell-time">{timeRange}</small>
             )}
             {data.display.showTags && tag && (
-              <span className="calendar-tag-grid">
+              <span className="schedule-cell-tags">
                 <em style={colorStyle(tag.color)}>{tag.shortName}</em>
               </span>
             )}
             <span
-              className={`calendar-assignment ${shift.isRest ? "is-rest" : ""}`}
+              className={`schedule-cell-shift ${shift.isRest ? "is-rest" : ""}`}
               style={colorStyle(shift.color)}
             >
-              <span className="calendar-assignment-main">
-                {data.display.showShift && <b>{shift.shortName}</b>}
-                {data.display.showHours && data.work.trackHours && (
-                  <em className="calendar-hours-label">
-                    {compactHours(shift.defaultHours)}h
-                  </em>
-                )}
-              </span>
+              {data.display.showShift && <b>{shift.shortName}</b>}
+              {data.display.showHours &&
+                data.work.trackHours &&
+                shift.countsAsWork &&
+                !shift.isRest && <em>{compactHours(shift.defaultHours)}h</em>}
             </span>
           </span>
         )}
@@ -1776,18 +1764,27 @@ function SettingsView({
   } | null>(null);
   const importInput = useRef<HTMLInputElement>(null);
   const orderedShiftItems = orderedShifts(data.shifts);
+  const selectedCareer =
+    CAREERS.find((career) => career.id === data.careerPreset) ?? CAREERS[0];
   function updateWork(patch: Partial<AppData["work"]>) {
     const linkedValue = patch.trackHours ?? patch.trackOvertime;
-    setData((current) => ({
-      ...current,
-      work: {
-        ...current.work,
-        ...patch,
-        ...(typeof linkedValue === "boolean"
-          ? { trackHours: linkedValue, trackOvertime: linkedValue }
-          : {}),
-      },
-    }));
+    setData((current) => {
+      const nextSystem = patch.system ?? current.work.system;
+      return {
+        ...current,
+        work: {
+          ...current.work,
+          ...patch,
+          period:
+            nextSystem === "comprehensive"
+              ? "month"
+              : (patch.period ?? current.work.period),
+          ...(typeof linkedValue === "boolean"
+            ? { trackHours: linkedValue, trackOvertime: linkedValue }
+            : {}),
+        },
+      };
+    });
   }
   function updateDisplay(patch: Partial<AppData["display"]>) {
     setData((current) => ({
@@ -1909,45 +1906,44 @@ function SettingsView({
           <div className="section-heading">
             <div>
               <p className="eyebrow">工作类型 / 职业预设</p>
-              <h2>选择适合你的起点</h2>
+              <h2>选择你的工作类型</h2>
             </div>
           </div>
-          <div className="career-select-layout">
-            <SelectSetting
-              label="工作类型"
+          <label className="career-unified-picker">
+            <select
+              aria-label="选择工作类型"
               value={data.careerPreset}
-              onChange={(value) => {
-                const preset = value as CareerPreset;
+              onChange={(event) => {
+                const preset = event.target.value as CareerPreset;
                 setData((current) => applyCareerPreset(current, preset));
                 notify(
                   `已切换为${CAREERS.find((item) => item.id === preset)?.name ?? "自定义"}预设`,
                 );
               }}
-              options={CAREERS.map((career) => [career.id, career.name])}
-            />
-            <div className="career-selected-copy">
-              <strong>
-                {
-                  CAREERS.find((career) => career.id === data.careerPreset)
-                    ?.name
-                }
-              </strong>
+            >
+              {CAREERS.map((career) => (
+                <option value={career.id} key={career.id}>
+                  {career.name}
+                </option>
+              ))}
+            </select>
+            <span className="career-picker-head">
               <span>
-                {
-                  CAREERS.find((career) => career.id === data.careerPreset)
-                    ?.detail
-                }
+                <small>当前工作类型</small>
+                <strong>{selectedCareer.name}</strong>
               </span>
-              <small>
-                只补充相关的起始班次、示例标签和推荐模板，不会限制自定义功能，也不会删除已有内容。
-              </small>
-              <div className="career-feature-chips">
-                {CAREER_FEATURES[data.careerPreset].map((feature) => (
-                  <i key={feature}>{feature}</i>
-                ))}
-              </div>
-            </div>
-          </div>
+              <i aria-hidden="true">⌄</i>
+            </span>
+            <span className="career-picker-detail">{selectedCareer.detail}</span>
+            <small className="career-picker-note">
+              点按整张卡片即可更换。只补充相关的起始班次、示例标签和推荐模板，不会限制自定义功能，也不会删除已有内容。
+            </small>
+            <span className="career-feature-chips">
+              {CAREER_FEATURES[data.careerPreset].map((feature) => (
+                <i key={feature}>{feature}</i>
+              ))}
+            </span>
+          </label>
         </section>
         <section className="glass-panel setting-card wide calendar-display-card">
           <div className="section-heading">
@@ -2147,14 +2143,9 @@ function SettingsView({
                     options={Object.entries(SYSTEM_LABELS)}
                   />
                   {data.work.system === "comprehensive" && (
-                    <SelectSetting
-                      label="统计周期"
-                      value={data.work.period}
-                      onChange={(value) =>
-                        updateWork({ period: value as StatisticsPeriod })
-                      }
-                      options={Object.entries(PERIOD_LABELS)}
-                    />
+                    <p className="conditional-note comprehensive-month-note">
+                      综合计算工时统一按月累计，无需另外选择统计周期。
+                    </p>
                   )}
                   {data.work.system === "standard" && (
                     <>

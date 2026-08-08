@@ -452,7 +452,7 @@ export function createDefaultData(): AppData {
       trackHours: true,
       trackOvertime: true,
       system: "comprehensive",
-      period: "year",
+      period: "month",
       dailyStandard: 8,
       weeklyStandard: 40,
       standardDailyEnabled: true,
@@ -667,6 +667,13 @@ export function normalizeAppData(raw: unknown): AppData {
         : [],
     ),
   );
+  const normalizedSystem: WorkSystem =
+    rawWork.system === "standard" ||
+    rawWork.system === "irregular" ||
+    rawWork.system === "custom" ||
+    rawWork.system === "manual"
+      ? rawWork.system
+      : "comprehensive";
   return {
     dataVersion: DATA_VERSION,
     careerPreset:
@@ -695,21 +702,17 @@ export function normalizeAppData(raw: unknown): AppData {
     work: {
       trackHours: rawWork.trackHours !== false,
       trackOvertime: rawWork.trackHours !== false,
-      system:
-        rawWork.system === "standard" ||
-        rawWork.system === "irregular" ||
-        rawWork.system === "custom" ||
-        rawWork.system === "manual"
-          ? rawWork.system
-          : "comprehensive",
+      system: normalizedSystem,
       period:
-        rawWork.period === "week" ||
-        rawWork.period === "month" ||
-        rawWork.period === "quarter" ||
-        rawWork.period === "halfYear" ||
-        rawWork.period === "custom"
-          ? rawWork.period
-          : "year",
+        normalizedSystem === "comprehensive"
+          ? "month"
+          : rawWork.period === "week" ||
+              rawWork.period === "month" ||
+              rawWork.period === "quarter" ||
+              rawWork.period === "halfYear" ||
+              rawWork.period === "custom"
+            ? rawWork.period
+            : "year",
       dailyStandard: numberValue(rawWork.dailyStandard, 8),
       weeklyStandard: numberValue(rawWork.weeklyStandard, 40),
       standardDailyEnabled: rawWork.standardDailyEnabled !== false,

@@ -153,6 +153,14 @@ test("旧数据只开启工时统计时会迁移为工时与加班同步开启",
   assert.equal(normalized.work.trackOvertime, true);
 });
 
+test("综合计算工时固定迁移为按月统计", () => {
+  const raw = createDefaultData();
+  raw.work.system = "comprehensive";
+  raw.work.period = "year";
+  const normalized = normalizeAppData(raw);
+  assert.equal(normalized.work.period, "month");
+});
+
 test("标准工时下 10 小时相对每日 8 小时记录 2 小时额外工时", () => {
   const data = createDefaultData();
   const record: DayRecord = {
