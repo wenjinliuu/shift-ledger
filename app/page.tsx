@@ -70,6 +70,10 @@ function getMonthlyTarget(data: AppData, year: number, month: number) {
 }
 function getAnnualTarget(data: AppData, year: number) { return MONTH_LABELS.reduce((sum, _, month) => sum + getMonthlyTarget(data, year, month), 0); }
 function getPeriodOvertime(records: DayRecord[], data: AppData, year: number) {
+  if (data.work.system === "custom" && data.work.customRule === "monthly") return MONTH_LABELS.reduce((sum, _, month) => {
+    const monthRecords = records.filter((record) => record.date.startsWith(`${year}-${pad(month + 1)}`));
+    return sum + calculateOvertime(monthRecords, data.work, 0);
+  }, 0);
   if (data.work.system !== "comprehensive") return calculateOvertime(records, data.work, getAnnualTarget(data, year));
   if (data.work.period === "month") return MONTH_LABELS.reduce((sum, _, month) => {
     const monthRecords = records.filter((record) => record.date.startsWith(`${year}-${pad(month + 1)}`));
