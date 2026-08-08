@@ -1180,8 +1180,12 @@ function AnnualRing({
     ((targetShare - basicProgress) / 100) * Math.PI * 2 - Math.PI / 2;
   const markerX = 80 + Math.cos(markerAngle) * 64;
   const markerY = 80 + Math.sin(markerAngle) * 64;
+  const calloutElbowX = 146;
   const calloutX = 171;
-  const calloutY = Math.max(34, Math.min(126, markerY));
+  const calloutY =
+    markerY < 80
+      ? Math.max(28, markerY - 18)
+      : Math.min(132, markerY + 18);
   const legends: {
     id: string;
     label: string;
@@ -1268,10 +1272,13 @@ function AnnualRing({
           )}
           {basicProgress > 0 && (
             <g className="pie-progress-callout">
-              <polyline
-                points={`${markerX},${markerY} 143,${calloutY} 148,${calloutY}`}
+              <path
+                className="callout-marker"
+                d={`M ${markerX - 2.2} ${markerY} a 2.2 2.2 0 1 0 4.4 0 a 2.2 2.2 0 1 0 -4.4 0`}
               />
-              <rect x="148" y={calloutY - 13} width="46" height="28" rx="8" />
+              <polyline
+                points={`${markerX},${markerY} ${calloutElbowX},${calloutY} 156,${calloutY}`}
+              />
               <text x={calloutX} y={calloutY - 3}>
                 已完成 {Math.round(completedPercent)}%
               </text>
@@ -1725,7 +1732,10 @@ function CalendarDisplayPreview({ data }: { data: AppData }) {
   const timeRange = shift ? fullShiftRange(shift) : "";
   return (
     <div className="calendar-display-preview">
-      <p>日历单元格预览</p>
+      <span className="calendar-preview-copy">
+        <strong>单元格效果预览</strong>
+        <small>随上方显示选项实时同步</small>
+      </span>
       <div className="calendar-day preview-calendar-cell">
         <span className="calendar-date-row">
           <span className="day-number">8</span>
