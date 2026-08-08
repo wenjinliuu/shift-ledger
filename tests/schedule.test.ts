@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   SHIFT_IDS, applyCareerPreset, calculateOvertime, calculateShiftDuration, createDefaultData,
-  generateCycleRecords, materializeCycleYear, migrateLegacyData, replaceCycleFromDate,
+  generateCycleRecords, materializeCycleYear, migrateLegacyData, normalizeAppData, replaceCycleFromDate,
   type ActiveCycle, type DayRecord,
 } from "../app/lib/schedule.ts";
 
@@ -27,7 +27,7 @@ test("4白2休4夜2休按班次 ID 正确循环", () => {
 });
 
 test("单日手动改班后，跨年补全循环不会覆盖该日", () => {
-  const data = createDefaultData();
+  const data = applyCareerPreset(createDefaultData(), "transport");
   const cycle: ActiveCycle = { id: "cycle-b", name: "早中晚休", startDate: "2026-12-30", shiftIds: [SHIFT_IDS.morning, SHIFT_IDS.middle, SHIFT_IDS.late, SHIFT_IDS.rest] };
   let next = replaceCycleFromDate(data, cycle, 2027);
   const override: DayRecord = { date: "2027-01-02", shiftId: SHIFT_IDS.day, hours: 12, tagIds: [], completed: false, planned: true, source: "manual" };
@@ -35,6 +35,32 @@ test("单日手动改班后，跨年补全循环不会覆盖该日", () => {
   next = materializeCycleYear(next, 2027);
   assert.equal(next.records.find((item) => item.date === override.date)?.shiftId, SHIFT_IDS.day);
   assert.equal(next.records.find((item) => item.date === "2027-01-03")?.shiftId, SHIFT_IDS.morning);
+});
+
+test("默认制造业预设只创建必要班次，其他班次按职业补充", () => {
+  const data = createDefaultData();
+  assert.deepEqual(data.shifts.map((shift) => shift.id), [SHIFT_IDS.day, SHIFT_IDS.night, SHIFT_IDS.rest]);
+  const transport = applyCareerPreset(data, "transport");
+  assert.ok(transport.shifts.some((shift) => shift.id === SHIFT_IDS.morning));
+  assert.ok(transport.cycleTemplates.some((template) => template.category === "threeShift"));
+});
+
+test("旧版 v2 数据缺少日历显示设置时自动补默认值", () => {
+  const raw = createDefaultData() as unknown as Record<string, unknown>;
+  delete raw.display;
+  const normalized = normalizeAppData(raw);
+  assert.equal(normalized.display.showHolidays, true);
+  assert.equal(normalized.display.showShift, true);
+  assert.equal(normalized.display.showHours, false);
+});
+
+test("关闭工时统计时规范化数据会同步关闭加班统计", () => {
+  const raw = createDefaultData();
+  raw.work.trackHours = false;
+  raw.work.trackOvertime = true;
+  const normalized = normalizeAppData(raw);
+  assert.equal(normalized.work.trackHours, false);
+  assert.equal(normalized.work.trackOvertime, false);
 });
 
 test("标准工时下 10 小时相对每日 8 小时记录 2 小时额外工时", () => {
@@ -62,6 +88,13 @@ test("医疗预设补充小夜、大夜和职责标签且不重复", () => {
   assert.ok(twice.shifts.some((shift) => shift.id === SHIFT_IDS.smallNight));
   assert.ok(twice.tags.some((tag) => tag.name === "责班"));
   assert.equal(twice.shifts.filter((shift) => shift.id === SHIFT_IDS.bigNight).length, 1);
+});
+
+test("切换工作类型不会累积未使用的其他职业示例标签", () => {
+  const medical = applyCareerPreset(createDefaultData(), "medical");
+  const transport = applyCareerPreset(medical, "transport");
+  assert.equal(transport.tags.some((tag) => tag.id.startsWith("tag-medical-")), false);
+  assert.equal(transport.tags.some((tag) => tag.id.startsWith("tag-transport-")), true);
 });
 
 test("跨午夜班次可以正确计算默认时长", () => {

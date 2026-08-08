@@ -1177,3 +1177,120 @@ body:has(.modal-backdrop) .bottom-nav { opacity:0; visibility:hidden; pointer-ev
   .annual-hero > .annual-overtime-metric > strong { font-size:25px; }
   .annual-hero > .annual-hero-metric > small { max-width:145px; font-size:7.5px; line-height:1.35; }
 }
+
+/* v15 — unified responsive controls, calendar layers and data visualizations */
+button, select, input { -webkit-tap-highlight-color:transparent; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline:3px solid rgba(47,125,244,.28); outline-offset:2px; }
+.primary-small,.secondary-small,.primary-button,.secondary-button,.delete-button { min-height:42px; height:auto; line-height:1.2; }
+.primary-small,.secondary-small { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:9px 14px; white-space:nowrap; }
+.month-switch button { min-width:42px; min-height:42px; }
+.calendar-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; }
+.calendar-actions button { flex:0 0 auto; }
+.close-button { flex:0 0 40px; width:40px; height:40px; display:grid; place-items:center; }
+.sheet-actions button,.data-actions button { min-width:0; padding:10px 14px; overflow-wrap:anywhere; }
+
+.calendar-grid { gap:7px; }
+.calendar-day { min-height:96px; padding:8px; gap:6px; overflow:hidden; justify-content:flex-start; }
+.calendar-date-row { width:100%; min-height:18px; display:flex; align-items:center; justify-content:space-between; gap:3px; }
+.calendar-date-row .day-number { flex:0 0 auto; }
+.holiday-flag { position:static; left:auto; bottom:auto; max-width:calc(100% - 20px); padding:2px 5px; overflow:hidden; border-radius:999px; background:rgba(255,238,236,.92); font-size:7px; line-height:1.2; text-overflow:ellipsis; white-space:nowrap; }
+.calendar-day:has(.holiday-flag) { gap:6px; }
+.calendar-assignment { width:100%; min-height:0; margin-top:auto; padding:5px 6px; display:flex; flex-direction:column; align-items:stretch; justify-content:center; gap:3px; overflow:hidden; border-radius:10px; }
+.calendar-assignment-main { min-width:0; display:flex; align-items:center; justify-content:center; gap:4px; }
+.calendar-assignment-main > b { min-width:0; overflow:hidden; font-size:10px; line-height:1.15; text-overflow:ellipsis; white-space:nowrap; }
+.calendar-tag-line { min-width:0; display:flex; align-items:center; gap:3px; overflow:hidden; }
+.calendar-tag-line em { min-width:0; max-width:42px; padding:1px 3px; overflow:hidden; border:0; border-radius:4px; background:rgba(255,255,255,.66); font-size:7px; line-height:1.2; text-overflow:ellipsis; white-space:nowrap; }
+.calendar-assignment-meta { display:block; width:100%; margin:0; overflow:hidden; color:color-mix(in srgb,var(--entity-color) 70%,#61718a); font-size:6.5px; line-height:1.2; text-align:center; text-overflow:ellipsis; white-space:nowrap; }
+.calendar-record-dot { width:7px; height:7px; margin:auto; border-radius:50%; opacity:.7; }
+
+.stats-layout.annual-dashboard { grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:start; }
+.stats-summary-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.stats-summary-grid.annual-summary { grid-column:span 2; }
+.stats-summary-grid.annual-summary.hours-only { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.stats-summary-grid.schedule-summary { margin:16px 0 18px; grid-template-columns:repeat(3,minmax(0,1fr)); }
+.stats-summary-grid .metric-card { min-width:0; min-height:112px; }
+.outlook-metrics.dynamic-metrics { grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); }
+.annual-overview-card { grid-column:span 2; }
+.annual-overview-grid { grid-template-columns:minmax(220px,280px) minmax(0,1fr); gap:28px; }
+.annual-ring-wrap { min-width:0; padding:8px; display:flex; flex-direction:column; align-items:center; }
+.annual-ring { position:relative; width:220px; height:220px; padding:0; display:grid; place-items:center; border-radius:50%; background:transparent; box-shadow:none; }
+.annual-ring:before { content:none; }
+.annual-ring svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; filter:drop-shadow(0 14px 24px rgba(54,85,140,.12)); }
+.annual-ring circle { fill:none; transform:rotate(-90deg); transform-origin:60px 60px; stroke-linecap:round; }
+.annual-ring .ring-track { stroke:rgba(133,151,180,.18); stroke-width:15; }
+.annual-ring .ring-standard { stroke:#4388f5; stroke-width:15; }
+.annual-ring .ring-overtime { stroke:#8063e8; stroke-width:15; }
+.annual-ring .ring-progress-track { stroke:rgba(25,185,135,.12); stroke-width:5; }
+.annual-ring .ring-progress { stroke:#19b987; stroke-width:5; }
+.annual-ring > div { z-index:1; display:flex; flex-direction:column; align-items:center; }
+.annual-ring > div small { color:var(--muted); font-size:10px; }
+.annual-ring > div strong { margin:4px 0; font-size:28px; font-variant-numeric:tabular-nums; letter-spacing:-.05em; }
+.annual-ring > div span { color:#14946e; font-size:12px; font-weight:850; }
+.ring-legend { margin-top:12px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px 13px; color:#687892; font-size:8px; }
+.ring-legend span { display:flex; align-items:center; gap:5px; }
+.ring-legend i { width:7px; height:7px; border-radius:50%; }
+.ring-legend .blue { background:#4388f5; }.ring-legend .violet { background:#8063e8; }.ring-legend .gray { background:#c7d1df; }
+.pie-detail-list { grid-template-columns:1fr 1fr; }
+.stats-rule-note { grid-column:span 2; padding:16px 18px; display:flex; align-items:flex-start; gap:11px; border-radius:18px; }
+.stats-rule-note .app-icon { flex:0 0 auto; width:19px; height:19px; color:#4c7fd1; }
+.stats-rule-note strong { font-size:11px; }.stats-rule-note p { margin:4px 0 0; color:var(--muted); font-size:9px; line-height:1.55; }
+
+.chart-card { grid-column:span 2; min-width:0; overflow:hidden; }
+.chart-card .section-heading { gap:14px; }
+.chart-caption { margin:12px 0 0; padding:10px 12px; border-radius:12px; color:#6f7d92; background:rgba(231,240,255,.62); font-size:9px; line-height:1.5; }
+.chart-legend { flex-wrap:wrap; justify-content:flex-end; }
+.chart-legend i.bar-overtime-key { background:#8063e8; }
+.chart-legend i.bar-completed-key { border:2px solid #19b987; background:rgba(25,185,135,.14); }
+.chart-legend i.bar-target-key { height:0; border-top:2px dashed #ef8849; border-radius:0; background:transparent; }
+.bar-chart { width:100%; height:278px; margin-top:14px; padding:0 2px 2px; display:grid; grid-template-columns:repeat(12,minmax(28px,1fr)); align-items:stretch; gap:6px; overflow-x:auto; overflow-y:hidden; }
+.bar-chart > .chart-month { min-width:0; height:100%; display:grid; grid-template-rows:18px minmax(0,1fr) 22px; align-items:stretch; gap:5px; border-radius:12px; background:transparent; }
+.bar-chart > .chart-month.selected { background:linear-gradient(180deg,rgba(229,240,255,.72),rgba(246,238,255,.56)); box-shadow:inset 0 0 0 1px rgba(72,126,222,.18); }
+.bar-value { align-self:end; opacity:1; color:#74839a; font-size:7.5px; font-variant-numeric:tabular-nums; text-align:center; }
+.bar-track { position:relative; min-height:0; display:flex; align-items:flex-end; justify-content:center; overflow:visible; border-radius:8px; background:linear-gradient(180deg,rgba(129,153,190,.055),rgba(129,153,190,.11)); }
+.bar-stack { position:relative; width:66%; min-height:0; display:flex; flex-direction:column; justify-content:flex-end; overflow:hidden; border-radius:7px 7px 3px 3px; outline:0; filter:none; box-shadow:0 6px 14px rgba(47,101,187,.12); }
+.bar-track .bar-stack i { position:static; width:100%; min-height:0; flex:0 0 auto; opacity:1; }
+.bar-track .bar-overtime { order:1; background:linear-gradient(180deg,#9a80ef,#7657df); }
+.bar-track .bar-basic { order:2; border-radius:0; background:linear-gradient(180deg,#73a5ff,#3578ed); }
+.bar-completed { position:absolute; z-index:2; left:0; right:0; bottom:0; pointer-events:none; border-top:2px solid #16aa7b; background:linear-gradient(180deg,rgba(33,202,147,.08),rgba(23,176,128,.32)); }
+.bar-target { position:absolute; z-index:4; left:2px; right:2px; height:0; border-top:1px dashed rgba(230,117,51,.78); }
+.bar-target span { position:absolute; right:0; bottom:2px; display:none; color:#d96d2f; font-size:6px; font-style:normal; white-space:nowrap; }
+.chart-month.selected .bar-target span,.chart-month:hover .bar-target span { display:block; }
+.chart-month > small { align-self:center; justify-self:center; min-width:29px; padding:3px 4px; border-radius:999px; color:var(--muted); font-size:8px; line-height:1; text-align:center; }
+.chart-month.selected > small { color:#286fdb; background:#e7f0ff; font-weight:900; }
+
+.career-select-layout { margin-top:18px; display:grid; grid-template-columns:minmax(220px,.7fr) minmax(0,1.3fr); gap:14px; align-items:stretch; }
+.career-select-layout .select-setting { margin:0; min-height:88px; align-content:center; }
+.career-selected-copy { min-width:0; padding:15px 17px; display:flex; flex-direction:column; justify-content:center; gap:4px; border:1px solid rgba(255,255,255,.86); border-radius:17px; background:rgba(255,255,255,.43); }
+.career-selected-copy strong { font-size:13px; }.career-selected-copy span { color:#53749f; font-size:10px; font-weight:750; }.career-selected-copy small { color:var(--muted); font-size:8.5px; line-height:1.5; }
+.calendar-display-layout { margin-top:17px; display:grid; grid-template-columns:minmax(0,1.25fr) minmax(210px,.75fr); gap:22px; align-items:center; }
+.calendar-display-options { min-width:0; }
+.calendar-display-preview { padding:16px; display:flex; flex-direction:column; align-items:center; border:1px solid rgba(255,255,255,.9); border-radius:20px; background:linear-gradient(145deg,rgba(255,255,255,.64),rgba(232,241,255,.48)); }
+.calendar-display-preview > p { align-self:stretch; margin:0 0 10px; color:#62728a; font-size:10px; font-weight:850; text-align:center; }
+.calendar-display-preview > small { margin-top:10px; color:var(--muted); font-size:7.5px; line-height:1.5; text-align:center; }
+.preview-calendar-cell { width:118px; min-height:118px; padding:9px; display:flex; flex-direction:column; gap:7px; border:1px solid rgba(255,255,255,.92); border-radius:17px; background:rgba(255,255,255,.68); box-shadow:0 12px 26px rgba(51,86,142,.1); }
+.preview-calendar-cell .calendar-assignment { margin-top:auto; }
+.conditional-note { margin:6px 0; padding:10px 12px; border-radius:12px; color:#6d7c91; background:rgba(230,239,255,.55); font-size:9px; line-height:1.5; }
+.setting-toggle { min-height:54px; }
+.select-setting select,.number-setting input { min-height:42px; }
+.entity-list button { min-height:36px; min-width:42px; border-radius:10px; }
+.tag-list > span button { min-width:30px; min-height:30px; }
+
+@media (max-width:720px) {
+  .topbar { gap:10px; }.month-switch { flex:0 0 auto; }.month-switch button { min-width:38px; min-height:38px; }
+  .calendar-toolbar { flex-wrap:wrap; gap:10px; }.calendar-toolbar > div:first-child { flex:1 1 auto; }.calendar-actions { width:100%; display:grid; grid-template-columns:1fr 1fr; }.calendar-actions button { width:100%; min-height:40px; padding:8px 9px; font-size:10px; }
+  .calendar-panel { padding:16px 8px 13px; }.calendar-grid { gap:3px; }.calendar-day { min-height:78px; padding:4px 3px; gap:3px; border-radius:11px; }.calendar-date-row { min-height:16px; }.calendar-date-row .day-number { font-size:10px; }.holiday-flag { max-width:calc(100% - 16px); padding:1px 3px; font-size:5.8px; }
+  .calendar-assignment { padding:3px 2px; gap:2px; border-radius:7px; }.calendar-assignment-main { gap:2px; }.calendar-assignment-main > b { font-size:7.5px; }.calendar-tag-line { gap:1px; }.calendar-tag-line em { max-width:26px; padding:1px 2px; font-size:5.5px; }.calendar-assignment-meta { font-size:5.3px; }
+  .stats-summary-grid,.stats-summary-grid.schedule-summary { grid-template-columns:1fr 1fr; gap:9px; }.stats-summary-grid.annual-summary { grid-column:auto; }.stats-summary-grid.schedule-summary .metric-card:last-child { grid-column:span 2; }
+  .annual-overview-card,.stats-rule-note,.chart-card { grid-column:auto; width:100%; }.annual-overview-grid { grid-template-columns:1fr; gap:10px; }.annual-ring { width:188px; height:188px; }.pie-detail-list { grid-template-columns:1fr 1fr; }
+  .chart-card { padding:20px 12px; }.chart-card .section-heading { align-items:flex-start; }.chart-legend { justify-content:flex-start; gap:6px 10px; font-size:7.5px; }.bar-chart { height:250px; grid-template-columns:repeat(12,minmax(34px,1fr)); gap:4px; }.bar-chart > .chart-month { grid-template-rows:16px minmax(0,1fr) 20px; }.bar-stack { width:62%; }.bar-value { font-size:7px; }
+  .career-select-layout,.calendar-display-layout { grid-template-columns:1fr; gap:12px; }.career-select-layout .select-setting { min-height:72px; }.calendar-display-preview { padding:14px; }.preview-calendar-cell { width:112px; min-height:112px; }
+  .setting-card .section-heading { gap:10px; }.setting-card .section-heading .primary-small { flex:0 0 auto; max-width:46%; white-space:normal; text-align:center; }
+  .entity-list > div { grid-template-columns:7px minmax(0,1fr) auto; }.entity-list button { min-height:38px; }
+  .sheet-actions { grid-template-columns:minmax(0,1fr) minmax(0,1.6fr); }.sheet-actions button { white-space:normal; }
+}
+
+@media (max-width:380px) {
+  .stats-summary-grid,.stats-summary-grid.schedule-summary,.stats-summary-grid.annual-summary.hours-only { grid-template-columns:1fr; }.stats-summary-grid.schedule-summary .metric-card:last-child { grid-column:auto; }
+  .pie-detail-list { grid-template-columns:1fr; }.annual-ring { width:170px; height:170px; }
+  .calendar-actions button { font-size:9px; }.calendar-day { min-height:74px; }.calendar-assignment-meta { font-size:5px; }
+}

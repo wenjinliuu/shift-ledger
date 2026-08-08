@@ -9,6 +9,14 @@ export type CompensationMode = "hours" | "salary" | "timeOff" | "fixed" | "custo
 export type CareerPreset = "manufacturing" | "medical" | "transport" | "safety" | "service" | "custom";
 export type CustomOvertimeRule = "daily" | "weekly" | "monthly" | "period" | "manual";
 
+export type CalendarDisplaySettings = {
+  showShift: boolean;
+  showTags: boolean;
+  showShiftTime: boolean;
+  showHours: boolean;
+  showHolidays: boolean;
+};
+
 export type Shift = {
   id: string;
   name: string;
@@ -81,6 +89,7 @@ export type AppData = {
   tags: DutyTag[];
   cycleTemplates: CycleTemplate[];
   activeCycle: ActiveCycle | null;
+  display: CalendarDisplaySettings;
   work: WorkSettings;
   targets: Record<string, number>;
   records: DayRecord[];
@@ -114,7 +123,7 @@ const LEGACY_SHIFT_MAP: Record<string, string> = {
 export const SHIFT_COLORS = ["#2f7df4", "#665ce8", "#17a878", "#ef7d36", "#d65374", "#7a879b", "#08a2b8", "#9b63d9"];
 export const TAG_COLORS = ["#6a62de", "#0d9b82", "#d66a38", "#d14f72", "#3377cc", "#7b8799"];
 
-function baseShifts(hours: Partial<Record<string, number>> = {}): Shift[] {
+function shiftCatalog(hours: Partial<Record<string, number>> = {}): Shift[] {
   return [
     { id: SHIFT_IDS.day, name: "白班", shortName: "白", color: "#ef7d36", startTime: "08:00", endTime: "20:00", crossesMidnight: false, isRest: false, defaultHours: hours.day ?? 12, countsAsWork: true, legacyType: "day" },
     { id: SHIFT_IDS.night, name: "夜班", shortName: "夜", color: "#5368e8", startTime: "20:00", endTime: "08:00", crossesMidnight: true, isRest: false, defaultHours: hours.night ?? 12, countsAsWork: true, legacyType: "night" },
@@ -125,6 +134,11 @@ function baseShifts(hours: Partial<Record<string, number>> = {}): Shift[] {
     { id: SHIFT_IDS.leave, name: "请假", shortName: "假", color: "#d65374", startTime: "", endTime: "", crossesMidnight: false, isRest: true, defaultHours: 0, countsAsWork: false, legacyType: "leave" },
     { id: SHIFT_IDS.custom, name: "其他", shortName: "工", color: "#17a878", startTime: "", endTime: "", crossesMidnight: false, isRest: false, defaultHours: 0, countsAsWork: true, legacyType: "custom" },
   ];
+}
+
+function baseShifts(hours: Partial<Record<string, number>> = {}) {
+  const initialIds = new Set<string>([SHIFT_IDS.day, SHIFT_IDS.night, SHIFT_IDS.rest]);
+  return shiftCatalog(hours).filter((shift) => initialIds.has(shift.id));
 }
 
 export function builtInTemplates(): CycleTemplate[] {
@@ -143,13 +157,22 @@ export function builtInTemplates(): CycleTemplate[] {
 }
 
 export function createDefaultData(): AppData {
+  const shifts = baseShifts();
+  const shiftIds = new Set(shifts.map((shift) => shift.id));
   return {
     dataVersion: DATA_VERSION,
     careerPreset: "manufacturing",
-    shifts: baseShifts(),
+    shifts,
     tags: [],
-    cycleTemplates: builtInTemplates(),
+    cycleTemplates: builtInTemplates().filter((template) => template.category === "manufacturing" && template.shiftIds.every((id) => shiftIds.has(id))),
     activeCycle: null,
+    display: {
+      showShift: true,
+      showTags: true,
+      showShiftTime: false,
+      showHours: false,
+      showHolidays: true,
+    },
     work: {
       trackHours: true,
       trackOvertime: true,
@@ -250,6 +273,7 @@ export function normalizeAppData(raw: unknown): AppData {
   const shiftIds = new Set(safeShifts.map((shift) => shift.id));
   const tagIds = new Set(tags.map((tag) => tag.id));
   const rawWork = item.work && typeof item.work === "object" ? item.work as Record<string, unknown> : {};
+  const rawDisplay = item.display && typeof item.display === "object" ? item.display as Record<string, unknown> : {};
   const templates = uniqueById((Array.isArray(item.cycleTemplates) ? item.cycleTemplates : builtInTemplates()).flatMap((rawTemplate): CycleTemplate[] => {
     if (!rawTemplate || typeof rawTemplate !== "object") return [];
     const template = rawTemplate as Record<string, unknown>;
@@ -270,6 +294,13 @@ export function normalizeAppData(raw: unknown): AppData {
     tags,
     cycleTemplates: templates.length ? templates : builtInTemplates().filter((template) => template.shiftIds.every((id) => shiftIds.has(id))),
     activeCycle,
+    display: {
+      showShift: rawDisplay.showShift !== false,
+      showTags: rawDisplay.showTags !== false,
+      showShiftTime: rawDisplay.showShiftTime === true,
+      showHours: rawDisplay.showHours === true,
+      showHolidays: rawDisplay.showHolidays !== false,
+    },
     work: {
       trackHours: rawWork.trackHours !== false,
       trackOvertime: rawWork.trackHours !== false && rawWork.trackOvertime !== false,
@@ -291,7 +322,7 @@ export function normalizeAppData(raw: unknown): AppData {
 export function migrateLegacyData(settingsRaw: unknown, recordsRaw: unknown): AppData {
   const settings = settingsRaw && typeof settingsRaw === "object" ? settingsRaw as Record<string, unknown> : {};
   const rawCycle = Array.isArray(settings.cycle) ? settings.cycle.filter((value): value is string => typeof value === "string" && Boolean(LEGACY_SHIFT_MAP[value])) : [];
-  const shifts = baseShifts({
+  const shifts = shiftCatalog({
     day: numberValue(settings.dayHours, 12),
     night: numberValue(settings.nightHours, 12),
     morning: numberValue(settings.morningHours, 8),
@@ -310,7 +341,16 @@ export function migrateLegacyData(settingsRaw: unknown, recordsRaw: unknown): Ap
 }
 
 export function applyCareerPreset(data: AppData, preset: CareerPreset): AppData {
-  const additions: Shift[] = [];
+  const catalog = shiftCatalog();
+  const recommendedIds: Record<CareerPreset, string[]> = {
+    manufacturing: [SHIFT_IDS.day, SHIFT_IDS.night, SHIFT_IDS.rest],
+    medical: [SHIFT_IDS.day, SHIFT_IDS.morning, SHIFT_IDS.smallNight, SHIFT_IDS.bigNight, SHIFT_IDS.rest, SHIFT_IDS.standby],
+    transport: [SHIFT_IDS.morning, SHIFT_IDS.middle, SHIFT_IDS.late, SHIFT_IDS.night, SHIFT_IDS.rest],
+    safety: [SHIFT_IDS.day, SHIFT_IDS.night, SHIFT_IDS.standby, SHIFT_IDS.rest],
+    service: [SHIFT_IDS.morning, SHIFT_IDS.middle, SHIFT_IDS.late, SHIFT_IDS.rest],
+    custom: [SHIFT_IDS.rest],
+  };
+  const additions = catalog.filter((shift) => recommendedIds[preset].includes(shift.id));
   const tags: DutyTag[] = [];
   if (preset === "medical") {
     additions.push(
@@ -318,11 +358,24 @@ export function applyCareerPreset(data: AppData, preset: CareerPreset): AppData 
       { id: SHIFT_IDS.bigNight, name: "大夜", shortName: "大夜", color: "#433f9e", startTime: "00:00", endTime: "08:00", crossesMidnight: false, isRest: false, defaultHours: 8, countsAsWork: true },
       { id: SHIFT_IDS.standby, name: "备班", shortName: "备", color: "#0d9b82", startTime: "", endTime: "", crossesMidnight: false, isRest: false, defaultHours: 0, countsAsWork: false },
     );
-    ["责班", "主班", "门诊", "ICU", "手术"].forEach((name, index) => tags.push({ id: `tag-medical-${index}`, name, shortName: name, color: TAG_COLORS[index % TAG_COLORS.length] }));
+    ["责班", "主班", "门诊", "ICU"].forEach((name, index) => tags.push({ id: `tag-medical-${index}`, name, shortName: name, color: TAG_COLORS[index % TAG_COLORS.length] }));
   }
+  if (preset === "safety") additions.push({ id: SHIFT_IDS.standby, name: "备班", shortName: "备", color: "#0d9b82", startTime: "", endTime: "", crossesMidnight: false, isRest: false, defaultHours: 0, countsAsWork: false });
+  if (preset === "manufacturing") ["带班", "机台", "培训"].forEach((name, index) => tags.push({ id: `tag-manufacturing-${index}`, name, shortName: name, color: TAG_COLORS[index % TAG_COLORS.length] }));
+  if (preset === "transport") ["值乘", "调度", "站务"].forEach((name, index) => tags.push({ id: `tag-transport-${index}`, name, shortName: name, color: TAG_COLORS[index % TAG_COLORS.length] }));
+  if (preset === "safety") ["值守", "巡检", "备勤"].forEach((name, index) => tags.push({ id: `tag-safety-${index}`, name, shortName: name, color: TAG_COLORS[index % TAG_COLORS.length] }));
+  if (preset === "service") ["前台", "夜审", "领班"].forEach((name, index) => tags.push({ id: `tag-service-${index}`, name, shortName: name, color: TAG_COLORS[index % TAG_COLORS.length] }));
   const shifts = uniqueById([...data.shifts, ...additions]);
-  const nextTags = uniqueById([...data.tags, ...tags]);
+  const usedTagIds = new Set(data.records.flatMap((record) => record.tagIds));
+  const presetTagPattern = /^tag-(medical|manufacturing|transport|safety|service)-/;
+  const retainedTags = data.tags.filter((tag) => !presetTagPattern.test(tag.id) || tag.id.startsWith(`tag-${preset}-`) || usedTagIds.has(tag.id));
+  const nextTags = uniqueById([...retainedTags, ...tags]);
   const templates = [...data.cycleTemplates];
+  const availableShiftIds = new Set(shifts.map((shift) => shift.id));
+  const recommendedCategories = preset === "transport" || preset === "service" ? new Set(["threeShift"]) : preset === "manufacturing" || preset === "safety" ? new Set(["manufacturing"]) : new Set<string>();
+  builtInTemplates().filter((template) => recommendedCategories.has(template.category) && template.shiftIds.every((id) => availableShiftIds.has(id))).forEach((template) => {
+    if (!templates.some((item) => item.id === template.id)) templates.push(template);
+  });
   if (preset === "medical" && !templates.some((template) => template.id === "tpl-medical-start")) {
     templates.push({ id: "tpl-medical-start", name: "白白 · 小夜 · 大夜 · 休休", caption: "医疗起始模板，可自由修改", shiftIds: [SHIFT_IDS.day, SHIFT_IDS.day, SHIFT_IDS.smallNight, SHIFT_IDS.bigNight, SHIFT_IDS.rest, SHIFT_IDS.rest], category: "medical", builtIn: true });
   }
