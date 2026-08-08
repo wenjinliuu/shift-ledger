@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  ACCENT_COLORS,
   SHIFT_IDS,
   applyCareerPreset,
   calculateOvertime,
@@ -14,6 +15,24 @@ import {
   type ActiveCycle,
   type DayRecord,
 } from "../app/lib/schedule.ts";
+
+test("旧主题颜色会迁移到 ChatGPT 强调色体系", () => {
+  const raw = createDefaultData();
+  raw.shifts[0].color = "#ef7d36";
+  raw.shifts[1].color = "#5368e8";
+  raw.tags = [
+    {
+      id: "tag-legacy",
+      name: "旧标签",
+      shortName: "旧",
+      color: "#d14f72",
+    },
+  ];
+  const normalized = normalizeAppData(raw);
+  assert.equal(normalized.shifts[0].color, ACCENT_COLORS.yellow);
+  assert.equal(normalized.shifts[1].color, ACCENT_COLORS.blue);
+  assert.equal(normalized.tags[0].color, ACCENT_COLORS.pink);
+});
 
 test("旧版 day/night/rest 数据迁移成稳定班次 ID 并保留时长", () => {
   const data = migrateLegacyData(

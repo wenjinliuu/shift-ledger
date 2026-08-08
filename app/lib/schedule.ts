@@ -150,24 +150,71 @@ const LEGACY_SHIFT_MAP: Record<string, string> = {
   custom: SHIFT_IDS.custom,
 };
 
+export const ACCENT_COLORS = {
+  gray: "#8e8e8e",
+  blue: "#3a83f6",
+  green: "#53b559",
+  yellow: "#f6c543",
+  pink: "#ed77af",
+  orange: "#ed7c37",
+  purple: "#a67df2",
+  red: "#e66770",
+  cyan: "#55a8c7",
+} as const;
+
 export const SHIFT_COLORS = [
-  "#2f7df4",
-  "#665ce8",
-  "#17a878",
-  "#ef7d36",
-  "#d65374",
-  "#7a879b",
-  "#08a2b8",
-  "#9b63d9",
+  ACCENT_COLORS.blue,
+  ACCENT_COLORS.purple,
+  ACCENT_COLORS.green,
+  ACCENT_COLORS.yellow,
+  ACCENT_COLORS.orange,
+  ACCENT_COLORS.pink,
+  ACCENT_COLORS.gray,
+  ACCENT_COLORS.cyan,
 ];
 export const TAG_COLORS = [
-  "#6a62de",
-  "#0d9b82",
-  "#d66a38",
-  "#d14f72",
-  "#3377cc",
-  "#7b8799",
+  ACCENT_COLORS.purple,
+  ACCENT_COLORS.green,
+  ACCENT_COLORS.orange,
+  ACCENT_COLORS.pink,
+  ACCENT_COLORS.blue,
+  ACCENT_COLORS.gray,
+  ACCENT_COLORS.yellow,
+  ACCENT_COLORS.cyan,
 ];
+
+const LEGACY_COLOR_MAP: Record<string, string> = {
+  "#2f7df4": ACCENT_COLORS.blue,
+  "#3377cc": ACCENT_COLORS.blue,
+  "#5368e8": ACCENT_COLORS.blue,
+  "#665ce8": ACCENT_COLORS.purple,
+  "#7459d9": ACCENT_COLORS.purple,
+  "#6a62de": ACCENT_COLORS.purple,
+  "#9b63d9": ACCENT_COLORS.purple,
+  "#433f9e": ACCENT_COLORS.purple,
+  "#17a878": ACCENT_COLORS.green,
+  "#0d9b82": ACCENT_COLORS.green,
+  "#ef7d36": ACCENT_COLORS.yellow,
+  "#e89135": ACCENT_COLORS.orange,
+  "#d66a38": ACCENT_COLORS.orange,
+  "#d65374": ACCENT_COLORS.pink,
+  "#d14f72": ACCENT_COLORS.pink,
+  "#7a879b": ACCENT_COLORS.gray,
+  "#7b8799": ACCENT_COLORS.gray,
+  "#8793a5": ACCENT_COLORS.gray,
+  "#08a2b8": ACCENT_COLORS.cyan,
+};
+
+export function normalizeThemeColor(color: string) {
+  return LEGACY_COLOR_MAP[color.trim().toLowerCase()] ?? color;
+}
+
+export function gradientEndForColor(color: string) {
+  const normalized = normalizeThemeColor(color).toLowerCase();
+  if (normalized === ACCENT_COLORS.yellow) return ACCENT_COLORS.orange;
+  if (normalized === ACCENT_COLORS.blue) return ACCENT_COLORS.purple;
+  return normalized;
+}
 
 function shiftCatalog(hours: Partial<Record<string, number>> = {}): Shift[] {
   return [
@@ -175,7 +222,7 @@ function shiftCatalog(hours: Partial<Record<string, number>> = {}): Shift[] {
       id: SHIFT_IDS.day,
       name: "白班",
       shortName: "白",
-      color: "#ef7d36",
+      color: ACCENT_COLORS.yellow,
       startTime: "08:00",
       endTime: "20:00",
       crossesMidnight: false,
@@ -188,7 +235,7 @@ function shiftCatalog(hours: Partial<Record<string, number>> = {}): Shift[] {
       id: SHIFT_IDS.night,
       name: "夜班",
       shortName: "夜",
-      color: "#5368e8",
+      color: ACCENT_COLORS.blue,
       startTime: "20:00",
       endTime: "08:00",
       crossesMidnight: true,
@@ -201,7 +248,7 @@ function shiftCatalog(hours: Partial<Record<string, number>> = {}): Shift[] {
       id: SHIFT_IDS.morning,
       name: "早班",
       shortName: "早",
-      color: "#e89135",
+      color: ACCENT_COLORS.orange,
       startTime: "08:00",
       endTime: "16:00",
       crossesMidnight: false,
@@ -214,7 +261,7 @@ function shiftCatalog(hours: Partial<Record<string, number>> = {}): Shift[] {
       id: SHIFT_IDS.middle,
       name: "中班",
       shortName: "中",
-      color: "#08a2b8",
+      color: ACCENT_COLORS.cyan,
       startTime: "16:00",
       endTime: "00:00",
       crossesMidnight: false,
@@ -227,7 +274,7 @@ function shiftCatalog(hours: Partial<Record<string, number>> = {}): Shift[] {
       id: SHIFT_IDS.late,
       name: "晚班",
       shortName: "晚",
-      color: "#7459d9",
+      color: ACCENT_COLORS.purple,
       startTime: "00:00",
       endTime: "08:00",
       crossesMidnight: false,
@@ -240,7 +287,7 @@ function shiftCatalog(hours: Partial<Record<string, number>> = {}): Shift[] {
       id: SHIFT_IDS.rest,
       name: "休息",
       shortName: "休",
-      color: "#8793a5",
+      color: ACCENT_COLORS.gray,
       startTime: "",
       endTime: "",
       crossesMidnight: false,
@@ -253,7 +300,7 @@ function shiftCatalog(hours: Partial<Record<string, number>> = {}): Shift[] {
       id: SHIFT_IDS.leave,
       name: "请假",
       shortName: "假",
-      color: "#d65374",
+      color: ACCENT_COLORS.pink,
       startTime: "",
       endTime: "",
       crossesMidnight: false,
@@ -266,7 +313,7 @@ function shiftCatalog(hours: Partial<Record<string, number>> = {}): Shift[] {
       id: SHIFT_IDS.custom,
       name: "其他",
       shortName: "工",
-      color: "#17a878",
+      color: ACCENT_COLORS.green,
       startTime: "",
       endTime: "",
       crossesMidnight: false,
@@ -279,7 +326,7 @@ function shiftCatalog(hours: Partial<Record<string, number>> = {}): Shift[] {
       id: SHIFT_IDS.duty,
       name: "责班",
       shortName: "责",
-      color: "#6a62de",
+      color: ACCENT_COLORS.purple,
       startTime: "08:00",
       endTime: "16:00",
       crossesMidnight: false,
@@ -291,7 +338,7 @@ function shiftCatalog(hours: Partial<Record<string, number>> = {}): Shift[] {
       id: SHIFT_IDS.clinic,
       name: "门诊",
       shortName: "诊",
-      color: "#0d9b82",
+      color: ACCENT_COLORS.green,
       startTime: "08:00",
       endTime: "16:00",
       crossesMidnight: false,
@@ -513,7 +560,10 @@ function normalizeShift(raw: unknown): Shift | null {
       typeof item.shortName === "string" && item.shortName.trim()
         ? item.shortName.trim().slice(0, 4)
         : item.name.slice(0, 2),
-    color: typeof item.color === "string" ? item.color : SHIFT_COLORS[0],
+    color:
+      typeof item.color === "string"
+        ? normalizeThemeColor(item.color)
+        : SHIFT_COLORS[0],
     startTime: typeof item.startTime === "string" ? item.startTime : "",
     endTime: typeof item.endTime === "string" ? item.endTime : "",
     crossesMidnight: Boolean(item.crossesMidnight),
@@ -585,7 +635,10 @@ export function normalizeAppData(raw: unknown): AppData {
             typeof tag.shortName === "string"
               ? tag.shortName.trim().slice(0, 6)
               : tag.name.slice(0, 3),
-          color: typeof tag.color === "string" ? tag.color : TAG_COLORS[0],
+          color:
+            typeof tag.color === "string"
+              ? normalizeThemeColor(tag.color)
+              : TAG_COLORS[0],
         },
       ];
     }),
@@ -838,7 +891,7 @@ export function applyCareerPreset(
         id: SHIFT_IDS.smallNight,
         name: "小夜",
         shortName: "小夜",
-        color: "#665ce8",
+        color: ACCENT_COLORS.blue,
         startTime: "16:00",
         endTime: "00:00",
         crossesMidnight: false,
@@ -850,7 +903,7 @@ export function applyCareerPreset(
         id: SHIFT_IDS.bigNight,
         name: "大夜",
         shortName: "大夜",
-        color: "#433f9e",
+        color: ACCENT_COLORS.purple,
         startTime: "00:00",
         endTime: "08:00",
         crossesMidnight: false,
@@ -862,7 +915,7 @@ export function applyCareerPreset(
         id: SHIFT_IDS.standby,
         name: "备班",
         shortName: "备",
-        color: "#0d9b82",
+        color: ACCENT_COLORS.green,
         startTime: "",
         endTime: "",
         crossesMidnight: false,
@@ -885,7 +938,7 @@ export function applyCareerPreset(
       id: SHIFT_IDS.standby,
       name: "备班",
       shortName: "备",
-      color: "#0d9b82",
+      color: ACCENT_COLORS.green,
       startTime: "",
       endTime: "",
       crossesMidnight: false,

@@ -19,6 +19,7 @@ import {
   calculateOvertime,
   calculateShiftDuration,
   createDefaultData,
+  gradientEndForColor,
   makeId,
   materializeCycleYear,
   migrateLegacyData,
@@ -158,7 +159,10 @@ function inclusiveDateRange(first: string, second: string) {
   return dates;
 }
 function colorStyle(color: string) {
-  return { "--entity-color": color } as CSSProperties;
+  return {
+    "--entity-color": color,
+    "--entity-color-2": gradientEndForColor(color),
+  } as CSSProperties;
 }
 
 function statutoryHolidayName(key: string) {
