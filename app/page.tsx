@@ -1180,8 +1180,8 @@ function AnnualRing({
     ((targetShare - basicProgress) / 100) * Math.PI * 2 - Math.PI / 2;
   const markerX = 80 + Math.cos(markerAngle) * 64;
   const markerY = 80 + Math.sin(markerAngle) * 64;
-  const calloutX = 132;
-  const calloutY = Math.max(28, Math.min(132, markerY));
+  const calloutX = 171;
+  const calloutY = Math.max(34, Math.min(126, markerY));
   const legends: {
     id: string;
     label: string;
@@ -1269,8 +1269,9 @@ function AnnualRing({
           {basicProgress > 0 && (
             <g className="pie-progress-callout">
               <polyline
-                points={`${markerX},${markerY} 119,${calloutY} ${calloutX},${calloutY}`}
+                points={`${markerX},${markerY} 143,${calloutY} 148,${calloutY}`}
               />
+              <rect x="148" y={calloutY - 13} width="46" height="28" rx="8" />
               <text x={calloutX} y={calloutY - 3}>
                 已完成 {Math.round(completedPercent)}%
               </text>
@@ -1310,18 +1311,40 @@ function DayCountPie({
   completed: number;
 }) {
   const total = Math.max(1, work + rest);
-  const style = { "--work-share": `${(work / total) * 100}%` } as CSSProperties;
+  const workShare = Math.min(100, (work / total) * 100);
+  const completedShare = work > 0 ? Math.min(100, (completed / work) * 100) : 0;
   return (
     <div className="day-count-visual">
       <div
         className="day-count-pie"
-        style={style}
         role="img"
-        aria-label={`工作日 ${work} 天，休息日 ${rest} 天`}
+        aria-label={`计划工作 ${work} 天，已完成 ${completed} 天，休息 ${rest} 天`}
       >
-        <span>
-          <strong>{work + rest}</strong>
-          <small>已排天数</small>
+        <svg viewBox="0 0 160 160" aria-hidden="true">
+          <circle className="day-count-outer-track" cx="80" cy="80" r="62" />
+          <circle
+            className="day-count-work-ring"
+            cx="80"
+            cy="80"
+            r="62"
+            pathLength="100"
+            strokeDasharray={`${workShare} ${100 - workShare}`}
+          />
+          <circle className="day-count-inner-track" cx="80" cy="80" r="45" />
+          <circle
+            className="day-count-completed-ring"
+            cx="80"
+            cy="80"
+            r="45"
+            pathLength="100"
+            strokeDasharray={`${completedShare} ${100 - completedShare}`}
+          />
+        </svg>
+        <span className="day-count-center">
+          <strong>
+            {completed}<b>天</b>
+          </strong>
+          <small>已经上班</small>
         </span>
       </div>
       <div className="day-count-legend">
@@ -1932,7 +1955,7 @@ function SettingsView({
                 <small>当前工作类型</small>
                 <strong>{selectedCareer.name}</strong>
               </span>
-              <i aria-hidden="true">⌄</i>
+              <SelectChevron />
             </span>
             <span className="career-picker-detail">{selectedCareer.detail}</span>
             <small className="career-picker-note">
@@ -2142,11 +2165,6 @@ function SettingsView({
                     }
                     options={Object.entries(SYSTEM_LABELS)}
                   />
-                  {data.work.system === "comprehensive" && (
-                    <p className="conditional-note comprehensive-month-note">
-                      综合计算工时统一按月累计，无需另外选择统计周期。
-                    </p>
-                  )}
                   {data.work.system === "standard" && (
                     <>
                       <NumberSetting
@@ -2265,31 +2283,29 @@ function SettingsView({
                   </button>
                 </div>
               </div>
+              <p className="target-grid-note">
+                系统按工作日统一自动推演；点按任意月份可手动修正。
+              </p>
               <div className="target-grid">
                 {MONTH_LABELS.map((label, index) => {
                   const key = `${targetYear}-${pad(index + 1)}`;
                   const value = getMonthlyTarget(data, targetYear, index);
+                  const overridden = Number.isFinite(data.targets[key]);
                   return (
                     <button
-                      className={
-                        Number.isFinite(data.targets[key]) ? "overridden" : ""
-                      }
+                      className={overridden ? "overridden" : ""}
                       key={key}
+                      aria-label={`${label} ${compactHours(value)} 小时，点按修改`}
                       onClick={() => setTargetEdit({ key, value })}
                     >
                       <span className="target-month-copy">
                         <b>{label}</b>
-                        <small>
-                          {Number.isFinite(data.targets[key])
-                            ? "已手动修正"
-                            : "按工作日自动推算"}
-                        </small>
+                        {overridden && <small>已修正</small>}
                       </span>
                       <strong>
                         {compactHours(value)}
                         <b>h</b>
                       </strong>
-                      <em>点击修改</em>
                     </button>
                   );
                 })}
@@ -2418,9 +2434,19 @@ function SelectSetting({
             </option>
           ))}
         </select>
-        <i aria-hidden="true">⌄</i>
+        <SelectChevron />
       </span>
     </label>
+  );
+}
+
+function SelectChevron() {
+  return (
+    <span className="select-chevron" aria-hidden="true">
+      <svg viewBox="0 0 16 16">
+        <path d="M3.5 6.25 8 10.5l4.5-4.25" />
+      </svg>
+    </span>
   );
 }
 function NumberSetting({
