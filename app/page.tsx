@@ -1721,12 +1721,12 @@ function ShiftBreakdown({
 
 function CalendarDisplayPreview({ data }: { data: AppData }) {
   const shift = data.shifts.find((item) => item.countsAsWork) ?? data.shifts[0];
-  const tag = data.tags[0];
+  const previewTags = data.tags.slice(0, 2);
   const timeRange = shift ? fullShiftRange(shift) : "";
   return (
     <div className="calendar-display-preview">
       <p>日历单元格预览</p>
-      <div className="preview-calendar-cell">
+      <div className="calendar-day preview-calendar-cell">
         <span className="calendar-date-row">
           <span className="day-number">8</span>
           <span className="calendar-day-badges">
@@ -1740,9 +1740,13 @@ function CalendarDisplayPreview({ data }: { data: AppData }) {
             {data.display.showShiftTime && timeRange && (
               <small className="schedule-cell-time">{timeRange}</small>
             )}
-            {data.display.showTags && tag && (
+            {data.display.showTags && previewTags.length > 0 && (
               <span className="schedule-cell-tags">
-                <em style={colorStyle(tag.color)}>{tag.shortName}</em>
+                {previewTags.map((tag) => (
+                  <em key={tag.id} style={colorStyle(tag.color)}>
+                    {tag.shortName}
+                  </em>
+                ))}
               </span>
             )}
             <span

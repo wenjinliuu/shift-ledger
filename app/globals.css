@@ -9969,3 +9969,193 @@ input:focus-visible {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* v21 — restrained calendar labels, two-line legends and true-size preview */
+.schedule-cell-tags em {
+  padding: 3px 2px;
+  border: 1px solid
+    color-mix(in srgb, var(--entity-color, #6a62de) 28%, rgba(255, 255, 255, 0.64));
+  border-radius: 7px;
+  color: color-mix(in srgb, var(--entity-color, #6a62de) 88%, #2b3b52);
+  background: color-mix(
+    in srgb,
+    var(--entity-color, #6a62de) 14%,
+    rgba(255, 255, 255, 0.84)
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(7px) saturate(125%);
+  -webkit-backdrop-filter: blur(7px) saturate(125%);
+}
+.schedule-cell-shift {
+  min-height: 27px;
+  padding: 0 6px;
+  border: 1px solid
+    color-mix(in srgb, var(--entity-color, #4b82d5) 27%, rgba(255, 255, 255, 0.62));
+  border-radius: 9px;
+  color: color-mix(in srgb, var(--entity-color, #356ec8) 88%, #25374f);
+  background: color-mix(
+    in srgb,
+    var(--entity-color, #4b82d5) 17%,
+    rgba(255, 255, 255, 0.82)
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px) saturate(128%);
+  -webkit-backdrop-filter: blur(8px) saturate(128%);
+  transition: none;
+}
+.calendar-day:active .schedule-cell-shift,
+.preview-calendar-cell:active .schedule-cell-shift {
+  transform: none;
+  filter: none;
+}
+.schedule-cell-shift b {
+  color: inherit;
+  font-size: 8px;
+  letter-spacing: 0;
+  text-shadow: none;
+}
+.schedule-cell-shift em {
+  color: color-mix(in srgb, var(--entity-color, #356ec8) 76%, #526178);
+  font-size: 6.3px;
+  text-shadow: none;
+}
+.schedule-cell-shift.is-rest {
+  border-color: rgba(135, 151, 174, 0.18);
+  color: #718097;
+  background: rgba(230, 235, 242, 0.64);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.annual-ring-legend {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: start;
+  gap: 7px;
+}
+.annual-ring-legend > span {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 5px;
+  color: #718096;
+  font-size: 7.2px;
+  line-height: 1.15;
+}
+.annual-ring-legend > span > i {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  margin-top: 1px;
+}
+.annual-ring-legend > span > span {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  white-space: nowrap;
+}
+.annual-ring-legend > span b {
+  color: #263750;
+  font-size: 8.5px;
+  line-height: 1;
+}
+
+.preview-calendar-cell.calendar-day,
+.preview-calendar-cell.calendar-day:nth-child(n) {
+  width: clamp(56px, 14vw, 86px);
+  min-height: 96px;
+  padding: 4px 3px;
+  gap: 2px;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow: hidden;
+  border-radius: 11px;
+}
+.preview-calendar-cell:has(.holiday-flag) .calendar-date-row {
+  min-height: 18px;
+  align-items: center;
+}
+.preview-calendar-cell .holiday-flag,
+.preview-calendar-cell:has(.holiday-flag) .holiday-flag {
+  position: static;
+  max-width: 34px;
+  padding: 2px 3px;
+  font-size: 5.7px;
+  text-align: center;
+}
+.preview-calendar-cell .schedule-cell-content {
+  margin-top: auto;
+  gap: 2px;
+}
+.preview-calendar-cell .schedule-cell-time {
+  font-size: 5.2px;
+}
+.preview-calendar-cell .schedule-cell-tags {
+  gap: 1px;
+}
+.preview-calendar-cell .schedule-cell-tags em {
+  min-height: 14px;
+  padding: 2px 1px;
+  display: grid;
+  place-items: center;
+  font-size: 5.3px;
+}
+.preview-calendar-cell .schedule-cell-shift {
+  min-height: 27px;
+}
+
+@media (max-width: 720px) {
+  .schedule-cell-tags em {
+    padding: 2px 1px;
+    border-radius: 5px;
+    font-size: 5.1px;
+  }
+  .schedule-cell-shift {
+    min-height: 24px;
+    padding: 0 4px;
+    border-radius: 7px;
+  }
+  .schedule-cell-shift b {
+    font-size: 6.8px;
+  }
+  .schedule-cell-shift em {
+    font-size: 5.4px;
+  }
+  .annual-ring-legend {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .annual-ring-legend > span {
+    gap: 3px;
+    font-size: 6.2px;
+  }
+  .annual-ring-legend > span > i {
+    width: 6.5px;
+    height: 6.5px;
+  }
+  .annual-ring-legend > span b {
+    font-size: 7.1px;
+  }
+  .preview-calendar-cell.calendar-day,
+  .preview-calendar-cell.calendar-day:nth-child(n) {
+    width: clamp(52px, 14vw, 62px);
+    min-height: 85px;
+  }
+  .preview-calendar-cell .schedule-cell-tags em {
+    min-height: 13px;
+  }
+  .preview-calendar-cell .schedule-cell-shift {
+    min-height: 24px;
+  }
+}
+
+@media (max-width: 380px) {
+  .annual-ring-legend > span {
+    font-size: 5.7px;
+  }
+  .annual-ring-legend > span b {
+    font-size: 6.5px;
+  }
+}
