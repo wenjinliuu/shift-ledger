@@ -28,6 +28,11 @@
   --success-gradient: linear-gradient(135deg, #68c66e, #65b9a2);
   --warning-gradient: linear-gradient(135deg, #f8ce5e, #f08e4e);
   --danger-gradient: linear-gradient(135deg, #ed7781, #f08bbc);
+  --shift-glass-tint-strong: 10%;
+  --shift-glass-tint-soft: 5%;
+  --shift-glass-border-tint: 17%;
+  --shift-glass-blur: 16px;
+  --shift-glass-saturation: 132%;
 }
 
 * {
@@ -11648,6 +11653,58 @@ select:focus-visible {
   background: transparent;
   box-shadow: none;
 }
+.shift-library-item,
+.shift-stat-item,
+.calendar-day,
+.calendar-day:nth-child(n),
+.preview-calendar-cell.calendar-day,
+.preview-calendar-cell.calendar-day:nth-child(n) {
+  --shift-glass-color: var(--entity-color, var(--gray));
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--shift-glass-color) var(--shift-glass-border-tint),
+      rgba(255, 255, 255, 0.82)
+    );
+  background:
+    radial-gradient(
+      circle at 12% -12%,
+      rgba(255, 255, 255, 0.9),
+      transparent 45%
+    ),
+    linear-gradient(
+      148deg,
+      color-mix(
+        in srgb,
+        var(--shift-glass-color) var(--shift-glass-tint-strong),
+        rgba(255, 255, 255, 0.74)
+      ),
+      color-mix(
+        in srgb,
+        var(--shift-glass-color) var(--shift-glass-tint-soft),
+        rgba(240, 242, 247, 0.72)
+      )
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    inset 0 -1px 0
+      color-mix(in srgb, var(--shift-glass-color) 6%, transparent),
+    0 5px 14px
+      color-mix(
+        in srgb,
+        var(--shift-glass-color) 6%,
+        rgba(45, 48, 60, 0.035)
+      );
+  backdrop-filter: blur(var(--shift-glass-blur))
+    saturate(var(--shift-glass-saturation));
+  -webkit-backdrop-filter: blur(var(--shift-glass-blur))
+    saturate(var(--shift-glass-saturation));
+}
+.calendar-day:not([style]) {
+  --shift-glass-tint-strong: 3%;
+  --shift-glass-tint-soft: 1%;
+  --shift-glass-border-tint: 7%;
+}
 .calendar-day,
 .calendar-day:nth-child(n),
 .preview-calendar-cell.calendar-day,
@@ -11655,16 +11712,45 @@ select:focus-visible {
   min-height: 94px;
   padding: 5px 4px 4px;
   gap: 3px;
-  border-color: color-mix(in srgb, var(--entity-color, var(--blue)) 9%, rgba(75, 78, 89, 0.08));
-  background:
-    linear-gradient(150deg, rgba(255, 255, 255, 0.52), transparent 48%),
-    color-mix(in srgb, var(--entity-color, var(--blue)) 6%, rgba(241, 243, 247, 0.84));
+}
+.calendar-day.today,
+.calendar-day.today:nth-child(n) {
+  border-color: rgba(58, 131, 246, 0.38);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.92),
-    inset 0 -1px 0 color-mix(in srgb, var(--entity-color, var(--blue)) 5%, transparent),
-    0 4px 10px rgba(48, 51, 61, 0.045);
-  backdrop-filter: blur(13px) saturate(128%);
-  -webkit-backdrop-filter: blur(13px) saturate(128%);
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    inset 0 0 0 1px rgba(58, 131, 246, 0.14),
+    0 0 0 2px rgba(58, 131, 246, 0.07),
+    0 5px 14px
+      color-mix(
+        in srgb,
+        var(--shift-glass-color) 6%,
+        rgba(45, 48, 60, 0.035)
+      );
+}
+.calendar-day.batch-selected,
+.calendar-day.batch-selected:nth-child(n) {
+  border-color: rgba(166, 125, 242, 0.46);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    inset 0 0 0 1px rgba(166, 125, 242, 0.14),
+    0 0 0 2px rgba(166, 125, 242, 0.08),
+    0 5px 14px
+      color-mix(
+        in srgb,
+        var(--shift-glass-color) 6%,
+        rgba(45, 48, 60, 0.035)
+      );
+}
+@media (hover: hover) {
+  .calendar-day:hover {
+    border-color: color-mix(
+      in srgb,
+      var(--shift-glass-color) 25%,
+      rgba(255, 255, 255, 0.82)
+    );
+    filter: saturate(1.04) brightness(1.015);
+    transform: translateY(-1px);
+  }
 }
 .calendar-date-row .day-number,
 .day-number {
@@ -11751,9 +11837,6 @@ select:focus-visible {
   .preview-calendar-cell.calendar-day:nth-child(n) {
     min-height: 82px;
     padding: 4px 3px 3px;
-    background:
-      linear-gradient(150deg, rgba(255, 255, 255, 0.46), transparent 48%),
-      color-mix(in srgb, var(--entity-color, var(--blue)) 6%, rgba(239, 241, 246, 0.84));
   }
   .calendar-date-row .day-number,
   .day-number {
