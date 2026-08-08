@@ -1,6 +1,8 @@
 [build]
   command = "npm run build"
   publish = "out"
+  # 开发阶段由 GitHub Pages 托管；退出码 0 会跳过 Netlify 的 Git 自动构建。
+  ignore = "exit 0"
 
 [build.environment]
   NODE_VERSION = "22"
