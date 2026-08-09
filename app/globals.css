@@ -12149,3 +12149,230 @@ select:focus-visible {
     font-size: 11.5px;
   }
 }
+
+/* v25 final authority — responsive statistics and the low-cost calendar surface. */
+.stats-period-toggle {
+  flex: 0 0 auto;
+  padding: 3px;
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(42px, 1fr));
+  gap: 3px;
+  border: 1px solid rgba(112, 105, 224, 0.18);
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.7), rgba(236, 239, 255, 0.5)),
+    linear-gradient(135deg, rgba(58, 131, 246, 0.12), rgba(166, 125, 242, 0.14));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 7px 18px rgba(83, 83, 171, 0.09);
+  backdrop-filter: blur(14px) saturate(132%);
+  -webkit-backdrop-filter: blur(14px) saturate(132%);
+}
+.stats-period-toggle button {
+  min-width: 42px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  color: #777b8b;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 850;
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    background 150ms ease,
+    box-shadow 150ms ease;
+}
+.stats-period-toggle button.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(58, 131, 246, 0.94), rgba(133, 91, 232, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    0 5px 12px rgba(88, 89, 205, 0.2);
+}
+
+/* Keep the rounded panel visible without trimming the two bottom corner cells. */
+.calendar-panel,
+.calendar-panel.glass-panel {
+  overflow: visible;
+  isolation: auto;
+}
+.calendar-month-stage {
+  overflow: visible;
+  border-radius: 0;
+  will-change: auto;
+}
+.calendar-month-stage.slide-in-left,
+.calendar-month-stage.slide-in-right {
+  will-change: transform, opacity;
+  animation-duration: 0.145s;
+}
+
+/* Do not ask the GPU to blur 35 cells and every inner badge while swiping. */
+.calendar-day,
+.calendar-day:nth-child(n),
+.schedule-cell-tags em,
+.schedule-cell-shift {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.calendar-day,
+.calendar-day:nth-child(n),
+.preview-calendar-cell.calendar-day,
+.preview-calendar-cell.calendar-day:nth-child(n) {
+  min-height: 82px;
+  padding: 4px 3px 3px;
+  gap: 2px;
+}
+.calendar-date-row .day-number,
+.day-number {
+  font-size: 15px;
+  line-height: 1;
+}
+.calendar-day-badges,
+.calendar-day.has-complete .calendar-day-badges {
+  top: 4px;
+  right: 4px;
+  gap: 3px;
+}
+.calendar-day.batch-selected .calendar-day-badges {
+  right: 23px;
+}
+.holiday-flag,
+.calendar-day.has-holiday .holiday-flag,
+.preview-calendar-cell .holiday-flag {
+  display: block;
+  min-height: 13px;
+  padding: 2px 4px;
+  border: 1px solid rgba(216, 84, 97, 0.12);
+  border-radius: 6px;
+  color: #d34e5c;
+  background: rgba(255, 242, 244, 0.86);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  font-size: 7.6px;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Day drawer: one stable input shell, with the unit outside the editable area. */
+.day-editor-v2 .editor-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.day-editor-v2 .field {
+  min-width: 0;
+  margin-top: 16px;
+  display: grid;
+  align-items: stretch;
+  gap: 7px;
+}
+.day-editor-v2 .field > span {
+  color: #626977;
+  font-size: 11px;
+  font-weight: 800;
+}
+.day-editor-v2 .field > div {
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 13px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(84, 103, 139, 0.13);
+  border-radius: 15px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.46), transparent 56%),
+    rgba(248, 249, 253, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 6px 16px rgba(51, 63, 91, 0.05);
+}
+.day-editor-v2 .field > div:focus-within {
+  border-color: rgba(91, 111, 231, 0.46);
+  box-shadow:
+    0 0 0 3px rgba(89, 111, 231, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96);
+}
+.day-editor-v2 .field input[type="number"] {
+  width: 100%;
+  min-width: 0;
+  height: 50px;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  outline: 0;
+  color: #25262a;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  text-align: left;
+  font-size: 18px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+.day-editor-v2 .field b {
+  margin: 0;
+  padding-left: 10px;
+  border-left: 1px solid rgba(88, 98, 122, 0.1);
+  color: #818693;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .annual-overview-card .section-heading {
+    align-items: center;
+  }
+  .stats-period-toggle {
+    grid-template-columns: repeat(2, minmax(38px, 1fr));
+  }
+  .stats-period-toggle button {
+    min-width: 38px;
+    min-height: 30px;
+    padding: 0 10px;
+  }
+  .calendar-day,
+  .calendar-day:nth-child(n),
+  .preview-calendar-cell.calendar-day,
+  .preview-calendar-cell.calendar-day:nth-child(n) {
+    min-height: 72px;
+    padding: 3px 2px 2px;
+    gap: 1px;
+  }
+  .calendar-date-row .day-number,
+  .day-number {
+    font-size: 14px;
+  }
+  .calendar-day-badges,
+  .calendar-day.has-complete .calendar-day-badges {
+    top: 3px;
+    right: 3px;
+  }
+  .holiday-flag,
+  .calendar-day.has-holiday .holiday-flag {
+    min-height: 12px;
+    padding: 2px 3px;
+    border-radius: 5px;
+    font-size: 7px;
+  }
+  .day-editor-v2 .editor-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stats-period-toggle button,
+  .calendar-month-stage.slide-in-left,
+  .calendar-month-stage.slide-in-right {
+    transition: none;
+    animation: none;
+  }
+}

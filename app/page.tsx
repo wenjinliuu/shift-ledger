@@ -37,6 +37,7 @@ import {
 } from "./lib/schedule";
 
 type View = "calendar" | "stats" | "settings";
+type StatsScope = "month" | "year";
 type EntityEditor =
   | { type: "shift"; value?: Shift }
   | { type: "tag"; value?: DutyTag }
@@ -532,7 +533,8 @@ export default function Home() {
   function changeMonth(delta: number) {
     setSelectedMonth((value) => {
       const next = new Date(value.getFullYear(), value.getMonth() + delta, 1);
-      setData((current) => materializeCycleYear(current, next.getFullYear()));
+      if (next.getFullYear() !== value.getFullYear())
+        setData((current) => materializeCycleYear(current, next.getFullYear()));
       return next;
     });
   }
@@ -838,7 +840,13 @@ function CalendarView({
     [records],
   );
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const motionTimer = useRef<number | null>(null);
   const [monthMotion, setMonthMotion] = useState("");
+  const calendarDays = useMemo(
+    () => getCalendarDays(year, month),
+    [year, month],
+  );
+  const batchDateSet = useMemo(() => new Set(batchDates), [batchDates]);
   const workRecords = records.filter(
     (record) => shifts.get(record.shiftId)?.countsAsWork,
   );
@@ -883,12 +891,13 @@ function CalendarView({
     touchStart.current = null;
     if (Math.abs(dx) >= 55 && Math.abs(dx) > Math.abs(dy) * 1.25) {
       const direction = dx < 0 ? 1 : -1;
-      setMonthMotion(direction > 0 ? "slide-out-left" : "slide-out-right");
-      window.setTimeout(() => {
-        onChangeMonth(direction);
-        setMonthMotion(direction > 0 ? "slide-in-right" : "slide-in-left");
-        window.setTimeout(() => setMonthMotion(""), 170);
-      }, 120);
+      if (motionTimer.current) window.clearTimeout(motionTimer.current);
+      onChangeMonth(direction);
+      setMonthMotion(direction > 0 ? "slide-in-right" : "slide-in-left");
+      motionTimer.current = window.setTimeout(() => {
+        setMonthMotion("");
+        motionTimer.current = null;
+      }, 145);
     }
   }
   return (
@@ -941,7 +950,7 @@ function CalendarView({
               ))}
             </div>
             <div className="calendar-grid">
-              {getCalendarDays(year, month).map((day, index) => {
+              {calendarDays.map((day, index) => {
                 if (!day)
                   return (
                     <span className="calendar-spacer" key={`blank-${index}`} />
@@ -956,7 +965,7 @@ function CalendarView({
                 const holiday = data.display.showHolidays
                   ? statutoryHolidayName(key)
                   : "";
-                const selected = batchDates.includes(key);
+                const selected = batchDateSet.has(key);
                 const selectedIndex = batchDates.indexOf(key);
                 const completedDay = Boolean(
                   record &&
@@ -983,8 +992,9 @@ function CalendarView({
                 return (
                   <button
                     aria-label={ariaParts.join("，")}
+                    data-holiday={holiday || undefined}
                     key={key}
-                    className={`calendar-day ${key === todayKey ? "today" : ""} ${selected ? "batch-selected" : ""}`}
+                    className={`calendar-day ${key === todayKey ? "today" : ""} ${selected ? "batch-selected" : ""} ${holiday ? "has-holiday" : ""} ${completedDay ? "has-complete" : ""}`}
                     style={shift ? colorStyle(shift.color) : undefined}
                     onClick={() =>
                       batchMode ? onToggleBatchDate(key) : onOpenDate(key)
@@ -1190,9 +1200,7 @@ function ProgressRingDashboard({
   totalValue: string;
   centerLabel: string;
 }) {
-  const [selectedId, setSelectedId] = useState<string | null>(
-    metrics[0]?.id ?? null,
-  );
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = metrics.find((metric) => metric.id === selectedId) ?? null;
   const mainMetric = metrics[0];
   const mainPercent = mainMetric?.total
@@ -1349,6 +1357,7 @@ function AnnualRing({
   rest,
   completedRest,
   plannedDays,
+  periodLabel,
 }: {
   target: number;
   actual: number;
@@ -1357,6 +1366,7 @@ function AnnualRing({
   rest: number;
   completedRest: number;
   plannedDays: number;
+  periodLabel: string;
 }) {
   const annualTotal = Math.max(0, target + overtime);
   const confirmedOvertime = Math.min(overtime, actualOvertime);
@@ -1367,7 +1377,7 @@ function AnnualRing({
   const metrics: ProgressRingMetric[] = [
     {
       id: "total",
-      label: "全年进度",
+      label: `${periodLabel}进度`,
       completed: Math.min(annualTotal, actual),
       total: annualTotal,
       unit: "h",
@@ -1401,9 +1411,9 @@ function AnnualRing({
   return (
     <ProgressRingDashboard
       metrics={metrics}
-      totalLabel="全年预计"
+      totalLabel={`${periodLabel}预计`}
       totalValue={`${compactHours(annualTotal)}h · ${plannedDays}天`}
-      centerLabel="全年进度"
+      centerLabel={`${periodLabel}进度`}
     />
   );
 }
@@ -1530,6 +1540,7 @@ function StatsView({
   data: AppData;
   todayKey: string;
 }) {
+  const [ringScope, setRingScope] = useState<StatsScope>("year");
   const shiftMap = useMemo(
     () => new Map(data.shifts.map((shift) => [shift.id, shift])),
     [data.shifts],
@@ -1545,11 +1556,44 @@ function StatsView({
   );
   const completed = completedByDate(workRecords, todayKey);
   const completedRest = completedByDate(restRecords, todayKey);
-  const totalHours = workRecords.reduce((sum, record) => sum + record.hours, 0);
   const actualHours = completed.reduce((sum, record) => sum + record.hours, 0);
   const annualTarget = getAnnualTarget(data, year);
   const annualOvertime = getPeriodOvertime(workRecords, data, year);
   const actualOvertime = getPeriodOvertime(completed, data, year);
+  const monthPrefix = `${year}-${pad(month + 1)}`;
+  const monthWorkRecords = workRecords.filter((record) =>
+    record.date.startsWith(monthPrefix),
+  );
+  const monthRestRecords = restRecords.filter((record) =>
+    record.date.startsWith(monthPrefix),
+  );
+  const completedMonthWork = completedByDate(monthWorkRecords, todayKey);
+  const completedMonthRest = completedByDate(monthRestRecords, todayKey);
+  const monthTarget = getMonthlyTarget(data, year, month);
+  const monthActualHours = completedMonthWork.reduce(
+    (sum, record) => sum + record.hours,
+    0,
+  );
+  const monthOvertime = calculateOvertime(
+    monthWorkRecords,
+    data.work,
+    monthTarget,
+  );
+  const actualMonthOvertime = calculateOvertime(
+    completedMonthWork,
+    data.work,
+    monthTarget,
+  );
+  const ringTarget = ringScope === "year" ? annualTarget : monthTarget;
+  const ringActualHours = ringScope === "year" ? actualHours : monthActualHours;
+  const ringOvertime = ringScope === "year" ? annualOvertime : monthOvertime;
+  const ringActualOvertime =
+    ringScope === "year" ? actualOvertime : actualMonthOvertime;
+  const ringRestRecords = ringScope === "year" ? restRecords : monthRestRecords;
+  const ringCompletedRest =
+    ringScope === "year" ? completedRest : completedMonthRest;
+  const ringWorkRecords = ringScope === "year" ? workRecords : monthWorkRecords;
+  const ringPeriodLabel = ringScope === "year" ? "全年" : `${month + 1}月`;
   const monthlyOvertime = canAllocateOvertimeByMonth(data);
   const shiftBreakdown = data.shifts
     .map((shift) => {
@@ -1648,58 +1692,43 @@ function StatsView({
   return (
     <div className="stats-page">
       <div className="stats-layout annual-dashboard">
-        <section
-          className={`stats-summary-grid annual-summary ${data.work.trackOvertime ? "with-overtime" : "hours-only"}`}
-        >
-          <MetricCard
-            label="全年计划工时"
-            value={`${compactHours(totalHours)}h`}
-            detail={`${workRecords.length} 个工作日`}
-            tone="blue"
-          />
-          <MetricCard
-            label="已完成工时"
-            value={`${compactHours(actualHours)}h`}
-            detail={`${completed.length} 个已完成班次`}
-            tone="green"
-          />
-          {data.work.trackOvertime && (
-            <MetricCard
-              label="预计额外工时"
-              value={`${compactHours(annualOvertime)}h`}
-              detail={SYSTEM_LABELS[data.work.system]}
-              tone="orange"
-            />
-          )}
-          {data.work.trackOvertime && (
-            <MetricCard
-              label="已确认额外工时"
-              value={`${compactHours(actualOvertime)}h`}
-              detail="截至今日已确认"
-              tone="violet"
-            />
-          )}
-        </section>
         {data.work.trackOvertime && data.work.system === "comprehensive" && (
           <section className="annual-overview-card glass-panel">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">全年仪表盘</p>
+                <p className="eyebrow">{ringPeriodLabel}仪表盘</p>
                 <h2>标准、额外与完成进度</h2>
               </div>
-              <span className="soft-badge">
-                {PERIOD_LABELS[data.work.period]}周期
-              </span>
+              <div className="stats-period-toggle" aria-label="统计周期">
+                <button
+                  type="button"
+                  className={ringScope === "month" ? "active" : ""}
+                  aria-pressed={ringScope === "month"}
+                  onClick={() => setRingScope("month")}
+                >
+                  月
+                </button>
+                <button
+                  type="button"
+                  className={ringScope === "year" ? "active" : ""}
+                  aria-pressed={ringScope === "year"}
+                  onClick={() => setRingScope("year")}
+                >
+                  年
+                </button>
+              </div>
             </div>
             <div className="annual-overview-grid">
               <AnnualRing
-                target={annualTarget}
-                actual={actualHours}
-                overtime={annualOvertime}
-                actualOvertime={actualOvertime}
-                rest={restRecords.length}
-                completedRest={completedRest.length}
-                plannedDays={workRecords.length + restRecords.length}
+                key={`${ringScope}-${year}-${month}`}
+                target={ringTarget}
+                actual={ringActualHours}
+                overtime={ringOvertime}
+                actualOvertime={ringActualOvertime}
+                rest={ringRestRecords.length}
+                completedRest={ringCompletedRest.length}
+                plannedDays={ringWorkRecords.length + ringRestRecords.length}
+                periodLabel={ringPeriodLabel}
               />
             </div>
           </section>
