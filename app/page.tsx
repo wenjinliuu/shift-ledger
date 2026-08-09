@@ -1165,157 +1165,246 @@ function MetricCard({
   );
 }
 
+type ProgressRingTone = "green" | "blue" | "violet" | "yellow";
+type ProgressRingMetric = {
+  id: string;
+  label: string;
+  completed: number;
+  total: number;
+  unit: "h" | "天";
+  tone: ProgressRingTone;
+};
+
+function formatRingValue(value: number, unit: ProgressRingMetric["unit"]) {
+  return `${compactHours(value)}${unit}`;
+}
+
+function ProgressRingDashboard({
+  metrics,
+  totalLabel,
+  totalValue,
+  centerLabel,
+}: {
+  metrics: ProgressRingMetric[];
+  totalLabel: string;
+  totalValue: string;
+  centerLabel: string;
+}) {
+  const [selectedId, setSelectedId] = useState<string | null>(
+    metrics[0]?.id ?? null,
+  );
+  const selected = metrics.find((metric) => metric.id === selectedId) ?? null;
+  const mainMetric = metrics[0];
+  const mainPercent = mainMetric?.total
+    ? Math.min(100, (mainMetric.completed / mainMetric.total) * 100)
+    : 0;
+
+  return (
+    <div className="progress-ring-dashboard">
+      <div className="progress-rings-stage">
+        <svg
+          className="progress-rings"
+          viewBox="0 0 320 320"
+          role="img"
+          aria-label={metrics
+            .map(
+              (metric) =>
+                `${metric.label}已完成${formatRingValue(metric.completed, metric.unit)}，剩余${formatRingValue(Math.max(0, metric.total - metric.completed), metric.unit)}`,
+            )
+            .join("；")}
+          onClick={() => setSelectedId(null)}
+        >
+          {metrics.map((metric, index) => {
+            const radius = 132 - index * 29;
+            const percent = metric.total
+              ? Math.min(100, (metric.completed / metric.total) * 100)
+              : 0;
+            const angle = (percent / 100) * Math.PI * 2 - Math.PI / 2;
+            const endpointX = 160 + Math.cos(angle) * radius;
+            const endpointY = 160 + Math.sin(angle) * radius;
+            const isSelected = selectedId === metric.id;
+            return (
+              <g
+                key={metric.id}
+                className={`progress-ring-group tone-${metric.tone}${isSelected ? " selected" : ""}${selectedId && !isSelected ? " muted" : ""}`}
+                role="button"
+                tabIndex={0}
+                aria-label={`选择${metric.label}`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setSelectedId(metric.id);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setSelectedId(metric.id);
+                  }
+                }}
+              >
+                <circle
+                  className="progress-ring-track"
+                  cx="160"
+                  cy="160"
+                  r={radius}
+                  pathLength="100"
+                />
+                {percent > 0 && (
+                  <>
+                    <circle
+                      className="progress-ring-value"
+                      cx="160"
+                      cy="160"
+                      r={radius}
+                      pathLength="100"
+                      strokeDasharray={`${percent} ${100 - percent}`}
+                    />
+                    <circle
+                      className="progress-ring-endpoint"
+                      cx={endpointX}
+                      cy={endpointY}
+                      r="6"
+                    />
+                  </>
+                )}
+              </g>
+            );
+          })}
+          <text className="progress-ring-center-label" x="160" y="153">
+            {centerLabel}
+          </text>
+          <text className="progress-ring-center-value" x="160" y="181">
+            {Math.round(mainPercent)}%
+          </text>
+        </svg>
+      </div>
+
+      <div className={`progress-ring-selection${selected ? "" : " empty"}`}>
+        {selected ? (
+          <>
+            <div className="selection-heading">
+              <i className={`ring-dot tone-${selected.tone}`} />
+              <strong>{selected.label}</strong>
+              <span>
+                {selected.total
+                  ? `${Math.round((selected.completed / selected.total) * 100)}%`
+                  : "0%"}
+              </span>
+            </div>
+            <div className="selection-values">
+              <div className={`completed tone-${selected.tone}`}>
+                <span>已完成</span>
+                <strong>
+                  {formatRingValue(selected.completed, selected.unit)}
+                </strong>
+              </div>
+              <div className={`remaining tone-${selected.tone}`}>
+                <span>剩余</span>
+                <strong>
+                  {formatRingValue(
+                    Math.max(0, selected.total - selected.completed),
+                    selected.unit,
+                  )}
+                </strong>
+              </div>
+            </div>
+          </>
+        ) : (
+          <p>点击任意圆环查看已完成与剩余数据</p>
+        )}
+      </div>
+
+      <div className="progress-ring-legend">
+        <div className="progress-ring-total">
+          <i />
+          <span>{totalLabel}</span>
+          <strong>{totalValue}</strong>
+        </div>
+        <div className="progress-ring-metrics">
+          {metrics.map((metric) => (
+            <button
+              key={metric.id}
+              type="button"
+              className={selectedId === metric.id ? "selected" : ""}
+              onClick={() => setSelectedId(metric.id)}
+            >
+              <i className={`ring-dot tone-${metric.tone}`} />
+              <span>{metric.label}</span>
+              <strong>
+                {formatRingValue(metric.completed, metric.unit)} /{" "}
+                {formatRingValue(metric.total, metric.unit)}
+              </strong>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AnnualRing({
   target,
   actual,
   overtime,
   actualOvertime,
+  rest,
+  completedRest,
+  plannedDays,
 }: {
   target: number;
   actual: number;
   overtime: number;
   actualOvertime: number;
+  rest: number;
+  completedRest: number;
+  plannedDays: number;
 }) {
-  const chartTotal = Math.max(1, target + overtime);
-  const targetShare = (target / chartTotal) * 100;
-  const overtimeShare = Math.max(0, 100 - targetShare);
+  const annualTotal = Math.max(0, target + overtime);
   const confirmedOvertime = Math.min(overtime, actualOvertime);
   const confirmedBasic = Math.min(
     target,
     Math.max(0, actual - confirmedOvertime),
   );
-  const basicProgress = (confirmedBasic / chartTotal) * 100;
-  const overtimeProgress = (confirmedOvertime / chartTotal) * 100;
-  const completedPercent = Math.min(100, (actual / chartTotal) * 100);
-  const markerAngle =
-    ((targetShare - basicProgress) / 100) * Math.PI * 2 - Math.PI / 2;
-  const markerX = 80 + Math.cos(markerAngle) * 64;
-  const markerY = 80 + Math.sin(markerAngle) * 64;
-  const calloutElbowX = 146;
-  const calloutX = 171;
-  const calloutY =
-    markerY < 80
-      ? Math.max(28, markerY - 18)
-      : Math.min(132, markerY + 18);
-  const legends: {
-    id: string;
-    label: string;
-    value: number;
-  }[] = [
-    { id: "basic", label: "基本工时", value: target },
-    { id: "overtime", label: "预计加班", value: overtime },
-    { id: "completed", label: "已完成基本", value: confirmedBasic },
+  const metrics: ProgressRingMetric[] = [
     {
-      id: "completedOvertime",
-      label: "已完成加班",
-      value: confirmedOvertime,
+      id: "total",
+      label: "全年进度",
+      completed: Math.min(annualTotal, actual),
+      total: annualTotal,
+      unit: "h",
+      tone: "green",
     },
-    { id: "total", label: "预计总工时", value: target + overtime },
+    {
+      id: "basic",
+      label: "基本工时",
+      completed: confirmedBasic,
+      total: target,
+      unit: "h",
+      tone: "blue",
+    },
+    {
+      id: "overtime",
+      label: "预测加班",
+      completed: confirmedOvertime,
+      total: overtime,
+      unit: "h",
+      tone: "violet",
+    },
+    {
+      id: "rest",
+      label: "休息",
+      completed: Math.min(rest, completedRest),
+      total: rest,
+      unit: "天",
+      tone: "yellow",
+    },
   ];
   return (
-    <div className="annual-ring-wrap">
-      <div
-        className="annual-ring"
-        role="img"
-        aria-label={`标准工时 ${compactHours(target)} 小时，预计额外工时 ${compactHours(overtime)} 小时，已完成 ${compactHours(actual)} 小时`}
-      >
-        <div className="annual-pie-core">
-          <svg className="annual-pie-segments" viewBox="0 0 100 100" aria-label="基本工时与预计加班组成">
-            <circle
-              className="annual-pie-basic"
-              cx="50"
-              cy="50"
-              r="25"
-              pathLength="100"
-              strokeDasharray={`${targetShare} ${100 - targetShare}`}
-            />
-            {overtimeShare > 0 && (
-              <circle
-                className="annual-pie-overtime"
-                cx="50"
-                cy="50"
-                r="25"
-                pathLength="100"
-                strokeDasharray={`${overtimeShare} ${100 - overtimeShare}`}
-                strokeDashoffset={-targetShare}
-              />
-            )}
-          </svg>
-        </div>
-        <svg className="annual-progress-ring" viewBox="0 0 160 160" aria-label="全年已完成进度">
-          <circle
-            className="ring-progress-track"
-            cx="80"
-            cy="80"
-            r="64"
-            pathLength="100"
-          />
-          <circle
-            className="ring-progress ring-progress-basic"
-            cx="80"
-            cy="80"
-            r="64"
-            pathLength="100"
-            strokeDasharray={`${basicProgress} ${100 - basicProgress}`}
-            strokeDashoffset={-(targetShare - basicProgress)}
-          />
-          {overtimeProgress > 0 && (
-            <>
-              <circle
-                className="ring-overtime-outline"
-                cx="80"
-                cy="80"
-                r="69"
-                pathLength="100"
-                strokeDasharray={`${overtimeProgress} ${100 - overtimeProgress}`}
-                strokeDashoffset={-targetShare}
-              />
-              <circle
-                className="ring-progress ring-progress-overtime"
-                cx="80"
-                cy="80"
-                r="64"
-                pathLength="100"
-                strokeDasharray={`${overtimeProgress} ${100 - overtimeProgress}`}
-                strokeDashoffset={-targetShare}
-              />
-            </>
-          )}
-          {basicProgress > 0 && (
-            <g className="pie-progress-callout">
-              <path
-                className="callout-marker"
-                d={`M ${markerX - 2.2} ${markerY} a 2.2 2.2 0 1 0 4.4 0 a 2.2 2.2 0 1 0 -4.4 0`}
-              />
-              <polyline
-                points={`${markerX},${markerY} ${calloutElbowX},${calloutY} 156,${calloutY}`}
-              />
-              <text x={calloutX} y={calloutY - 3}>
-                已完成 {Math.round(completedPercent)}%
-              </text>
-              <text
-                className="callout-hours"
-                x={calloutX}
-                y={calloutY + 7}
-              >
-                {compactHours(actual)}h
-              </text>
-            </g>
-          )}
-        </svg>
-      </div>
-      <div className="ring-legend annual-ring-legend">
-        {legends.map((item) => (
-          <span key={item.id} className={`legend-${item.id}`}>
-            <i />
-            <span>
-              {item.label}
-              <b>{compactHours(item.value)}h</b>
-            </span>
-          </span>
-        ))}
-      </div>
-    </div>
+    <ProgressRingDashboard
+      metrics={metrics}
+      totalLabel="全年预计"
+      totalValue={`${compactHours(annualTotal)}h · ${plannedDays}天`}
+      centerLabel="全年进度"
+    />
   );
 }
 
@@ -1323,63 +1412,48 @@ function DayCountPie({
   work,
   rest,
   completed,
+  completedRest,
 }: {
   work: number;
   rest: number;
   completed: number;
+  completedRest: number;
 }) {
-  const total = Math.max(1, work + rest);
-  const workShare = Math.min(100, (work / total) * 100);
-  const completedShare = work > 0 ? Math.min(100, (completed / work) * 100) : 0;
+  const total = work + rest;
+  const elapsed = Math.min(total, completed + completedRest);
+  const metrics: ProgressRingMetric[] = [
+    {
+      id: "elapsed",
+      label: "已走过",
+      completed: elapsed,
+      total,
+      unit: "天",
+      tone: "green",
+    },
+    {
+      id: "work",
+      label: "工作",
+      completed: Math.min(work, completed),
+      total: work,
+      unit: "天",
+      tone: "blue",
+    },
+    {
+      id: "rest",
+      label: "休息",
+      completed: Math.min(rest, completedRest),
+      total: rest,
+      unit: "天",
+      tone: "yellow",
+    },
+  ];
   return (
-    <div className="day-count-visual">
-      <div
-        className="day-count-pie"
-        role="img"
-        aria-label={`计划工作 ${work} 天，已完成 ${completed} 天，休息 ${rest} 天`}
-      >
-        <svg viewBox="0 0 160 160" aria-hidden="true">
-          <circle className="day-count-outer-track" cx="80" cy="80" r="62" />
-          <circle
-            className="day-count-work-ring"
-            cx="80"
-            cy="80"
-            r="62"
-            pathLength="100"
-            strokeDasharray={`${workShare} ${100 - workShare}`}
-          />
-          <circle className="day-count-inner-track" cx="80" cy="80" r="45" />
-          <circle
-            className="day-count-completed-ring"
-            cx="80"
-            cy="80"
-            r="45"
-            pathLength="100"
-            strokeDasharray={`${completedShare} ${100 - completedShare}`}
-          />
-        </svg>
-        <span className="day-count-center">
-          <strong>
-            {completed}<b>天</b>
-          </strong>
-          <small>已经上班</small>
-        </span>
-      </div>
-      <div className="day-count-legend">
-        <span>
-          <i className="work" />
-          工作 {work} 天
-        </span>
-        <span>
-          <i className="rest" />
-          休息 {rest} 天
-        </span>
-        <span>
-          <i className="done" />
-          已完成 {completed} 天
-        </span>
-      </div>
-    </div>
+    <ProgressRingDashboard
+      metrics={metrics}
+      totalLabel="全年预计"
+      totalValue={`${total}天`}
+      centerLabel="全年进度"
+    />
   );
 }
 
@@ -1470,6 +1544,7 @@ function StatsView({
     (record) => shiftMap.get(record.shiftId)?.isRest,
   );
   const completed = completedByDate(workRecords, todayKey);
+  const completedRest = completedByDate(restRecords, todayKey);
   const totalHours = workRecords.reduce((sum, record) => sum + record.hours, 0);
   const actualHours = completed.reduce((sum, record) => sum + record.hours, 0);
   const annualTarget = getAnnualTarget(data, year);
@@ -1543,6 +1618,7 @@ function StatsView({
             work={workRecords.length}
             rest={restRecords.length}
             completed={completed.length}
+            completedRest={completedRest.length}
           />
         </section>
         <div className="stats-summary-grid schedule-summary">
@@ -1621,6 +1697,9 @@ function StatsView({
                 actual={actualHours}
                 overtime={annualOvertime}
                 actualOvertime={actualOvertime}
+                rest={restRecords.length}
+                completedRest={completedRest.length}
+                plannedDays={workRecords.length + restRecords.length}
               />
             </div>
           </section>
