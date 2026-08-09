@@ -973,13 +973,13 @@ function CalendarView({
                         {completedDay && (
                           <i className="complete-dot" title="已自动计入" />
                         )}
-                        {holiday && (
-                          <small className="holiday-flag">
-                            法·{statutoryHolidayShortName(holiday)}
-                          </small>
-                        )}
                       </span>
                     </span>
+                    {holiday && (
+                      <small className="holiday-flag">
+                        法·{statutoryHolidayShortName(holiday)}
+                      </small>
+                    )}
                     {batchMode && (
                       <span
                         className={`batch-check ${selected ? "" : "pending"}`}
@@ -1826,11 +1826,11 @@ function CalendarDisplayPreview({ data }: { data: AppData }) {
           <span className="day-number">8</span>
           <span className="calendar-day-badges">
             <i className="complete-dot" title="已自动计入" />
-            {data.display.showHolidays && (
-              <small className="holiday-flag">法·国庆</small>
-            )}
           </span>
         </span>
+        {data.display.showHolidays && (
+          <small className="holiday-flag">法·国庆</small>
+        )}
         {shift && (
           <span className="schedule-cell-content">
             {data.display.showShiftTime && timeRange && (
