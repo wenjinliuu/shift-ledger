@@ -12376,3 +12376,62 @@ select:focus-visible {
     animation: none;
   }
 }
+
+/* v26 final authority — visible holiday text and compact ring center copy. */
+.calendar-day-badges,
+.calendar-day.has-complete .calendar-day-badges {
+  width: max-content;
+  max-width: calc(100% - 22px);
+  overflow: visible;
+  pointer-events: none;
+}
+.holiday-flag,
+.calendar-day.has-holiday .holiday-flag,
+.preview-calendar-cell .holiday-flag,
+.preview-calendar-cell.has-holiday .holiday-flag {
+  position: static;
+  z-index: 6;
+  width: max-content;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  color: #c94655 !important;
+  background: transparent;
+  box-shadow: none;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.96);
+  font-size: 9.5px;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.progress-ring-center-label,
+.progress-ring-center-value {
+  fill: #686c74;
+}
+.progress-ring-center-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.progress-ring-center-value {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.06em;
+}
+
+@media (max-width: 720px) {
+  .holiday-flag,
+  .calendar-day.has-holiday .holiday-flag {
+    min-height: 0;
+    padding: 0;
+    border-radius: 0;
+    font-size: 8.5px;
+  }
+}
