@@ -6735,6 +6735,310 @@ body {
   }
 }
 
+/* v18 — interactive concentric annual progress rings */
+.annual-overview-grid {
+  display: block;
+}
+.progress-ring-dashboard {
+  --ring-green: #19b987;
+  --ring-blue: #4388f5;
+  --ring-violet: #7a58e8;
+  --ring-yellow: #f1b83f;
+  width: min(100%, 720px);
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+}
+.progress-rings-stage {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+}
+.progress-rings {
+  display: block;
+  width: min(100%, 390px);
+  height: auto;
+  overflow: visible;
+}
+.progress-ring-group {
+  cursor: pointer;
+  color: var(--ring-green);
+  transition:
+    opacity 160ms ease,
+    filter 160ms ease;
+}
+.progress-ring-group.tone-blue,
+.ring-dot.tone-blue {
+  color: var(--ring-blue);
+}
+.progress-ring-group.tone-violet,
+.ring-dot.tone-violet {
+  color: var(--ring-violet);
+}
+.progress-ring-group.tone-yellow,
+.ring-dot.tone-yellow {
+  color: var(--ring-yellow);
+}
+.progress-ring-group.tone-green,
+.ring-dot.tone-green {
+  color: var(--ring-green);
+}
+.progress-ring-group.muted {
+  opacity: 0.46;
+}
+.progress-ring-group.selected {
+  opacity: 1;
+  filter: drop-shadow(0 4px 9px color-mix(in srgb, currentColor 24%, transparent));
+}
+.progress-ring-track,
+.progress-ring-value {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 24;
+  transform: rotate(-90deg);
+  transform-origin: 160px 160px;
+  transition: stroke-width 160ms ease;
+}
+.progress-ring-track {
+  opacity: 0.16;
+}
+.progress-ring-value {
+  stroke-linecap: round;
+}
+.progress-ring-group:hover .progress-ring-track,
+.progress-ring-group:hover .progress-ring-value,
+.progress-ring-group:focus-visible .progress-ring-track,
+.progress-ring-group:focus-visible .progress-ring-value,
+.progress-ring-group.selected .progress-ring-track,
+.progress-ring-group.selected .progress-ring-value {
+  stroke-width: 28;
+}
+.progress-ring-group:focus-visible {
+  outline: none;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, currentColor 35%, transparent));
+}
+.progress-ring-endpoint {
+  pointer-events: none;
+  fill: currentColor;
+  stroke: rgba(255, 255, 255, 0.96);
+  stroke-width: 3;
+  transition: r 160ms ease;
+}
+.progress-ring-group.selected .progress-ring-endpoint {
+  r: 7;
+}
+.progress-ring-center-label,
+.progress-ring-center-value {
+  pointer-events: none;
+  fill: #25262a;
+  text-anchor: middle;
+}
+.progress-ring-center-label {
+  font-size: 12px;
+  font-weight: 800;
+}
+.progress-ring-center-value {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+.progress-ring-selection {
+  min-height: 84px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.86);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.42), transparent 58%),
+    rgba(255, 255, 255, 0.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 8px 22px rgba(54, 71, 103, 0.055);
+}
+.progress-ring-selection.empty {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+}
+.progress-ring-selection.empty p {
+  margin: 0;
+  font-size: 9px;
+}
+.selection-heading {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 9px;
+}
+.selection-heading strong {
+  font-size: 11px;
+}
+.selection-heading > span {
+  color: #5f6570;
+  font-size: 10px;
+  font-weight: 850;
+}
+.selection-values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.selection-values > div {
+  min-width: 0;
+  padding: 9px 11px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  border-radius: 13px;
+  color: currentColor;
+}
+.selection-values .completed {
+  background: color-mix(in srgb, currentColor 13%, rgba(255, 255, 255, 0.64));
+}
+.selection-values .remaining {
+  background: color-mix(in srgb, currentColor 5%, rgba(255, 255, 255, 0.72));
+}
+.selection-values .tone-green {
+  color: var(--ring-green);
+}
+.selection-values .tone-blue {
+  color: var(--ring-blue);
+}
+.selection-values .tone-violet {
+  color: var(--ring-violet);
+}
+.selection-values .tone-yellow {
+  color: var(--ring-yellow);
+}
+.selection-values span {
+  color: #6e737c;
+  font-size: 8px;
+}
+.selection-values strong {
+  color: currentColor;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.progress-ring-legend {
+  display: grid;
+  gap: 7px;
+}
+.progress-ring-total,
+.progress-ring-metrics button {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+}
+.progress-ring-total {
+  padding: 8px 10px;
+  color: #69707b;
+  font-size: 9px;
+}
+.progress-ring-total i,
+.ring-dot {
+  width: 8px;
+  height: 8px;
+  display: block;
+  border-radius: 50%;
+  background: currentColor;
+}
+.progress-ring-total i {
+  background: #9ca3af;
+}
+.progress-ring-total strong {
+  color: #4d535d;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.progress-ring-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+.progress-ring-metrics button {
+  min-height: 45px;
+  padding: 9px 10px;
+  border: 1px solid rgba(67, 70, 80, 0.075);
+  border-radius: 14px;
+  color: #616671;
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+.progress-ring-metrics button:hover,
+.progress-ring-metrics button.selected {
+  border-color: rgba(67, 70, 80, 0.13);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 0 1px 0 white,
+    0 5px 14px rgba(54, 69, 98, 0.065);
+}
+.progress-ring-metrics button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font-size: 9px;
+}
+.progress-ring-metrics button strong {
+  color: #31343a;
+  font-size: 9px;
+  white-space: nowrap;
+}
+.schedule-only-overview .progress-ring-dashboard {
+  width: min(100%, 440px);
+}
+
+@media (max-width: 720px) {
+  .progress-ring-dashboard {
+    gap: 11px;
+  }
+  .progress-rings {
+    width: min(100%, 330px);
+  }
+  .progress-ring-selection {
+    min-height: 78px;
+    padding: 10px 11px;
+    border-radius: 16px;
+  }
+  .selection-values > div {
+    padding: 8px 9px;
+  }
+  .progress-ring-metrics {
+    gap: 6px;
+  }
+  .progress-ring-metrics button {
+    min-height: 43px;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 390px) {
+  .progress-rings {
+    width: min(100%, 300px);
+  }
+  .progress-ring-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-ring-group,
+  .progress-ring-track,
+  .progress-ring-value,
+  .progress-ring-endpoint,
+  .progress-ring-metrics button {
+    transition: none;
+  }
+}
+
 /* Keep the component theme authoritative over earlier, more-specific layout rules. */
 .select-setting .select-control select,
 .setting-card .select-control select,
