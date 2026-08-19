@@ -12771,3 +12771,342 @@ select:focus-visible {
     flex-direction: column;
   }
 }
+
+/* v30 final authority — progress and composition use separate visual grammar. */
+.progress-ring-group {
+  cursor: default;
+  filter: none;
+}
+.progress-ring-track,
+.progress-ring-value {
+  stroke-width: 20;
+}
+.progress-ring-group:hover .progress-ring-track,
+.progress-ring-group:hover .progress-ring-value,
+.progress-ring-group:focus-visible .progress-ring-track,
+.progress-ring-group:focus-visible .progress-ring-value {
+  stroke-width: 20;
+}
+.progress-ring-metrics {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 7px;
+}
+.progress-ring-metric {
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 10px;
+  display: grid;
+  grid-template-columns: 9px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(67, 70, 80, 0.075);
+  border-radius: 14px;
+  color: #626873;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.44), transparent 58%),
+    rgba(255, 255, 255, 0.38);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84);
+}
+.progress-ring-metric > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.progress-ring-metric > span b {
+  overflow: hidden;
+  color: #4b4f58;
+  font-size: 9.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.progress-ring-metric > span small {
+  color: #90949d;
+  font-size: 7.5px;
+}
+.progress-ring-metric > strong {
+  color: #30333a;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.progress-ring-metric > em {
+  color: #8b8f98;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.annual-progress-content {
+  width: min(100%, 780px);
+  margin: 0 auto;
+  display: grid;
+  gap: 16px;
+}
+.shift-composition-section {
+  padding-top: 15px;
+  display: grid;
+  gap: 11px;
+  border-top: 1px solid rgba(73, 76, 88, 0.075);
+}
+.shift-composition-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.shift-composition-heading > span {
+  display: grid;
+  gap: 2px;
+}
+.shift-composition-heading small {
+  color: #91949d;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+.shift-composition-heading strong {
+  color: #383a41;
+  font-size: 11px;
+}
+.shift-composition-heading > b {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #737782;
+  background: rgba(255, 255, 255, 0.56);
+  font-size: 8px;
+  white-space: nowrap;
+}
+.shift-composition-bar {
+  width: 100%;
+  height: 17px;
+  display: flex;
+  gap: 2px;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.76);
+  border-radius: 999px;
+  background: rgba(123, 128, 141, 0.09);
+  box-shadow:
+    inset 0 1px 2px rgba(54, 58, 70, 0.08),
+    0 4px 12px rgba(54, 58, 70, 0.045);
+}
+.shift-composition-bar > i {
+  min-width: 2px;
+  height: 100%;
+  display: block;
+  background: var(--entity-color, var(--gray));
+}
+.shift-composition-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+.shift-composition-legend > div {
+  min-width: 0;
+  min-height: 46px;
+  padding: 8px 10px;
+  display: grid;
+  grid-template-columns: 9px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid color-mix(in srgb, var(--entity-color) 11%, rgba(70, 72, 82, 0.05));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--entity-color) 5%, rgba(255, 255, 255, 0.56));
+}
+.shift-composition-legend > div > i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--entity-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--entity-color) 10%, transparent);
+}
+.shift-composition-legend span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.shift-composition-legend span strong {
+  overflow: hidden;
+  color: #4a4d55;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.shift-composition-legend span small {
+  color: #898d96;
+  font-size: 7.5px;
+  white-space: nowrap;
+}
+.shift-composition-legend > div > b {
+  color: color-mix(in srgb, var(--entity-color) 74%, #4d5460);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.period-range {
+  margin-top: 9px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: #777c88;
+}
+.period-range > small {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.period-range > strong {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  color: #555a66;
+  font-size: 10px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.period-range > strong i {
+  color: #a0a4ad;
+  font-style: normal;
+}
+.calendar-toolbar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+.calendar-actions {
+  justify-self: end;
+}
+.stats-heading-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+}
+.embedded-month-switch .current-month {
+  white-space: nowrap;
+}
+.target-explorer .section-heading > div:first-child {
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .annual-overview-card {
+    padding: 17px 14px;
+  }
+  .annual-overview-card .section-heading {
+    gap: 13px;
+  }
+  .stats-heading-controls {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .stats-heading-controls .embedded-month-switch {
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) 36px;
+  }
+  .stats-heading-controls .embedded-month-switch .current-month {
+    min-width: 0;
+  }
+  .calendar-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .calendar-toolbar > .embedded-month-switch {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+  }
+  .calendar-toolbar > .embedded-month-switch .current-month {
+    min-width: 0;
+  }
+  .calendar-actions {
+    width: 100%;
+    justify-self: stretch;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .period-range {
+    width: 100%;
+    margin-top: 8px;
+    justify-content: space-between;
+  }
+  .period-range > strong {
+    font-size: 10.5px;
+  }
+  .progress-rings {
+    width: min(100%, 310px);
+  }
+  .progress-ring-metric {
+    grid-template-columns: 9px minmax(0, 1fr) auto auto;
+    padding: 8px 9px;
+  }
+  .shift-composition-legend {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .target-explorer .section-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 10px;
+  }
+  .target-explorer .period-range {
+    display: grid;
+    justify-content: start;
+    gap: 3px;
+  }
+  .target-year-switch strong {
+    min-width: 44px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 380px) {
+  .stats-heading-controls {
+    grid-template-columns: minmax(0, 1fr) 80px;
+    gap: 7px;
+  }
+  .progress-ring-metric {
+    grid-template-columns: 9px minmax(0, 1fr) auto;
+  }
+  .progress-ring-metric > em {
+    grid-column: 2 / -1;
+    justify-self: end;
+    margin-top: -4px;
+  }
+}
+
+/* v31 mobile calendar authority — keep navigation and actions on separate rows. */
+@media (max-width: 720px) {
+  .calendar-panel .calendar-toolbar {
+    position: static;
+    width: 100%;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 100% !important;
+    justify-content: stretch;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .calendar-panel .calendar-toolbar > .embedded-month-switch {
+    position: static;
+    width: 100%;
+    max-width: none;
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .calendar-panel .calendar-actions {
+    position: static !important;
+    inset: auto !important;
+    width: 100%;
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: stretch;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}

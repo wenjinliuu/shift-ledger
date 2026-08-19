@@ -31,6 +31,7 @@ import {
   normalizeAppData,
   replaceCycleFromDate,
   type ActiveCycle,
+  type AnnualCycle,
   type AnnualCycleMonth,
   type AppData,
   type CareerPreset,
@@ -471,12 +472,45 @@ function MonthSwitch({
         className="current-month"
         onClick={onCurrent}
       >
-        <small>{year}</small>
+        <small>{year}年</small>
         <strong>{month + 1}月</strong>
       </button>
       <button aria-label="下个月" onClick={() => onChange(1)}>
         ›
       </button>
+    </div>
+  );
+}
+
+function PeriodRange({
+  cycle,
+  year,
+  month,
+  annual,
+}: {
+  cycle: AnnualCycle;
+  year: number;
+  month: number;
+  annual: boolean;
+}) {
+  return (
+    <div className="period-range" aria-label={annual ? cycle.label : `${year}年${month + 1}月`}>
+      <small>{annual ? "年度工时范围" : "当前统计月份"}</small>
+      {annual ? (
+        <strong>
+          <span>
+            {cycle.startYear}.{pad(cycle.startMonth + 1)}
+          </span>
+          <i>—</i>
+          <span>
+            {cycle.endYear}.{pad(cycle.endMonth + 1)}
+          </span>
+        </strong>
+      ) : (
+        <strong>
+          {year}.{pad(month + 1)}
+        </strong>
+      )}
     </div>
   );
 }
@@ -1217,26 +1251,16 @@ function ProgressRingDashboard({
   totalLabel,
   totalValue,
   centerLabel,
-  composition = [],
-  showCompositionHours = true,
 }: {
   metrics: ProgressRingMetric[];
   totalLabel: string;
   totalValue: string;
   centerLabel: string;
-  composition?: ShiftBreakdownItem[];
-  showCompositionHours?: boolean;
 }) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selected = metrics.find((metric) => metric.id === selectedId) ?? null;
   const mainMetric = metrics[0];
   const mainPercent = mainMetric?.total
     ? Math.min(100, (mainMetric.completed / mainMetric.total) * 100)
     : 0;
-  const compositionTotal = composition.reduce(
-    (sum, item) => sum + item.records.length,
-    0,
-  );
 
   return (
     <div className="progress-ring-dashboard">
@@ -1251,34 +1275,19 @@ function ProgressRingDashboard({
                 `${metric.label}已完成${formatRingValue(metric.completed, metric.unit)}，剩余${formatRingValue(Math.max(0, metric.total - metric.completed), metric.unit)}`,
             )
             .join("；")}
-          onClick={() => setSelectedId(null)}
         >
           {metrics.map((metric, index) => {
-            const radius = 132 - index * 32;
+            const radius = 132 - index * 29;
             const percent = metric.total
               ? Math.min(100, (metric.completed / metric.total) * 100)
               : 0;
             const angle = (percent / 100) * Math.PI * 2 - Math.PI / 2;
             const endpointX = 160 + Math.cos(angle) * radius;
             const endpointY = 160 + Math.sin(angle) * radius;
-            const isSelected = selectedId === metric.id;
             return (
               <g
                 key={metric.id}
-                className={`progress-ring-group tone-${metric.tone}${isSelected ? " selected" : ""}${selectedId && !isSelected ? " muted" : ""}`}
-                role="button"
-                tabIndex={0}
-                aria-label={`选择${metric.label}`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setSelectedId(metric.id);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    setSelectedId(metric.id);
-                  }
-                }}
+                className={`progress-ring-group tone-${metric.tone}`}
               >
                 <circle
                   className="progress-ring-track"
@@ -1308,41 +1317,6 @@ function ProgressRingDashboard({
               </g>
             );
           })}
-          {compositionTotal > 0 && (
-            <g
-              className="shift-composition-ring"
-              transform="rotate(-90 160 160)"
-              aria-label="班次构成"
-            >
-              {composition.map((item, index) => {
-                const share = (item.records.length / compositionTotal) * 100;
-                const offset = composition
-                  .slice(0, index)
-                  .reduce(
-                    (sum, previous) =>
-                      sum +
-                      (previous.records.length / compositionTotal) * 100,
-                    0,
-                  );
-                return (
-                  <circle
-                    key={item.shift.id}
-                    cx="160"
-                    cy="160"
-                    r="39"
-                    pathLength="100"
-                    strokeDasharray={`${Math.max(0, share - 0.7)} ${100 - Math.max(0, share - 0.7)}`}
-                    strokeDashoffset={-offset}
-                    style={
-                      {
-                        "--shift-ring-color": item.shift.color,
-                      } as CSSProperties
-                    }
-                  />
-                );
-              })}
-            </g>
-          )}
           <text className="progress-ring-center-label" x="160" y="153">
             {centerLabel}
           </text>
@@ -1351,42 +1325,6 @@ function ProgressRingDashboard({
           </text>
         </svg>
       </div>
-
-      <div className={`progress-ring-selection${selected ? "" : " empty"}`}>
-        {selected ? (
-          <>
-            <div className="selection-heading">
-              <i className={`ring-dot tone-${selected.tone}`} />
-              <strong>{selected.label}</strong>
-              <span>
-                {selected.total
-                  ? `${Math.round((selected.completed / selected.total) * 100)}%`
-                  : "0%"}
-              </span>
-            </div>
-            <div className="selection-values">
-              <div className={`completed tone-${selected.tone}`}>
-                <span>已完成</span>
-                <strong>
-                  {formatRingValue(selected.completed, selected.unit)}
-                </strong>
-              </div>
-              <div className={`remaining tone-${selected.tone}`}>
-                <span>剩余</span>
-                <strong>
-                  {formatRingValue(
-                    Math.max(0, selected.total - selected.completed),
-                    selected.unit,
-                  )}
-                </strong>
-              </div>
-            </div>
-          </>
-        ) : (
-          <p>点击任意圆环查看已完成与剩余数据</p>
-        )}
-      </div>
-
       <div className="progress-ring-legend">
         <div className="progress-ring-total">
           <i />
@@ -1395,57 +1333,85 @@ function ProgressRingDashboard({
         </div>
         <div className="progress-ring-metrics">
           {metrics.map((metric) => (
-            <button
+            <div
               key={metric.id}
-              type="button"
-              className={selectedId === metric.id ? "selected" : ""}
-              onClick={() => setSelectedId(metric.id)}
+              className="progress-ring-metric"
             >
               <i className={`ring-dot tone-${metric.tone}`} />
-              <span>{metric.label}</span>
-              <strong>
-                {formatRingValue(metric.completed, metric.unit)} /{" "}
-                {formatRingValue(metric.total, metric.unit)}
-              </strong>
-            </button>
+              <span>
+                <b>{metric.label}</b>
+                <small>
+                  {metric.total
+                    ? `${Math.round((metric.completed / metric.total) * 100)}% 已完成`
+                    : "暂无目标"}
+                </small>
+              </span>
+              <strong>{formatRingValue(metric.completed, metric.unit)}</strong>
+              <em>/ {formatRingValue(metric.total, metric.unit)}</em>
+            </div>
           ))}
         </div>
       </div>
-      {compositionTotal > 0 && (
-        <div className="ring-shift-composition" aria-label="班次构成统计">
-          <div className="ring-composition-heading">
-            <span>
-              <small>班次构成</small>
-              <strong>不同班次统计</strong>
-            </span>
-            <b>共 {compositionTotal} 天</b>
-          </div>
-          <div className="ring-composition-grid">
-            {composition.map((item) => (
-              <div
-                key={item.shift.id}
-                className="ring-composition-item"
-                style={colorStyle(item.shift.color)}
-              >
-                <i />
-                <span>
-                  <strong>{item.shift.name}</strong>
-                  <small>
-                    {item.records.length}天
-                    {showCompositionHours && item.shift.countsAsWork
-                      ? ` · ${compactHours(item.hours)}h`
-                      : ""}
-                  </small>
-                </span>
-                <b>
-                  {Math.round((item.records.length / compositionTotal) * 100)}%
-                </b>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
+  );
+}
+
+function ShiftCompositionBar({
+  items,
+  showHours = true,
+}: {
+  items: ShiftBreakdownItem[];
+  showHours?: boolean;
+}) {
+  const totalDays = items.reduce((sum, item) => sum + item.records.length, 0);
+  if (!totalDays) return null;
+  return (
+    <section className="shift-composition-section" aria-label="班次构成">
+      <div className="shift-composition-heading">
+        <span>
+          <small>班次构成</small>
+          <strong>全年班次分布</strong>
+        </span>
+        <b>共 {totalDays} 天</b>
+      </div>
+      <div className="shift-composition-bar" role="img" aria-label="各班次占比">
+        {items.map((item) => {
+          const share = (item.records.length / totalDays) * 100;
+          return (
+            <i
+              key={item.shift.id}
+              title={`${item.shift.name} ${item.records.length}天，${Math.round(share)}%`}
+              style={
+                {
+                  "--entity-color": item.shift.color,
+                  width: `${share}%`,
+                } as CSSProperties
+              }
+            />
+          );
+        })}
+      </div>
+      <div className="shift-composition-legend">
+        {items.map((item) => {
+          const share = (item.records.length / totalDays) * 100;
+          return (
+            <div key={item.shift.id} style={colorStyle(item.shift.color)}>
+              <i />
+              <span>
+                <strong>{item.shift.name}</strong>
+                <small>
+                  {item.records.length}天
+                  {showHours && item.shift.countsAsWork
+                    ? ` · ${compactHours(item.hours)}h`
+                    : ""}
+                </small>
+              </span>
+              <b>{Math.round(share)}%</b>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -1454,6 +1420,8 @@ function AnnualRing({
   actual,
   overtime,
   actualOvertime,
+  rest,
+  completedRest,
   plannedDays,
   periodLabel,
   composition,
@@ -1462,6 +1430,8 @@ function AnnualRing({
   actual: number;
   overtime: number;
   actualOvertime: number;
+  rest: number;
+  completedRest: number;
   plannedDays: number;
   periodLabel: string;
   composition: ShiftBreakdownItem[];
@@ -1497,15 +1467,25 @@ function AnnualRing({
       unit: "h",
       tone: "violet",
     },
+    {
+      id: "rest",
+      label: "休息进度",
+      completed: Math.min(rest, completedRest),
+      total: rest,
+      unit: "天",
+      tone: "gray",
+    },
   ];
   return (
-    <ProgressRingDashboard
-      metrics={metrics}
-      totalLabel={`${periodLabel}预计`}
-      totalValue={`${compactHours(annualTotal)}h · ${plannedDays}天`}
-      centerLabel={`${periodLabel}进度`}
-      composition={composition}
-    />
+    <div className="annual-progress-content">
+      <ProgressRingDashboard
+        metrics={metrics}
+        totalLabel={`${periodLabel}预计`}
+        totalValue={`${compactHours(annualTotal)}h · ${plannedDays}天`}
+        centerLabel={`${periodLabel}进度`}
+      />
+      <ShiftCompositionBar items={composition} />
+    </div>
   );
 }
 
@@ -1547,18 +1527,19 @@ function DayCountPie({
       completed: Math.min(rest, completedRest),
       total: rest,
       unit: "天",
-      tone: "yellow",
+      tone: "gray",
     },
   ];
   return (
-    <ProgressRingDashboard
-      metrics={metrics}
-      totalLabel="全年预计"
-      totalValue={`${total}天`}
-      centerLabel="全年进度"
-      composition={composition}
-      showCompositionHours={false}
-    />
+    <div className="annual-progress-content">
+      <ProgressRingDashboard
+        metrics={metrics}
+        totalLabel="全年预计"
+        totalValue={`${total}天`}
+        centerLabel="全年进度"
+      />
+      <ShiftCompositionBar items={composition} showHours={false} />
+    </div>
   );
 }
 
@@ -1676,6 +1657,7 @@ function StatsView({
     record.date.startsWith(monthPrefix),
   );
   const completedMonthWork = completedByDate(monthWorkRecords, todayKey);
+  const completedMonthRest = completedByDate(monthRestRecords, todayKey);
   const monthTarget = getMonthlyTarget(data, year, month);
   const monthActualHours = completedMonthWork.reduce(
     (sum, record) => sum + record.hours,
@@ -1697,6 +1679,8 @@ function StatsView({
   const ringActualOvertime =
     ringScope === "year" ? actualOvertime : actualMonthOvertime;
   const ringRestRecords = ringScope === "year" ? restRecords : monthRestRecords;
+  const ringCompletedRest =
+    ringScope === "year" ? completedRest : completedMonthRest;
   const ringWorkRecords = ringScope === "year" ? workRecords : monthWorkRecords;
   const ringRecords =
     ringScope === "year"
@@ -1786,7 +1770,13 @@ function StatsView({
               onCurrent={onGoToCurrentMonth}
               compact
             />
-            <p className="eyebrow">{annualCycle.label} · 仅排班</p>
+            <PeriodRange
+              cycle={annualCycle}
+              year={year}
+              month={month}
+              annual
+            />
+            <p className="eyebrow">仅排班模式</p>
             <h2>这一周期安排了 {workRecords.length} 个工作日</h2>
             <p>
               工时统计已关闭，因此这里只展示班次与天数，不推算工时或额外工时。
@@ -1831,10 +1821,15 @@ function StatsView({
             <div className="section-heading">
               <div>
                 <p className="eyebrow">
-                  {ringScope === "year" ? annualCycle.label : ringPeriodLabel}
-                  仪表盘
+                  {ringScope === "year" ? "年度" : "月度"}工时仪表盘
                 </p>
                 <h2>标准、额外与完成进度</h2>
+                <PeriodRange
+                  cycle={annualCycle}
+                  year={year}
+                  month={month}
+                  annual={ringScope === "year"}
+                />
               </div>
               <div className="stats-heading-controls">
                 <MonthSwitch
@@ -1871,6 +1866,8 @@ function StatsView({
                 actual={ringActualHours}
                 overtime={ringOvertime}
                 actualOvertime={ringActualOvertime}
+                rest={ringRestRecords.length}
+                completedRest={ringCompletedRest.length}
                 plannedDays={ringWorkRecords.length + ringRestRecords.length}
                 periodLabel={ringPeriodLabel}
                 composition={shiftBreakdown}
@@ -2573,7 +2570,13 @@ function SettingsView({
               <div className="section-heading">
                 <div>
                   <p className="eyebrow">综合工时标准</p>
-                  <h2>{targetCycle.label}</h2>
+                  <h2>月度标准工时</h2>
+                  <PeriodRange
+                    cycle={targetCycle}
+                    year={targetYear}
+                    month={targetCycle.startMonth}
+                    annual
+                  />
                 </div>
                 <div className="target-year-switch">
                   <button
@@ -2582,7 +2585,7 @@ function SettingsView({
                   >
                     ‹
                   </button>
-                  <strong>{targetYear}</strong>
+                  <strong>{targetYear}年</strong>
                   <button
                     aria-label="下一年"
                     onClick={() => setTargetYear((value) => value + 1)}
