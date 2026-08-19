@@ -1650,6 +1650,236 @@ button {
   }
 }
 
+/* v28 — fiscal-year reporting, embedded period controls and unified shift colours. */
+.content-wrap {
+  padding-top: 18px;
+}
+.embedded-month-switch {
+  width: fit-content;
+  height: 46px;
+  padding: 4px;
+  border: 1px solid rgba(104, 105, 158, 0.13);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.72), rgba(239, 241, 251, 0.52)),
+    color-mix(in srgb, var(--blue) 5%, rgba(255, 255, 255, 0.72));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 7px 18px rgba(65, 68, 116, 0.07);
+}
+.embedded-month-switch button {
+  display: grid;
+  place-items: center;
+  color: #686d7b;
+}
+.embedded-month-switch .current-month {
+  min-width: 94px;
+  padding: 0 11px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+  color: #30323a;
+}
+.embedded-month-switch .current-month small {
+  color: #7d8290;
+  font-size: 10px;
+  font-weight: 780;
+}
+.embedded-month-switch .current-month strong {
+  font-size: 15px;
+  font-weight: 920;
+  letter-spacing: -0.035em;
+}
+.embedded-month-switch.compact {
+  height: 40px;
+  border-radius: 14px;
+}
+.embedded-month-switch.compact button {
+  min-width: 32px;
+  height: 32px;
+  font-size: 19px;
+}
+.embedded-month-switch.compact .current-month {
+  min-width: 82px;
+  padding: 0 8px;
+}
+.calendar-toolbar {
+  align-items: center;
+}
+.calendar-toolbar > .embedded-month-switch {
+  flex: 0 0 auto;
+}
+.stats-heading-controls {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+}
+.stats-rule-note > .embedded-month-switch {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+.schedule-only-copy > .embedded-month-switch {
+  margin: 0 0 16px;
+}
+.progress-ring-dashboard {
+  width: min(100%, 780px);
+}
+.shift-composition-ring {
+  pointer-events: none;
+}
+.shift-composition-ring circle {
+  fill: none;
+  stroke: var(--shift-ring-color, var(--gray));
+  stroke-width: 13;
+  stroke-linecap: butt;
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--shift-ring-color, var(--gray)) 14%, transparent));
+}
+.ring-shift-composition {
+  margin-top: 2px;
+  padding: 14px;
+  border: 1px solid rgba(78, 81, 94, 0.075);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.48), transparent 60%),
+    rgba(255, 255, 255, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
+}
+.ring-composition-heading {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ring-composition-heading > span {
+  display: grid;
+  gap: 2px;
+}
+.ring-composition-heading small {
+  color: #8a8e99;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+.ring-composition-heading strong {
+  color: #35373e;
+  font-size: 11px;
+}
+.ring-composition-heading > b {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #737784;
+  background: rgba(255, 255, 255, 0.54);
+  font-size: 8px;
+}
+.ring-composition-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+.ring-composition-item {
+  min-width: 0;
+  min-height: 46px;
+  padding: 8px 10px;
+  display: grid;
+  grid-template-columns: 9px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid color-mix(in srgb, var(--entity-color) 11%, rgba(70, 72, 82, 0.05));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--entity-color) 6%, rgba(255, 255, 255, 0.6));
+}
+.ring-composition-item > i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--entity-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--entity-color) 10%, transparent);
+}
+.ring-composition-item > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.ring-composition-item strong {
+  overflow: hidden;
+  color: #454850;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ring-composition-item small {
+  color: #858995;
+  font-size: 7.5px;
+}
+.ring-composition-item > b {
+  color: color-mix(in srgb, var(--entity-color) 76%, #48505d);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.progress-ring-group.tone-gray,
+.ring-dot.tone-gray,
+.selection-values .tone-gray {
+  color: #8e8e8e;
+}
+.metric-card.tone-gray .metric-glow {
+  background: #8e8e8e;
+}
+.annual-cycle-setting {
+  display: grid;
+  gap: 8px;
+}
+.annual-cycle-note {
+  margin: -2px 4px 2px;
+  color: #7c818d;
+  font-size: 9px;
+  line-height: 1.55;
+}
+.annual-cycle-note strong {
+  color: #5d6370;
+}
+
+@media (max-width: 720px) {
+  .content-wrap {
+    padding-top: max(10px, env(safe-area-inset-top, 0px));
+  }
+  .calendar-toolbar {
+    align-items: center;
+  }
+  .calendar-toolbar > .embedded-month-switch {
+    width: auto;
+    flex: 1 1 auto;
+  }
+  .calendar-toolbar > .embedded-month-switch .current-month {
+    flex: 1 1 auto;
+  }
+  .stats-heading-controls {
+    width: 100%;
+    align-items: stretch;
+    justify-content: space-between;
+  }
+  .annual-overview-card .section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .ring-composition-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ring-shift-composition {
+    padding: 11px;
+    border-radius: 16px;
+  }
+  .stats-rule-note {
+    flex-wrap: wrap;
+  }
+  .stats-rule-note > .embedded-month-switch {
+    width: 100%;
+    margin: 4px 0 0;
+  }
+}
+
 @media (max-width: 380px) {
   .metric-grid {
     grid-template-columns: 1fr 1fr;
@@ -12505,5 +12735,39 @@ select:focus-visible {
   }
   .calendar-day .schedule-cell-shift em {
     font-size: 7.1px;
+  }
+}
+
+/* v29 final authority — the page begins with its first working card. */
+.content-wrap {
+  padding-top: 18px;
+}
+.calendar-toolbar {
+  align-items: center;
+}
+.calendar-toolbar > .embedded-month-switch {
+  flex: 0 0 auto;
+}
+.progress-ring-dashboard {
+  width: min(100%, 780px);
+}
+
+@media (max-width: 720px) {
+  .content-wrap {
+    padding-top: max(10px, env(safe-area-inset-top, 0px));
+  }
+  .calendar-toolbar {
+    align-items: center;
+  }
+  .calendar-toolbar > .embedded-month-switch {
+    width: auto;
+    flex: 1 1 auto;
+  }
+  .calendar-toolbar > .embedded-month-switch .current-month {
+    flex: 1 1 auto;
+  }
+  .annual-overview-card .section-heading {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

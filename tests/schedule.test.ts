@@ -8,6 +8,7 @@ import {
   calculateShiftDuration,
   createDefaultData,
   generateCycleRecords,
+  getAnnualCycle,
   materializeCycleYear,
   migrateLegacyData,
   normalizeAppData,
@@ -32,6 +33,18 @@ test("旧主题颜色会迁移到 ChatGPT 强调色体系", () => {
   assert.equal(normalized.shifts[0].color, ACCENT_COLORS.yellow);
   assert.equal(normalized.shifts[1].color, ACCENT_COLORS.blue);
   assert.equal(normalized.tags[0].color, ACCENT_COLORS.pink);
+});
+
+test("内置休息班次始终恢复为统一灰色", () => {
+  const raw = createDefaultData();
+  const rest = raw.shifts.find((shift) => shift.id === SHIFT_IDS.rest);
+  assert.ok(rest);
+  rest.color = ACCENT_COLORS.yellow;
+  const normalized = normalizeAppData(raw);
+  assert.equal(
+    normalized.shifts.find((shift) => shift.id === SHIFT_IDS.rest)?.color,
+    ACCENT_COLORS.gray,
+  );
 });
 
 test("旧版 day/night/rest 数据迁移成稳定班次 ID 并保留时长", () => {
@@ -152,6 +165,30 @@ test("旧版 v2 数据缺少日历显示设置时自动补默认值", () => {
   assert.equal(normalized.display.showHolidays, true);
   assert.equal(normalized.display.showShift, true);
   assert.equal(normalized.display.showHours, false);
+});
+
+test("旧数据缺少年度起始月时默认按 1 月到 12 月", () => {
+  const raw = createDefaultData() as unknown as {
+    work: Record<string, unknown>;
+  };
+  delete raw.work.annualStartMonth;
+  const normalized = normalizeAppData(raw);
+  assert.equal(normalized.work.annualStartMonth, 1);
+});
+
+test("12 月起始的年度周期会跨年至次年 11 月", () => {
+  const cycle = getAnnualCycle(2026, 7, 12);
+  assert.equal(cycle.startDate, "2025-12-01");
+  assert.equal(cycle.endDate, "2026-11-30");
+  assert.equal(cycle.months.length, 12);
+  assert.equal(cycle.months[0].key, "2025-12");
+  assert.equal(cycle.months[11].key, "2026-11");
+});
+
+test("进入新的起始月后自动切换到下一年度周期", () => {
+  const cycle = getAnnualCycle(2026, 11, 12);
+  assert.equal(cycle.startDate, "2026-12-01");
+  assert.equal(cycle.endDate, "2027-11-30");
 });
 
 test("关闭工时统计时规范化数据会同步关闭加班统计", () => {

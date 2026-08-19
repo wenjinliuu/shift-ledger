@@ -101,6 +101,7 @@ export type WorkSettings = {
   trackOvertime: boolean;
   system: WorkSystem;
   period: StatisticsPeriod;
+  annualStartMonth: number;
   dailyStandard: number;
   weeklyStandard: number;
   standardDailyEnabled: boolean;
@@ -122,6 +123,68 @@ export type AppData = {
   targets: Record<string, number>;
   records: DayRecord[];
 };
+
+export type AnnualCycleMonth = {
+  year: number;
+  month: number;
+  key: string;
+};
+
+export type AnnualCycle = {
+  startYear: number;
+  startMonth: number;
+  endYear: number;
+  endMonth: number;
+  startDate: string;
+  endDate: string;
+  label: string;
+  months: AnnualCycleMonth[];
+};
+
+/**
+ * Returns the 12-month reporting cycle containing a calendar month.
+ * `annualStartMonth` is one-based so persisted settings stay human-readable.
+ */
+export function getAnnualCycle(
+  year: number,
+  month: number,
+  annualStartMonth = 1,
+): AnnualCycle {
+  const safeStart =
+    Number.isInteger(annualStartMonth) &&
+    annualStartMonth >= 1 &&
+    annualStartMonth <= 12
+      ? annualStartMonth
+      : 1;
+  const startMonth = safeStart - 1;
+  const startYear = month >= startMonth ? year : year - 1;
+  const months = Array.from({ length: 12 }, (_, index) => {
+    const cursor = new Date(startYear, startMonth + index, 1);
+    const cursorYear = cursor.getFullYear();
+    const cursorMonth = cursor.getMonth();
+    return {
+      year: cursorYear,
+      month: cursorMonth,
+      key: `${cursorYear}-${String(cursorMonth + 1).padStart(2, "0")}`,
+    };
+  });
+  const first = months[0];
+  const last = months[months.length - 1];
+  const lastDay = new Date(last.year, last.month + 1, 0).getDate();
+  return {
+    startYear: first.year,
+    startMonth: first.month,
+    endYear: last.year,
+    endMonth: last.month,
+    startDate: `${first.key}-01`,
+    endDate: `${last.key}-${String(lastDay).padStart(2, "0")}`,
+    label:
+      first.year === last.year
+        ? `${first.year}年${first.month + 1}月–${last.month + 1}月`
+        : `${first.year}年${first.month + 1}月–${last.year}年${last.month + 1}月`,
+    months,
+  };
+}
 
 export const SHIFT_IDS = {
   day: "shift-day",
@@ -500,6 +563,7 @@ export function createDefaultData(): AppData {
       trackOvertime: true,
       system: "comprehensive",
       period: "month",
+      annualStartMonth: 1,
       dailyStandard: 8,
       weeklyStandard: 40,
       standardDailyEnabled: true,
@@ -561,7 +625,9 @@ function normalizeShift(raw: unknown): Shift | null {
         ? item.shortName.trim().slice(0, 4)
         : item.name.slice(0, 2),
     color:
-      typeof item.color === "string"
+      item.id === "shift-rest"
+        ? ACCENT_COLORS.gray
+        : typeof item.color === "string"
         ? normalizeThemeColor(item.color)
         : SHIFT_COLORS[0],
     startTime: typeof item.startTime === "string" ? item.startTime : "",
@@ -766,6 +832,12 @@ export function normalizeAppData(raw: unknown): AppData {
               rawWork.period === "custom"
             ? rawWork.period
             : "year",
+      annualStartMonth:
+        Number.isInteger(Number(rawWork.annualStartMonth)) &&
+        Number(rawWork.annualStartMonth) >= 1 &&
+        Number(rawWork.annualStartMonth) <= 12
+          ? Number(rawWork.annualStartMonth)
+          : 1,
       dailyStandard: numberValue(rawWork.dailyStandard, 8),
       weeklyStandard: numberValue(rawWork.weeklyStandard, 40),
       standardDailyEnabled: rawWork.standardDailyEnabled !== false,

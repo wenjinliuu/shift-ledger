@@ -13,6 +13,7 @@ import {
 } from "./lib/holidays";
 import {
   DATA_VERSION,
+  ACCENT_COLORS,
   STORAGE_DATA,
   STORAGE_LEGACY_RECORDS,
   STORAGE_LEGACY_SETTINGS,
@@ -23,12 +24,14 @@ import {
   calculateShiftDuration,
   createDefaultData,
   gradientEndForColor,
+  getAnnualCycle,
   makeId,
   materializeCycleYear,
   migrateLegacyData,
   normalizeAppData,
   replaceCycleFromDate,
   type ActiveCycle,
+  type AnnualCycleMonth,
   type AppData,
   type CareerPreset,
   type CycleTemplate,
@@ -195,33 +198,48 @@ function getMonthlyTarget(data: AppData, year: number, month: number) {
         data.work.system === "comprehensive" ? 8 : data.work.dailyStandard,
       );
 }
-function getAnnualTarget(data: AppData, year: number) {
-  return MONTH_LABELS.reduce(
-    (sum, _, month) => sum + getMonthlyTarget(data, year, month),
+function reportingCycleForMonth(data: AppData, year: number, month: number) {
+  return getAnnualCycle(
+    year,
+    month,
+    data.work.system === "comprehensive" ? data.work.annualStartMonth : 1,
+  );
+}
+function getAnnualTarget(data: AppData, months: AnnualCycleMonth[]) {
+  return months.reduce(
+    (sum, item) => sum + getMonthlyTarget(data, item.year, item.month),
     0,
   );
 }
-function getPeriodOvertime(records: DayRecord[], data: AppData, year: number) {
+function recordsForMonths(records: DayRecord[], months: AnnualCycleMonth[]) {
+  const keys = new Set(months.map((item) => item.key));
+  return records.filter((record) => keys.has(record.date.slice(0, 7)));
+}
+function getPeriodOvertime(
+  records: DayRecord[],
+  data: AppData,
+  months: AnnualCycleMonth[],
+) {
   if (data.work.system === "custom" && data.work.customRule === "monthly")
-    return MONTH_LABELS.reduce((sum, _, month) => {
+    return months.reduce((sum, item) => {
       const monthRecords = records.filter((record) =>
-        record.date.startsWith(`${year}-${pad(month + 1)}`),
+        record.date.startsWith(item.key),
       );
       return sum + calculateOvertime(monthRecords, data.work, 0);
     }, 0);
   if (data.work.system !== "comprehensive")
-    return calculateOvertime(records, data.work, getAnnualTarget(data, year));
+    return calculateOvertime(records, data.work, getAnnualTarget(data, months));
   if (data.work.period === "month")
-    return MONTH_LABELS.reduce((sum, _, month) => {
+    return months.reduce((sum, item) => {
       const monthRecords = records.filter((record) =>
-        record.date.startsWith(`${year}-${pad(month + 1)}`),
+        record.date.startsWith(item.key),
       );
       return (
         sum +
         calculateOvertime(
           monthRecords,
           data.work,
-          getMonthlyTarget(data, year, month),
+          getMonthlyTarget(data, item.year, item.month),
         )
       );
     }, 0);
@@ -229,13 +247,9 @@ function getPeriodOvertime(records: DayRecord[], data: AppData, year: number) {
     const size = data.work.period === "quarter" ? 3 : 6;
     let overtime = 0;
     for (let start = 0; start < 12; start += size) {
-      const periodRecords = records.filter((record) => {
-        const month = Number(record.date.slice(5, 7)) - 1;
-        return month >= start && month < start + size;
-      });
-      const target = Array.from({ length: size }, (_, offset) =>
-        getMonthlyTarget(data, year, start + offset),
-      ).reduce((sum, value) => sum + value, 0);
+      const periodMonths = months.slice(start, start + size);
+      const periodRecords = recordsForMonths(records, periodMonths);
+      const target = getAnnualTarget(data, periodMonths);
       overtime += calculateOvertime(periodRecords, data.work, target);
     }
     return overtime;
@@ -251,7 +265,7 @@ function getPeriodOvertime(records: DayRecord[], data: AppData, year: number) {
       },
       0,
     );
-  return calculateOvertime(records, data.work, getAnnualTarget(data, year));
+  return calculateOvertime(records, data.work, getAnnualTarget(data, months));
 }
 
 function completedByDate(records: DayRecord[], todayKey: string) {
@@ -267,30 +281,28 @@ function comprehensiveScopeForMonth(
   records: DayRecord[],
   todayKey: string,
 ) {
-  let startMonth = month;
-  let endMonth = month;
+  const cycle = reportingCycleForMonth(data, year, month);
+  const activeIndex = cycle.months.findIndex(
+    (item) => item.year === year && item.month === month,
+  );
+  let scopeMonths = cycle.months.slice(activeIndex, activeIndex + 1);
   let label = `${month + 1}月`;
   if (data.work.period === "quarter") {
-    startMonth = Math.floor(month / 3) * 3;
-    endMonth = startMonth + 2;
-    label = `第 ${Math.floor(month / 3) + 1} 季度`;
+    const start = Math.floor(activeIndex / 3) * 3;
+    scopeMonths = cycle.months.slice(start, start + 3);
+    label = `第 ${Math.floor(activeIndex / 3) + 1} 季度`;
   } else if (data.work.period === "halfYear") {
-    startMonth = month < 6 ? 0 : 6;
-    endMonth = startMonth + 5;
-    label = startMonth === 0 ? "上半年" : "下半年";
+    const start = activeIndex < 6 ? 0 : 6;
+    scopeMonths = cycle.months.slice(start, start + 6);
+    label = start === 0 ? "上半年" : "下半年";
   } else if (data.work.period === "year" || data.work.period === "custom") {
-    startMonth = 0;
-    endMonth = 11;
-    label = data.work.period === "year" ? `${year}年度` : `${year}年自定义周期`;
+    scopeMonths = cycle.months;
+    label =
+      data.work.period === "year"
+        ? cycle.label
+        : `${cycle.label}自定义周期`;
   }
-  const scoped = records.filter((record) => {
-    const recordMonth = Number(record.date.slice(5, 7)) - 1;
-    return (
-      record.date.startsWith(`${year}-`) &&
-      recordMonth >= startMonth &&
-      recordMonth <= endMonth
-    );
-  });
+  const scoped = recordsForMonths(records, scopeMonths);
   if (data.work.period === "week") {
     const monthRecords = records.filter((record) =>
       record.date.startsWith(`${year}-${pad(month + 1)}`),
@@ -311,9 +323,7 @@ function comprehensiveScopeForMonth(
       ),
     };
   }
-  const target = Array.from({ length: endMonth - startMonth + 1 }, (_, index) =>
-    getMonthlyTarget(data, year, startMonth + index),
-  ).reduce((sum, value) => sum + value, 0);
+  const target = getAnnualTarget(data, scopeMonths);
   return {
     label,
     projected: calculateOvertime(scoped, data.work, target),
@@ -355,6 +365,18 @@ function canAllocateOvertimeByMonth(data: AppData) {
     (data.work.system !== "comprehensive" ||
       data.work.period === "month" ||
       data.work.period === "week")
+  );
+}
+
+function materializeReportingYears(
+  data: AppData,
+  year: number,
+  month: number,
+) {
+  const cycle = reportingCycleForMonth(data, year, month);
+  return [...new Set([cycle.startYear, cycle.endYear])].reduce(
+    (current, cycleYear) => materializeCycleYear(current, cycleYear),
+    data,
   );
 }
 
@@ -423,6 +445,42 @@ function Icon({ name }: { name: string }) {
   );
 }
 
+function MonthSwitch({
+  year,
+  month,
+  onChange,
+  onCurrent,
+  compact = false,
+}: {
+  year: number;
+  month: number;
+  onChange: (delta: number) => void;
+  onCurrent: () => void;
+  compact?: boolean;
+}) {
+  return (
+    <div
+      className={`month-switch glass-control embedded-month-switch${compact ? " compact" : ""}`}
+      aria-label="选择月份"
+    >
+      <button aria-label="上个月" onClick={() => onChange(-1)}>
+        ‹
+      </button>
+      <button
+        aria-label="回到本月"
+        className="current-month"
+        onClick={onCurrent}
+      >
+        <small>{year}</small>
+        <strong>{month + 1}月</strong>
+      </button>
+      <button aria-label="下个月" onClick={() => onChange(1)}>
+        ›
+      </button>
+    </div>
+  );
+}
+
 export default function Home() {
   const today = useMemo(() => new Date(), []);
   const todayKey = dateKey(today);
@@ -443,13 +501,16 @@ export default function Home() {
     const timer = window.setTimeout(() => {
       try {
         const modern = window.localStorage.getItem(STORAGE_DATA);
-        if (modern)
+        if (modern) {
+          const normalized = normalizeAppData(JSON.parse(modern));
           setData(
-            materializeCycleYear(
-              normalizeAppData(JSON.parse(modern)),
+            materializeReportingYears(
+              normalized,
               today.getFullYear(),
+              today.getMonth(),
             ),
           );
+        }
         else {
           const legacySettings = window.localStorage.getItem(
             STORAGE_LEGACY_SETTINGS,
@@ -457,13 +518,15 @@ export default function Home() {
           const legacyRecords = window.localStorage.getItem(
             STORAGE_LEGACY_RECORDS,
           );
+          const migrated = migrateLegacyData(
+            legacySettings ? JSON.parse(legacySettings) : undefined,
+            legacyRecords ? JSON.parse(legacyRecords) : [],
+          );
           setData(
-            materializeCycleYear(
-              migrateLegacyData(
-                legacySettings ? JSON.parse(legacySettings) : undefined,
-                legacyRecords ? JSON.parse(legacyRecords) : [],
-              ),
+            materializeReportingYears(
+              migrated,
               today.getFullYear(),
+              today.getMonth(),
             ),
           );
         }
@@ -500,14 +563,21 @@ export default function Home() {
   function changeMonth(delta: number) {
     setSelectedMonth((value) => {
       const next = new Date(value.getFullYear(), value.getMonth() + delta, 1);
-      if (next.getFullYear() !== value.getFullYear())
-        setData((current) => materializeCycleYear(current, next.getFullYear()));
+      setData((current) =>
+        materializeReportingYears(
+          current,
+          next.getFullYear(),
+          next.getMonth(),
+        ),
+      );
       return next;
     });
   }
   function goToCurrentMonth() {
     const next = new Date(today.getFullYear(), today.getMonth(), 1);
-    setData((current) => materializeCycleYear(current, next.getFullYear()));
+    setData((current) =>
+      materializeReportingYears(current, next.getFullYear(), next.getMonth()),
+    );
     setSelectedMonth(next);
   }
   function changeView(nextView: View) {
@@ -572,10 +642,14 @@ export default function Home() {
   }
   function activateCycle(cycle: ActiveCycle, saveTemplate: boolean) {
     setData((current) => {
+      const reportingCycle = reportingCycleForMonth(current, year, month);
       let next = replaceCycleFromDate(
         current,
         cycle,
-        Math.max(year, Number(cycle.startDate.slice(0, 4))),
+        Math.max(
+          reportingCycle.endYear,
+          Number(cycle.startDate.slice(0, 4)),
+        ),
       );
       if (
         saveTemplate &&
@@ -648,35 +722,6 @@ export default function Home() {
         </div>
       </aside>
       <section className="content-wrap">
-        <header className="topbar">
-          <div>
-            <p className="eyebrow">我的循环班表</p>
-            <h1>
-              {view === "calendar"
-                ? "排班日历"
-                : view === "stats"
-                  ? "班表统计"
-                  : "排班设置"}
-            </h1>
-          </div>
-          {view !== "settings" && (
-            <div className="month-switch glass-control">
-              <button aria-label="上个月" onClick={() => changeMonth(-1)}>
-                ‹
-              </button>
-              <button
-                aria-label="回到本月"
-                className="current-month"
-                onClick={goToCurrentMonth}
-              >
-                {year}年{month + 1}月
-              </button>
-              <button aria-label="下个月" onClick={() => changeMonth(1)}>
-                ›
-              </button>
-            </div>
-          )}
-        </header>
         {view === "calendar" && (
           <CalendarView
             year={year}
@@ -696,6 +741,7 @@ export default function Home() {
             }}
             onToggleBatchDate={toggleBatchDate}
             onChangeMonth={changeMonth}
+            onGoToCurrentMonth={goToCurrentMonth}
           />
         )}
         {view === "stats" && (
@@ -704,6 +750,8 @@ export default function Home() {
             month={month}
             data={data}
             todayKey={todayKey}
+            onChangeMonth={changeMonth}
+            onGoToCurrentMonth={goToCurrentMonth}
           />
         )}
         {view === "settings" && (
@@ -711,6 +759,7 @@ export default function Home() {
             data={data}
             setData={setData}
             activeYear={year}
+            activeMonth={month}
             onOpenGenerator={() => setShowGenerator(true)}
             notify={notify}
           />
@@ -786,6 +835,7 @@ function CalendarView({
   onToggleBatchMode,
   onToggleBatchDate,
   onChangeMonth,
+  onGoToCurrentMonth,
 }: {
   year: number;
   month: number;
@@ -801,6 +851,7 @@ function CalendarView({
   onToggleBatchMode: () => void;
   onToggleBatchDate: (key: string) => void;
   onChangeMonth: (delta: number) => void;
+  onGoToCurrentMonth: () => void;
 }) {
   const recordMap = useMemo(
     () => new Map(records.map((record) => [record.date, record])),
@@ -827,17 +878,15 @@ function CalendarView({
   );
   const actualHours = completed.reduce((sum, record) => sum + record.hours, 0);
   const monthlyBasicHours = getMonthlyTarget(data, year, month);
-  const yearWorkRecords = data.records.filter(
-    (record) =>
-      record.date.startsWith(`${year}-`) &&
-      shifts.get(record.shiftId)?.countsAsWork,
+  const allWorkRecords = data.records.filter((record) =>
+    shifts.get(record.shiftId)?.countsAsWork,
   );
   const overtimeSummary = overtimeForCalendarMonth(
     data,
     year,
     month,
     workRecords,
-    yearWorkRecords,
+    allWorkRecords,
     todayKey,
   );
   const upcoming = records.find(
@@ -876,10 +925,12 @@ function CalendarView({
           onTouchEnd={touchEndHandler}
         >
           <div className="calendar-toolbar">
-            <div>
-              <span className="year-pill">{year}</span>
-              <h2>{MONTH_LABELS[month]}</h2>
-            </div>
+            <MonthSwitch
+              year={year}
+              month={month}
+              onChange={onChangeMonth}
+              onCurrent={onGoToCurrentMonth}
+            />
             <div className="calendar-actions">
               <button
                 className={`secondary-small ${batchMode ? "exit-multi" : ""}`}
@@ -1142,7 +1193,7 @@ function MetricCard({
   );
 }
 
-type ProgressRingTone = "green" | "blue" | "violet" | "yellow";
+type ProgressRingTone = "green" | "blue" | "violet" | "yellow" | "gray";
 type ProgressRingMetric = {
   id: string;
   label: string;
@@ -1150,6 +1201,11 @@ type ProgressRingMetric = {
   total: number;
   unit: "h" | "天";
   tone: ProgressRingTone;
+};
+type ShiftBreakdownItem = {
+  shift: Shift;
+  records: DayRecord[];
+  hours: number;
 };
 
 function formatRingValue(value: number, unit: ProgressRingMetric["unit"]) {
@@ -1161,11 +1217,15 @@ function ProgressRingDashboard({
   totalLabel,
   totalValue,
   centerLabel,
+  composition = [],
+  showCompositionHours = true,
 }: {
   metrics: ProgressRingMetric[];
   totalLabel: string;
   totalValue: string;
   centerLabel: string;
+  composition?: ShiftBreakdownItem[];
+  showCompositionHours?: boolean;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = metrics.find((metric) => metric.id === selectedId) ?? null;
@@ -1173,6 +1233,10 @@ function ProgressRingDashboard({
   const mainPercent = mainMetric?.total
     ? Math.min(100, (mainMetric.completed / mainMetric.total) * 100)
     : 0;
+  const compositionTotal = composition.reduce(
+    (sum, item) => sum + item.records.length,
+    0,
+  );
 
   return (
     <div className="progress-ring-dashboard">
@@ -1190,7 +1254,7 @@ function ProgressRingDashboard({
           onClick={() => setSelectedId(null)}
         >
           {metrics.map((metric, index) => {
-            const radius = 132 - index * 29;
+            const radius = 132 - index * 32;
             const percent = metric.total
               ? Math.min(100, (metric.completed / metric.total) * 100)
               : 0;
@@ -1244,6 +1308,41 @@ function ProgressRingDashboard({
               </g>
             );
           })}
+          {compositionTotal > 0 && (
+            <g
+              className="shift-composition-ring"
+              transform="rotate(-90 160 160)"
+              aria-label="班次构成"
+            >
+              {composition.map((item, index) => {
+                const share = (item.records.length / compositionTotal) * 100;
+                const offset = composition
+                  .slice(0, index)
+                  .reduce(
+                    (sum, previous) =>
+                      sum +
+                      (previous.records.length / compositionTotal) * 100,
+                    0,
+                  );
+                return (
+                  <circle
+                    key={item.shift.id}
+                    cx="160"
+                    cy="160"
+                    r="39"
+                    pathLength="100"
+                    strokeDasharray={`${Math.max(0, share - 0.7)} ${100 - Math.max(0, share - 0.7)}`}
+                    strokeDashoffset={-offset}
+                    style={
+                      {
+                        "--shift-ring-color": item.shift.color,
+                      } as CSSProperties
+                    }
+                  />
+                );
+              })}
+            </g>
+          )}
           <text className="progress-ring-center-label" x="160" y="153">
             {centerLabel}
           </text>
@@ -1312,6 +1411,40 @@ function ProgressRingDashboard({
           ))}
         </div>
       </div>
+      {compositionTotal > 0 && (
+        <div className="ring-shift-composition" aria-label="班次构成统计">
+          <div className="ring-composition-heading">
+            <span>
+              <small>班次构成</small>
+              <strong>不同班次统计</strong>
+            </span>
+            <b>共 {compositionTotal} 天</b>
+          </div>
+          <div className="ring-composition-grid">
+            {composition.map((item) => (
+              <div
+                key={item.shift.id}
+                className="ring-composition-item"
+                style={colorStyle(item.shift.color)}
+              >
+                <i />
+                <span>
+                  <strong>{item.shift.name}</strong>
+                  <small>
+                    {item.records.length}天
+                    {showCompositionHours && item.shift.countsAsWork
+                      ? ` · ${compactHours(item.hours)}h`
+                      : ""}
+                  </small>
+                </span>
+                <b>
+                  {Math.round((item.records.length / compositionTotal) * 100)}%
+                </b>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1321,19 +1454,17 @@ function AnnualRing({
   actual,
   overtime,
   actualOvertime,
-  rest,
-  completedRest,
   plannedDays,
   periodLabel,
+  composition,
 }: {
   target: number;
   actual: number;
   overtime: number;
   actualOvertime: number;
-  rest: number;
-  completedRest: number;
   plannedDays: number;
   periodLabel: string;
+  composition: ShiftBreakdownItem[];
 }) {
   const annualTotal = Math.max(0, target + overtime);
   const confirmedOvertime = Math.min(overtime, actualOvertime);
@@ -1366,14 +1497,6 @@ function AnnualRing({
       unit: "h",
       tone: "violet",
     },
-    {
-      id: "rest",
-      label: "休息",
-      completed: Math.min(rest, completedRest),
-      total: rest,
-      unit: "天",
-      tone: "yellow",
-    },
   ];
   return (
     <ProgressRingDashboard
@@ -1381,6 +1504,7 @@ function AnnualRing({
       totalLabel={`${periodLabel}预计`}
       totalValue={`${compactHours(annualTotal)}h · ${plannedDays}天`}
       centerLabel={`${periodLabel}进度`}
+      composition={composition}
     />
   );
 }
@@ -1390,11 +1514,13 @@ function DayCountPie({
   rest,
   completed,
   completedRest,
+  composition,
 }: {
   work: number;
   rest: number;
   completed: number;
   completedRest: number;
+  composition: ShiftBreakdownItem[];
 }) {
   const total = work + rest;
   const elapsed = Math.min(total, completed + completedRest);
@@ -1430,6 +1556,8 @@ function DayCountPie({
       totalLabel="全年预计"
       totalValue={`${total}天`}
       centerLabel="全年进度"
+      composition={composition}
+      showCompositionHours={false}
     />
   );
 }
@@ -1441,6 +1569,8 @@ function MonthlyHoursChart({
 }: {
   monthly: {
     label: string;
+    month: number;
+    key: string;
     hours: number;
     completedHours: number;
     target: number;
@@ -1463,7 +1593,7 @@ function MonthlyHoursChart({
         return (
           <div
             title={`${item.label}：计划 ${compactHours(item.hours)}h，已完成 ${compactHours(item.completedHours)}h${showOvertime ? `，额外 ${compactHours(overtime)}h` : ""}`}
-            key={item.label}
+            key={item.key}
             className={`monthly-bar-item ${index === activeMonth ? "is-current" : ""}`}
           >
             <span className="monthly-bar-overtime-value">
@@ -1488,7 +1618,7 @@ function MonthlyHoursChart({
                 </span>
               )}
             </span>
-            <small>{index + 1}月</small>
+            <small>{item.month + 1}月</small>
           </div>
         );
       })}
@@ -1501,32 +1631,43 @@ function StatsView({
   month,
   data,
   todayKey,
+  onChangeMonth,
+  onGoToCurrentMonth,
 }: {
   year: number;
   month: number;
   data: AppData;
   todayKey: string;
+  onChangeMonth: (delta: number) => void;
+  onGoToCurrentMonth: () => void;
 }) {
   const [ringScope, setRingScope] = useState<StatsScope>("year");
   const shiftMap = useMemo(
     () => new Map(data.shifts.map((shift) => [shift.id, shift])),
     [data.shifts],
   );
-  const yearly = data.records.filter((record) =>
-    record.date.startsWith(`${year}-`),
-  );
-  const workRecords = yearly.filter(
+  const annualCycle = reportingCycleForMonth(data, year, month);
+  const annualRecords = recordsForMonths(data.records, annualCycle.months);
+  const workRecords = annualRecords.filter(
     (record) => shiftMap.get(record.shiftId)?.countsAsWork,
   );
-  const restRecords = yearly.filter(
+  const restRecords = annualRecords.filter(
     (record) => shiftMap.get(record.shiftId)?.isRest,
   );
   const completed = completedByDate(workRecords, todayKey);
   const completedRest = completedByDate(restRecords, todayKey);
   const actualHours = completed.reduce((sum, record) => sum + record.hours, 0);
-  const annualTarget = getAnnualTarget(data, year);
-  const annualOvertime = getPeriodOvertime(workRecords, data, year);
-  const actualOvertime = getPeriodOvertime(completed, data, year);
+  const annualTarget = getAnnualTarget(data, annualCycle.months);
+  const annualOvertime = getPeriodOvertime(
+    workRecords,
+    data,
+    annualCycle.months,
+  );
+  const actualOvertime = getPeriodOvertime(
+    completed,
+    data,
+    annualCycle.months,
+  );
   const monthPrefix = `${year}-${pad(month + 1)}`;
   const monthWorkRecords = workRecords.filter((record) =>
     record.date.startsWith(monthPrefix),
@@ -1535,7 +1676,6 @@ function StatsView({
     record.date.startsWith(monthPrefix),
   );
   const completedMonthWork = completedByDate(monthWorkRecords, todayKey);
-  const completedMonthRest = completedByDate(monthRestRecords, todayKey);
   const monthTarget = getMonthlyTarget(data, year, month);
   const monthActualHours = completedMonthWork.reduce(
     (sum, record) => sum + record.hours,
@@ -1557,14 +1697,16 @@ function StatsView({
   const ringActualOvertime =
     ringScope === "year" ? actualOvertime : actualMonthOvertime;
   const ringRestRecords = ringScope === "year" ? restRecords : monthRestRecords;
-  const ringCompletedRest =
-    ringScope === "year" ? completedRest : completedMonthRest;
   const ringWorkRecords = ringScope === "year" ? workRecords : monthWorkRecords;
-  const ringPeriodLabel = ringScope === "year" ? "全年" : `${month + 1}月`;
+  const ringRecords =
+    ringScope === "year"
+      ? annualRecords
+      : annualRecords.filter((record) => record.date.startsWith(monthPrefix));
+  const ringPeriodLabel = ringScope === "year" ? "年度" : `${month + 1}月`;
   const monthlyOvertime = canAllocateOvertimeByMonth(data);
   const shiftBreakdown = data.shifts
     .map((shift) => {
-      const records = yearly.filter((record) => record.shiftId === shift.id);
+      const records = ringRecords.filter((record) => record.shiftId === shift.id);
       return {
         shift,
         records,
@@ -1573,12 +1715,28 @@ function StatsView({
     })
     .filter((item) => item.records.length)
     .sort((a, b) => b.records.length - a.records.length);
-  const monthly = MONTH_LABELS.map((label, index) => {
+  const annualShiftBreakdown = data.shifts
+    .map((shift) => {
+      const records = annualRecords.filter(
+        (record) => record.shiftId === shift.id,
+      );
+      return {
+        shift,
+        records,
+        hours: records.reduce((sum, record) => sum + record.hours, 0),
+      };
+    })
+    .filter((item) => item.records.length)
+    .sort((a, b) => b.records.length - a.records.length);
+  const activeMonthIndex = annualCycle.months.findIndex(
+    (item) => item.year === year && item.month === month,
+  );
+  const monthly = annualCycle.months.map((item) => {
     const records = workRecords.filter((record) =>
-      record.date.startsWith(`${year}-${pad(index + 1)}`),
+      record.date.startsWith(item.key),
     );
     const completedRecords = completedByDate(records, todayKey);
-    const target = getMonthlyTarget(data, year, index);
+    const target = getMonthlyTarget(data, item.year, item.month);
     const overtime = !data.work.trackOvertime
       ? 0
       : data.work.system === "comprehensive"
@@ -1587,15 +1745,17 @@ function StatsView({
           : data.work.period === "week"
             ? comprehensiveScopeForMonth(
                 data,
-                year,
-                index,
+                item.year,
+                item.month,
                 workRecords,
                 todayKey,
               ).projected
             : 0
         : calculateOvertime(records, data.work, target);
     return {
-      label,
+      label: MONTH_LABELS[item.month],
+      month: item.month,
+      key: item.key,
       hours: records.reduce((sum, record) => sum + record.hours, 0),
       completedHours: completedRecords.reduce(
         (sum, record) => sum + record.hours,
@@ -1607,7 +1767,7 @@ function StatsView({
   });
   const systemNote =
     data.work.system === "comprehensive"
-      ? `综合工时按${PERIOD_LABELS[data.work.period]}周期累计；月度基本工时按每日 8h 推算，不会把单日超过 8h 直接认定为额外工时。`
+      ? `${annualCycle.label}为当前年度工时范围；综合工时按${PERIOD_LABELS[data.work.period]}周期累计，月度基本工时按每日 8h 推算。`
       : data.work.system === "standard"
         ? "标准工时按已开启的每日 / 每周阈值统计，日与周结果取较高值，避免重复累计。"
         : data.work.system === "custom"
@@ -1619,8 +1779,15 @@ function StatsView({
       <div className="stats-page">
         <section className="glass-panel schedule-only-overview">
           <div className="schedule-only-copy">
-            <p className="eyebrow">{year} 年 · 仅排班</p>
-            <h2>这一年安排了 {workRecords.length} 个工作日</h2>
+            <MonthSwitch
+              year={year}
+              month={month}
+              onChange={onChangeMonth}
+              onCurrent={onGoToCurrentMonth}
+              compact
+            />
+            <p className="eyebrow">{annualCycle.label} · 仅排班</p>
+            <h2>这一周期安排了 {workRecords.length} 个工作日</h2>
             <p>
               工时统计已关闭，因此这里只展示班次与天数，不推算工时或额外工时。
             </p>
@@ -1630,6 +1797,7 @@ function StatsView({
             rest={restRecords.length}
             completed={completed.length}
             completedRest={completedRest.length}
+            composition={annualShiftBreakdown}
           />
         </section>
         <div className="stats-summary-grid schedule-summary">
@@ -1649,10 +1817,9 @@ function StatsView({
             label="休息日"
             value={`${restRecords.length}天`}
             detail="休息与请假班次"
-            tone="violet"
+            tone="gray"
           />
         </div>
-        <ShiftBreakdown items={shiftBreakdown} showHours={false} />
       </div>
     );
 
@@ -1663,26 +1830,38 @@ function StatsView({
           <section className="annual-overview-card glass-panel">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">{ringPeriodLabel}仪表盘</p>
+                <p className="eyebrow">
+                  {ringScope === "year" ? annualCycle.label : ringPeriodLabel}
+                  仪表盘
+                </p>
                 <h2>标准、额外与完成进度</h2>
               </div>
-              <div className="stats-period-toggle" aria-label="统计周期">
-                <button
-                  type="button"
-                  className={ringScope === "month" ? "active" : ""}
-                  aria-pressed={ringScope === "month"}
-                  onClick={() => setRingScope("month")}
-                >
-                  月
-                </button>
-                <button
-                  type="button"
-                  className={ringScope === "year" ? "active" : ""}
-                  aria-pressed={ringScope === "year"}
-                  onClick={() => setRingScope("year")}
-                >
-                  年
-                </button>
+              <div className="stats-heading-controls">
+                <MonthSwitch
+                  year={year}
+                  month={month}
+                  onChange={onChangeMonth}
+                  onCurrent={onGoToCurrentMonth}
+                  compact
+                />
+                <div className="stats-period-toggle" aria-label="统计周期">
+                  <button
+                    type="button"
+                    className={ringScope === "month" ? "active" : ""}
+                    aria-pressed={ringScope === "month"}
+                    onClick={() => setRingScope("month")}
+                  >
+                    月
+                  </button>
+                  <button
+                    type="button"
+                    className={ringScope === "year" ? "active" : ""}
+                    aria-pressed={ringScope === "year"}
+                    onClick={() => setRingScope("year")}
+                  >
+                    年
+                  </button>
+                </div>
               </div>
             </div>
             <div className="annual-overview-grid">
@@ -1692,10 +1871,9 @@ function StatsView({
                 actual={ringActualHours}
                 overtime={ringOvertime}
                 actualOvertime={ringActualOvertime}
-                rest={ringRestRecords.length}
-                completedRest={ringCompletedRest.length}
                 plannedDays={ringWorkRecords.length + ringRestRecords.length}
                 periodLabel={ringPeriodLabel}
+                composition={shiftBreakdown}
               />
             </div>
           </section>
@@ -1714,6 +1892,15 @@ function StatsView({
                 : "加班统计已关闭。图表只展示计划工时、已完成工时和班次构成。"}
             </p>
           </div>
+          {data.work.system !== "comprehensive" && (
+            <MonthSwitch
+              year={year}
+              month={month}
+              onChange={onChangeMonth}
+              onCurrent={onGoToCurrentMonth}
+              compact
+            />
+          )}
         </section>
         <section className="chart-card glass-panel">
           <div className="section-heading">
@@ -1748,67 +1935,12 @@ function StatsView({
             )}
           <MonthlyHoursChart
             monthly={monthly}
-            activeMonth={month}
+            activeMonth={activeMonthIndex}
             showOvertime={monthlyOvertime}
           />
         </section>
-        <ShiftBreakdown items={shiftBreakdown} showHours />
       </div>
     </div>
-  );
-}
-
-function ShiftBreakdown({
-  items,
-  showHours,
-}: {
-  items: { shift: Shift; records: DayRecord[]; hours: number }[];
-  showHours: boolean;
-}) {
-  const totalDays = items.reduce((sum, item) => sum + item.records.length, 0);
-  return (
-    <section className="glass-panel shift-statistics-card">
-      <div className="section-heading">
-        <div>
-          <p className="eyebrow">班次构成</p>
-          <h2>不同班次统计</h2>
-        </div>
-        <span className="soft-badge">共 {totalDays} 天</span>
-      </div>
-      <div className="shift-stat-grid">
-        {items.length ? (
-          items.map((item) => {
-            const share = totalDays
-              ? (item.records.length / totalDays) * 100
-              : 0;
-            return (
-              <article
-                key={item.shift.id}
-                className="shift-stat-item"
-                style={colorStyle(item.shift.color)}
-              >
-                <div className="shift-stat-head">
-                  <i>{item.shift.shortName}</i>
-                  <strong>{item.shift.name}</strong>
-                </div>
-                <div className="shift-stat-values">
-                  <b>
-                    {item.records.length}
-                    <small>天</small>
-                  </b>
-                  {showHours && <span>{compactHours(item.hours)}h</span>}
-                </div>
-                <span className="shift-stat-track">
-                  <i style={{ width: `${share}%` }} />
-                </span>
-              </article>
-            );
-          })
-        ) : (
-          <p className="empty-copy">还没有排班记录</p>
-        )}
-      </div>
-    </section>
   );
 }
 
@@ -1875,18 +2007,26 @@ function SettingsView({
   data,
   setData,
   activeYear,
+  activeMonth,
   onOpenGenerator,
   notify,
 }: {
   data: AppData;
   setData: (value: AppData | ((current: AppData) => AppData)) => void;
   activeYear: number;
+  activeMonth: number;
   onOpenGenerator: () => void;
   notify: (message?: string) => void;
 }) {
   const [editor, setEditor] = useState<EntityEditor>(null);
   const [message, setMessage] = useState("");
-  const [targetYear, setTargetYear] = useState(activeYear);
+  const currentCycle = reportingCycleForMonth(
+    data,
+    activeYear,
+    activeMonth,
+  );
+  const currentCycleStartYear = currentCycle.startYear;
+  const [targetYear, setTargetYear] = useState(currentCycleStartYear);
   const [targetEdit, setTargetEdit] = useState<{
     key: string;
     value: number;
@@ -1895,11 +2035,16 @@ function SettingsView({
   const orderedShiftItems = orderedShifts(data.shifts);
   const selectedCareer =
     CAREERS.find((career) => career.id === data.careerPreset) ?? CAREERS[0];
+  const targetCycle = getAnnualCycle(
+    targetYear,
+    data.work.annualStartMonth - 1,
+    data.work.annualStartMonth,
+  );
   function updateWork(patch: Partial<AppData["work"]>) {
     const linkedValue = patch.trackHours ?? patch.trackOvertime;
     setData((current) => {
       const nextSystem = patch.system ?? current.work.system;
-      return {
+      const next = {
         ...current,
         work: {
           ...current.work,
@@ -1913,6 +2058,7 @@ function SettingsView({
             : {}),
         },
       };
+      return materializeReportingYears(next, activeYear, activeMonth);
     });
   }
   function updateDisplay(patch: Partial<AppData["display"]>) {
@@ -1922,13 +2068,17 @@ function SettingsView({
     }));
   }
   function saveShift(shift: Shift) {
+    const normalizedShift =
+      shift.id === "shift-rest"
+        ? { ...shift, color: ACCENT_COLORS.gray }
+        : shift;
     if (
       data.shifts.some(
         (item) =>
-          item.id !== shift.id &&
-          item.name.trim() === shift.name.trim() &&
-          item.startTime === shift.startTime &&
-          item.endTime === shift.endTime,
+          item.id !== normalizedShift.id &&
+          item.name.trim() === normalizedShift.name.trim() &&
+          item.startTime === normalizedShift.startTime &&
+          item.endTime === normalizedShift.endTime,
       )
     ) {
       setMessage("已有名称和时间相同的班次，请直接编辑现有班次。");
@@ -1936,7 +2086,10 @@ function SettingsView({
     }
     setData((current) => ({
       ...current,
-      shifts: [...current.shifts.filter((item) => item.id !== shift.id), shift],
+      shifts: [
+        ...current.shifts.filter((item) => item.id !== normalizedShift.id),
+        normalizedShift,
+      ],
     }));
     setEditor(null);
     notify();
@@ -2286,6 +2439,40 @@ function SettingsView({
                     }
                     options={Object.entries(SYSTEM_LABELS)}
                   />
+                  {data.work.system === "comprehensive" && (
+                    <div className="annual-cycle-setting">
+                      <SelectSetting
+                        label="年度工时起止月份"
+                        value={String(data.work.annualStartMonth)}
+                        onChange={(value) => {
+                          const annualStartMonth = Number(value);
+                          setTargetYear(
+                            getAnnualCycle(
+                              activeYear,
+                              activeMonth,
+                              annualStartMonth,
+                            ).startYear,
+                          );
+                          updateWork({ annualStartMonth });
+                        }}
+                        options={Array.from({ length: 12 }, (_, index) => {
+                          const start = index + 1;
+                          const end = start === 1 ? 12 : start - 1;
+                          return [
+                            String(start),
+                            start === 1
+                              ? "1月—12月"
+                              : `${start}月—次年${end}月`,
+                          ];
+                        })}
+                      />
+                      <p className="annual-cycle-note">
+                        当前年度范围：
+                        <strong>{currentCycle.label}</strong>
+                        。年度统计、额外工时和月度图表会同步按这个范围计算。
+                      </p>
+                    </div>
+                  )}
                   {data.work.system === "standard" && (
                     <>
                       <NumberSetting
@@ -2386,7 +2573,7 @@ function SettingsView({
               <div className="section-heading">
                 <div>
                   <p className="eyebrow">综合工时标准</p>
-                  <h2>{targetYear} 年月度推算</h2>
+                  <h2>{targetCycle.label}</h2>
                 </div>
                 <div className="target-year-switch">
                   <button
@@ -2408,9 +2595,10 @@ function SettingsView({
                 系统按工作日统一自动推演；点按任意月份可手动修正。
               </p>
               <div className="target-grid">
-                {MONTH_LABELS.map((label, index) => {
-                  const key = `${targetYear}-${pad(index + 1)}`;
-                  const value = getMonthlyTarget(data, targetYear, index);
+                {targetCycle.months.map((item) => {
+                  const label = MONTH_LABELS[item.month];
+                  const key = item.key;
+                  const value = getMonthlyTarget(data, item.year, item.month);
                   const overridden = Number.isFinite(data.targets[key]);
                   return (
                     <button
