@@ -13116,22 +13116,6 @@ select:focus-visible {
   }
 }
 
-/* v9 — iOS 原生外壳（Capacitor）专用微调 */
-html.native-app,
-html.native-app body {
-  overscroll-behavior-y: none;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-}
-
-html.native-app input,
-html.native-app textarea,
-html.native-app select {
-  -webkit-user-select: text;
-  user-select: text;
-}
-
 /* 隐私政策等纯文本法务页面 */
 .legal-page {
   max-width: 720px;

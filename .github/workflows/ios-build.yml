@@ -1,41 +1,78 @@
-name: Build iOS App
+name: iOS Build & Test
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
   pull_request:
-    paths:
-      - "ios/**"
-      - "capacitor.config.ts"
-      - "package.json"
-      - ".github/workflows/ios-build.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ios-build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    # 仅做无签名编译验证，不产出可上架的包；上架仍走本地 Xcode Archive。
-    runs-on: macos-15
+    runs-on: macos-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: ios
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      # Liquid Glass 需要 iOS 26 SDK，锁定最新正式版 Xcode
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
         with:
-          node-version: 22
-          cache: npm
+          xcode-version: latest-stable
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build web assets and sync iOS
-        run: npm run ios:sync
-
-      - name: Build Xcode project without signing
+      - name: Show toolchain
         run: |
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i iphoneos || true
+
+      - name: Install tools
+        run: brew install xcodegen xcbeautify
+
+      - name: Generate project
+        run: xcodegen generate
+
+      # 模拟器机型随 runner 镜像变动，动态挑一台可用的 iPhone，避免写死机型名
+      - name: Pick simulator
+        id: sim
+        run: |
+          cat > /tmp/pick_sim.py <<'PYEOF'
+          import json, subprocess, sys
+
+          raw = subprocess.check_output(
+              ["xcrun", "simctl", "list", "devices", "available", "--json"]
+          )
+          devices = json.loads(raw)["devices"]
+          names = [
+              device["name"]
+              for runtime, items in devices.items()
+              if "iOS" in runtime
+              for device in items
+              if device["name"].startswith("iPhone")
+          ]
+          if not names:
+              sys.exit("找不到可用的 iPhone 模拟器")
+          print(sorted(names)[-1])
+          PYEOF
+          NAME=$(python3 /tmp/pick_sim.py)
+          echo "找到模拟器：$NAME"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Build and test
+        env:
+          NSUnbufferedIO: YES
+        run: |
+          set -o pipefail
           xcodebuild \
-            -project ios/App/App.xcodeproj \
-            -scheme App \
+            -project ShiftLedger.xcodeproj \
+            -scheme ShiftLedger \
             -configuration Debug \
-            -destination 'generic/platform=iOS Simulator' \
-            -skipPackagePluginValidation \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
             CODE_SIGNING_ALLOWED=NO \
-            build
+            clean test | xcbeautify --renderer github-actions

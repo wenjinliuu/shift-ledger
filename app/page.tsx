@@ -12,12 +12,6 @@ import {
   statutoryHolidayShortName,
 } from "./lib/holidays";
 import {
-  exportBackupFile,
-  loadStoredData,
-  saveStoredData,
-} from "./lib/native";
-import { initNativeShell } from "./lib/native-shell";
-import {
   DATA_VERSION,
   ACCENT_COLORS,
   STORAGE_DATA,
@@ -542,11 +536,9 @@ export default function Home() {
   const [toast, setToast] = useState("");
 
   useEffect(() => {
-    let cancelled = false;
-    const timer = window.setTimeout(async () => {
+    const timer = window.setTimeout(() => {
       try {
-        const modern = await loadStoredData(STORAGE_DATA);
-        if (cancelled) return;
+        const modern = window.localStorage.getItem(STORAGE_DATA);
         if (modern) {
           const normalized = normalizeAppData(JSON.parse(modern));
           setData(
@@ -579,19 +571,12 @@ export default function Home() {
       } catch {
         setData(createDefaultData());
       }
-      if (cancelled) return;
       setReady(true);
     }, 0);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
+    return () => window.clearTimeout(timer);
   }, [today]);
   useEffect(() => {
-    void initNativeShell();
-  }, []);
-  useEffect(() => {
-    if (ready) void saveStoredData(STORAGE_DATA, JSON.stringify(data));
+    if (ready) window.localStorage.setItem(STORAGE_DATA, JSON.stringify(data));
   }, [data, ready]);
 
   const year = selectedMonth.getFullYear();
@@ -2157,24 +2142,28 @@ function SettingsView({
     }));
     notify("标签已删除");
   }
-  async function exportBackup() {
-    const contents = JSON.stringify(
-      {
-        app: "shift-ledger",
-        version: DATA_VERSION,
-        exportedAt: new Date().toISOString(),
-        data,
-      },
-      null,
-      2,
+  function exportBackup() {
+    const blob = new Blob(
+      [
+        JSON.stringify(
+          {
+            app: "shift-ledger",
+            version: DATA_VERSION,
+            exportedAt: new Date().toISOString(),
+            data,
+          },
+          null,
+          2,
+        ),
+      ],
+      { type: "application/json" },
     );
-    const fileName = `循环班表备份-${dateKey(new Date())}.json`;
-    try {
-      const result = await exportBackupFile(fileName, contents);
-      if (result === "shared") setMessage("备份已生成，请在分享面板中选择保存位置");
-    } catch {
-      setMessage("导出失败：请重试或检查系统存储权限");
-    }
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `循环班表备份-${dateKey(new Date())}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
   }
   async function importBackup(file?: File) {
     if (!file) return;
