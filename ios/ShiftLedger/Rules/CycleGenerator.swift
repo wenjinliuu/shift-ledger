@@ -41,7 +41,7 @@ enum CycleGenerator {
     /// 把某一年的循环记录落到数据里。已有的手动记录保持不动。
     static func materialize(_ document: ScheduleDocument, year: Int) -> ScheduleDocument {
         guard let cycle = document.activeCycle,
-              Int(cycle.startDate.prefix(4)) ?? 0 <= year
+              (Int(cycle.startDate.prefix(4)) ?? 0) <= year
         else { return document }
 
         let generated = records(cycle: cycle,

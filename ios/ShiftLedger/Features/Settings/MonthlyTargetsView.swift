@@ -34,10 +34,10 @@ struct MonthlyTargetsView: View {
                             Spacer()
                             Text(HoursFormatter.hours(value))
                                 .monospacedDigit()
-                                .foregroundStyle(override == nil ? .secondary : Palette.blue)
+                                .foregroundStyle(override == nil ? Color.secondary : Palette.blue)
                             Text(override == nil ? "推算" : "已修正")
                                 .font(.caption2)
-                                .foregroundStyle(override == nil ? .tertiary : Palette.blue)
+                                .foregroundStyle(override == nil ? Color.secondary.opacity(0.7) : Palette.blue)
                                 .frame(width: 40, alignment: .trailing)
                         }
                     }
