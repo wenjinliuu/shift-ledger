@@ -1,6 +1,7 @@
 # 循环班表
 
-专门为不按星期工作的人设计的个人循环班表。采用手机优先设计，可作为 PWA 添加到桌面使用。
+专门为不按星期工作的人设计的个人循环班表。采用手机优先设计，同一份代码同时发布为
+网页版（PWA）和 iOS 原生应用（Capacitor 打包，`ios/` 为 Xcode 工程）。
 
 ## 功能
 
@@ -20,10 +21,12 @@
 - 统计页面会根据功能开关切换为仅排班、仅工时或工时与加班视图
 - JSON 数据备份导出与导入恢复
 - 手机端液态玻璃界面和桌面模式
+- iOS 版原生适配：沙盒文件持久化、系统分享面板导出备份、启动图与状态栏适配
 
 ## 数据说明
 
-当前版本的数据保存在浏览器本机，不会上传到服务器。数据结构版本为 v2；旧版 `day / night / rest` 数据会在首次打开时自动迁移。更换设备或清除浏览器数据前，请先在设置页导出 JSON 备份。
+当前版本的数据保存在设备本机，不会上传到服务器。网页版写入浏览器本机存储，
+iOS 版写入应用沙盒 `Documents/shift-ledger/data.json`（从 PWA 升级时会自动迁移一次）。数据结构版本为 v2；旧版 `day / night / rest` 数据会在首次打开时自动迁移。更换设备或清除浏览器数据前，请先在设置页导出 JSON 备份。
 
 首次使用保持空日历，不会自动生成任何班次。可从循环排班模板开始，也可以逐日手动记录。
 
@@ -43,6 +46,20 @@ npm run build
 ```
 
 项目使用 Next.js 静态导出，Netlify 发布目录为 `out`。`main` 分支更新后，Netlify 会自动重新构建和发布。
+
+## iOS 版
+
+```bash
+npm run ios:sync   # 静态导出 + 同步到 ios/
+npm run ios:open   # 用 Xcode 打开工程（需要 macOS）
+```
+
+Bundle ID 为 `com.wenjinliu.shiftledger`，仅 iPhone、仅竖屏，最低 iOS 15。
+`ios/App/App/public` 是构建产物，不入库；改完网页代码需要重新 `npm run ios:sync`。
+图标与启动图源文件在 `assets/`，更新后运行 `npx @capacitor/assets generate --ios --assetPath assets`。
+
+完整的签名、元数据、审核与发版流程见 [`docs/ios-release.md`](docs/ios-release.md)，
+隐私政策页面在 `/privacy/`。
 
 ## 免责声明
 

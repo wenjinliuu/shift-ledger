@@ -12,6 +12,12 @@ import {
   statutoryHolidayShortName,
 } from "./lib/holidays";
 import {
+  exportBackupFile,
+  loadStoredData,
+  saveStoredData,
+} from "./lib/native";
+import { initNativeShell } from "./lib/native-shell";
+import {
   DATA_VERSION,
   ACCENT_COLORS,
   STORAGE_DATA,
@@ -42,6 +48,10 @@ import {
   type StatisticsPeriod,
   type WorkSystem,
 } from "./lib/schedule";
+
+const APP_VERSION = "1.0.0";
+const PRIVACY_URL = "https://wenjinliuu.github.io/shift-ledger/privacy/";
+const SUPPORT_URL = "https://github.com/wenjinliuu/shift-ledger/issues";
 
 type View = "calendar" | "stats" | "settings";
 type StatsScope = "month" | "year";
@@ -532,9 +542,11 @@ export default function Home() {
   const [toast, setToast] = useState("");
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
       try {
-        const modern = window.localStorage.getItem(STORAGE_DATA);
+        const modern = await loadStoredData(STORAGE_DATA);
+        if (cancelled) return;
         if (modern) {
           const normalized = normalizeAppData(JSON.parse(modern));
           setData(
@@ -567,12 +579,19 @@ export default function Home() {
       } catch {
         setData(createDefaultData());
       }
+      if (cancelled) return;
       setReady(true);
     }, 0);
-    return () => window.clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [today]);
   useEffect(() => {
-    if (ready) window.localStorage.setItem(STORAGE_DATA, JSON.stringify(data));
+    void initNativeShell();
+  }, []);
+  useEffect(() => {
+    if (ready) void saveStoredData(STORAGE_DATA, JSON.stringify(data));
   }, [data, ready]);
 
   const year = selectedMonth.getFullYear();
@@ -2138,28 +2157,24 @@ function SettingsView({
     }));
     notify("标签已删除");
   }
-  function exportBackup() {
-    const blob = new Blob(
-      [
-        JSON.stringify(
-          {
-            app: "shift-ledger",
-            version: DATA_VERSION,
-            exportedAt: new Date().toISOString(),
-            data,
-          },
-          null,
-          2,
-        ),
-      ],
-      { type: "application/json" },
+  async function exportBackup() {
+    const contents = JSON.stringify(
+      {
+        app: "shift-ledger",
+        version: DATA_VERSION,
+        exportedAt: new Date().toISOString(),
+        data,
+      },
+      null,
+      2,
     );
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `循环班表备份-${dateKey(new Date())}.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    const fileName = `循环班表备份-${dateKey(new Date())}.json`;
+    try {
+      const result = await exportBackupFile(fileName, contents);
+      if (result === "shared") setMessage("备份已生成，请在分享面板中选择保存位置");
+    } catch {
+      setMessage("导出失败：请重试或检查系统存储权限");
+    }
   }
   async function importBackup(file?: File) {
     if (!file) return;
@@ -2658,6 +2673,34 @@ function SettingsView({
                 importBackup(event.target.files?.[0])
               }
             />
+          </div>
+        </section>
+        <section className="glass-panel setting-card wide about-card">
+          <div>
+            <p className="eyebrow">关于</p>
+            <h2>循环班表 {APP_VERSION}</h2>
+            <span>
+              数据只保存在本机，不上传服务器。工时为个人预估，最终以公司考勤记录
+              和适用制度为准。
+            </span>
+          </div>
+          <div className="data-actions">
+            <a
+              className="secondary-button"
+              href={PRIVACY_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              隐私政策
+            </a>
+            <a
+              className="secondary-button"
+              href={SUPPORT_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              反馈与支持
+            </a>
           </div>
         </section>
       </div>

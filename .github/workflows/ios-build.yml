@@ -1,0 +1,41 @@
+name: Build iOS App
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "ios/**"
+      - "capacitor.config.ts"
+      - "package.json"
+      - ".github/workflows/ios-build.yml"
+
+jobs:
+  build:
+    # 仅做无签名编译验证，不产出可上架的包；上架仍走本地 Xcode Archive。
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web assets and sync iOS
+        run: npm run ios:sync
+
+      - name: Build Xcode project without signing
+        run: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            build
