@@ -17,7 +17,8 @@ struct ShiftLedgerApp: App {
         }
         .onChange(of: scenePhase) { _, phase in
             // 退到后台先把未落盘的编辑写下去。
-            if phase != .active { store.flush() }
+            guard phase != .active else { return }
+            Task { @MainActor in store.flush() }
         }
     }
 }
