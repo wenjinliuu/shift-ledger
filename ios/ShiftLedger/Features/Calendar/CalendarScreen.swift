@@ -16,18 +16,17 @@ struct CalendarScreen: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Palette.canvas()
-                ScrollView {
-                    VStack(spacing: 16) {
-                        monthPanel
-                        nextShiftCard
-                        outlookSection
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 28)
+            ScrollView {
+                VStack(spacing: 16) {
+                    monthPanel
+                    nextShiftCard
+                    outlookSection
                 }
+                .padding(.horizontal, 16)
             }
+            // 标签栏是浮动玻璃，内容底部要自己让出这段高度
+            .contentMargins(.bottom, 96, for: .scrollContent)
+            .background { Palette.canvas() }
             .navigationTitle("循环班表")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

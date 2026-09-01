@@ -162,7 +162,9 @@ private struct DayCell: View {
         }
         .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("day-\(key)")
         .accessibilityLabel(accessibilityText)
+        .accessibilityAddTraits(.isButton)
     }
 
     private var batchBadge: String {

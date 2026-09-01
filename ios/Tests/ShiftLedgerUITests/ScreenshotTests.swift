@@ -31,10 +31,13 @@ final class ScreenshotTests: XCTestCase {
             dismissSheet()
         }
 
-        // 点日历上的一天，展示逐日编辑
-        let firstDay = app.scrollViews.buttons.firstMatch
-        if firstDay.waitForExistence(timeout: 3) {
-            firstDay.tap()
+        // 点当月的某一天，展示逐日编辑
+        let day = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier BEGINSWITH %@", "day-"))
+            .element(boundBy: 8)
+        if day.waitForExistence(timeout: 5) {
+            day.tap()
+            Thread.sleep(forTimeInterval: 1.2)
             capture("05-day-editor")
         }
     }

@@ -52,6 +52,7 @@ struct SettingsScreen: View {
                     }
                 }
             }
+            .contentMargins(.bottom, 96, for: .scrollContent)
             .navigationTitle("设置")
             .sheet(item: $editingShift) { shift in
                 ShiftEditorView(shift: shift)
@@ -111,7 +112,10 @@ struct SettingsScreen: View {
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.tertiary)
                     }
+                    .contentShape(Rectangle())
                 }
+                // 不加 .plain 的话整行会被按钮的强调色染蓝
+                .buttonStyle(.plain)
             }
             Button {
                 isCreatingShift = true
@@ -155,7 +159,9 @@ struct SettingsScreen: View {
                         Spacer()
                         Text(tag.shortName).font(.caption).foregroundStyle(.secondary)
                     }
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
             }
             Button {
                 isCreatingTag = true

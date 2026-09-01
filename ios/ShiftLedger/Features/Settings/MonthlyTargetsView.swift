@@ -40,7 +40,9 @@ struct MonthlyTargetsView: View {
                                 .foregroundStyle(override == nil ? Color.secondary.opacity(0.7) : Palette.blue)
                                 .frame(width: 40, alignment: .trailing)
                         }
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
                 }
             } header: {
                 Text("\(String(year))年每月基本工时")

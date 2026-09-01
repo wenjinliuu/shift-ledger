@@ -10,24 +10,22 @@ struct StatsScreen: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Palette.canvas(Palette.purple)
-                ScrollView {
-                    VStack(spacing: 16) {
-                        scopePicker
-                        summarySection
-                        if document.work.trackHours {
-                            progressSection
-                        }
-                        compositionSection
-                        if document.work.trackHours {
-                            monthlyChartSection
-                        }
+            ScrollView {
+                VStack(spacing: 16) {
+                    scopePicker
+                    summarySection
+                    if document.work.trackHours {
+                        progressSection
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 28)
+                    compositionSection
+                    if document.work.trackHours {
+                        monthlyChartSection
+                    }
                 }
+                .padding(.horizontal, 16)
             }
+            .contentMargins(.bottom, 96, for: .scrollContent)
+            .background { Palette.canvas(Palette.purple) }
             .navigationTitle("统计")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -264,7 +262,7 @@ struct ProgressRing: View {
             Circle()
                 .stroke(Color.primary.opacity(0.08), lineWidth: 12)
             Circle()
-                .trim(from: 0, to: max(0.001, min(progress, 1)))
+                .trim(from: 0, to: min(max(progress, 0), 1))
                 .stroke(LinearGradient(colors: [Palette.green, Palette.cyan],
                                        startPoint: .top, endPoint: .bottomTrailing),
                         style: StrokeStyle(lineWidth: 12, lineCap: .round))

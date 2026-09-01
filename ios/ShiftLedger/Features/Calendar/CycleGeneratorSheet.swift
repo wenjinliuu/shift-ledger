@@ -120,6 +120,7 @@ struct CycleGeneratorSheet: View {
                         .disabled(shiftIds.isEmpty || name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
+            .onAppear(perform: prefillFromActiveCycle)
         }
     }
 
@@ -129,6 +130,14 @@ struct CycleGeneratorSheet: View {
     }
 
     private var startKey: String { ScheduleCalendar.key(startDate) }
+
+    /// 已经在用某套循环时，进来就填好它，改起点或改某一天都不用从头拼。
+    private func prefillFromActiveCycle() {
+        guard shiftIds.isEmpty, let active = document.activeCycle else { return }
+        shiftIds = active.shiftIds
+        name = active.name
+        if let date = ScheduleCalendar.date(from: active.startDate) { startDate = date }
+    }
 
     private func apply() {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
