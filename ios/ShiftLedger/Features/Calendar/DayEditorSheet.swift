@@ -65,6 +65,7 @@ struct DayEditorSheet: View {
                         dismiss()
                     } label: {
                         Label("清空这一天", systemImage: "trash")
+                            .foregroundStyle(.red)
                     }
                 }
             }

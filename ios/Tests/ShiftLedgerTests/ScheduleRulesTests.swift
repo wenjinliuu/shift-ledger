@@ -187,6 +187,23 @@ final class ScheduleRulesTests: XCTestCase {
 
     // MARK: - 班次时长
 
+    func testCompactRangeMatchesTheWebVersion() {
+        // 日历上显示的紧凑区间：8~20、20~8、16~24（结束的 00:00 写成 24）
+        let day = ShiftDefinition(id: "s1", name: "白班", shortName: "白", color: AccentHex.yellow,
+                                  startTime: "08:00", endTime: "20:00", defaultHours: 12)
+        let night = ShiftDefinition(id: "s2", name: "夜班", shortName: "夜", color: AccentHex.blue,
+                                    startTime: "20:00", endTime: "08:00", crossesMidnight: true,
+                                    defaultHours: 12)
+        let middle = ShiftDefinition(id: "s3", name: "中班", shortName: "中", color: AccentHex.cyan,
+                                     startTime: "16:00", endTime: "00:00", defaultHours: 8)
+        let half = ShiftDefinition(id: "s4", name: "半点班", shortName: "半", color: AccentHex.green,
+                                   startTime: "08:30", endTime: "17:45", defaultHours: 9)
+        XCTAssertEqual(day.compactRange, "8~20")
+        XCTAssertEqual(night.compactRange, "20~8")
+        XCTAssertEqual(middle.compactRange, "16~24")
+        XCTAssertEqual(half.compactRange, "8.5~18")
+    }
+
     func testCrossMidnightShiftDuration() {
         XCTAssertEqual(ShiftDefinition.duration(startTime: "20:00", endTime: "08:00", crossesMidnight: true), 12)
         XCTAssertEqual(ShiftDefinition.duration(startTime: "16:00", endTime: "00:00", crossesMidnight: false), 8)

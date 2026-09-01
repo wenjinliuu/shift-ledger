@@ -16,6 +16,11 @@ final class ScreenshotTests: XCTestCase {
     func testCaptureMainScreens() {
         capture("01-calendar")
 
+        // 滚到底再截一张：验证内容没有被浮动标签栏压住
+        scrollToBottom()
+        capture("01b-calendar-bottom")
+        tapTab("日历")
+
         tapTab("统计")
         capture("02-stats")
 
@@ -49,6 +54,13 @@ final class ScreenshotTests: XCTestCase {
         XCTAssertTrue(tab.waitForExistence(timeout: 10), "找不到标签：\(label)")
         tab.tap()
         // 等一帧，避免截到转场中间态
+        Thread.sleep(forTimeInterval: 1.2)
+    }
+
+    private func scrollToBottom() {
+        let scroll = app.scrollViews.firstMatch
+        guard scroll.waitForExistence(timeout: 5) else { return }
+        for _ in 0..<4 { scroll.swipeUp(velocity: .fast) }
         Thread.sleep(forTimeInterval: 1.2)
     }
 

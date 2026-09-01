@@ -34,6 +34,7 @@ struct TagEditorView: View {
                             dismiss()
                         } label: {
                             Label("删除这个标签", systemImage: "trash")
+                                .foregroundStyle(.red)
                         }
                     } footer: {
                         Text("删除后，已挂这个标签的日子会自动去掉它，排班本身不受影响。")

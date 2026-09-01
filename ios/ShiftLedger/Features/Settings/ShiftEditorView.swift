@@ -76,6 +76,7 @@ struct ShiftEditorView: View {
                             showsDeleteConfirm = true
                         } label: {
                             Label("删除这个班次", systemImage: "trash")
+                                .foregroundStyle(.red)
                         }
                     } footer: {
                         Text(usageFooter)

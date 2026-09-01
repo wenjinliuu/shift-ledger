@@ -81,7 +81,8 @@ struct ShiftDefinition: Identifiable, Codable, Hashable, Sendable {
         let hour = total / 60
         let minute = total % 60
         if asEnd, hour == 0, minute == 0 { return "24" }
-        let rounded = (Double(hour) + Double(minute) / 60 * 2).rounded() / 2
+        // 先把 时+分 换算成小时，再按半小时取整；漏掉这对括号会把小时数除以 2
+        let rounded = ((Double(hour) + Double(minute) / 60) * 2).rounded() / 2
         return HoursFormatter.compact(rounded)
     }
 }

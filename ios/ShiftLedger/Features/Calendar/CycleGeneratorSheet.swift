@@ -35,6 +35,7 @@ struct CycleGeneratorSheet: View {
                             dismiss()
                         } label: {
                             Label("停用循环", systemImage: "pause.circle")
+                                .foregroundStyle(.red)
                         }
                     }
                 }
