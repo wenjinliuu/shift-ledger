@@ -9,6 +9,10 @@ on:
         type: string
   push:
     tags: ["v*"]
+    # 合入 main 之前 workflow_dispatch 用不了，也推不了 tag。
+    # 只有改动本文件时才触发，相当于一个按需开关；合并后收回。
+    branches: ["claude/**"]
+    paths: [".github/workflows/testflight.yml"]
 
 concurrency:
   group: testflight
