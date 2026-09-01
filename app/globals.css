@@ -2200,7 +2200,12 @@ button {
 .data-actions .secondary-button {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
+}
+a.secondary-button {
+  color: inherit;
+  text-decoration: none;
 }
 .data-actions .app-icon {
   width: 16px;
@@ -13109,4 +13114,38 @@ select:focus-visible {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
+}
+
+/* 隐私政策等纯文本法务页面 */
+.legal-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) 20px
+    calc(40px + env(safe-area-inset-bottom, 0px));
+  line-height: 1.75;
+  color: #22242b;
+}
+
+.legal-page h1 {
+  font-size: 24px;
+  margin: 0 0 6px;
+}
+
+.legal-page h2 {
+  font-size: 17px;
+  margin: 26px 0 8px;
+}
+
+.legal-page p {
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+
+.legal-meta {
+  color: #6b7080;
+  font-size: 13px;
+}
+
+.legal-page a {
+  color: #1e6fe8;
 }

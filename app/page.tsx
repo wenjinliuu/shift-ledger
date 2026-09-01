@@ -43,6 +43,10 @@ import {
   type WorkSystem,
 } from "./lib/schedule";
 
+const APP_VERSION = "1.0.0";
+const PRIVACY_URL = "https://wenjinliuu.github.io/shift-ledger/privacy/";
+const SUPPORT_URL = "https://github.com/wenjinliuu/shift-ledger/issues";
+
 type View = "calendar" | "stats" | "settings";
 type StatsScope = "month" | "year";
 type EntityEditor =
@@ -2658,6 +2662,34 @@ function SettingsView({
                 importBackup(event.target.files?.[0])
               }
             />
+          </div>
+        </section>
+        <section className="glass-panel setting-card wide about-card">
+          <div>
+            <p className="eyebrow">关于</p>
+            <h2>循环班表 {APP_VERSION}</h2>
+            <span>
+              数据只保存在本机，不上传服务器。工时为个人预估，最终以公司考勤记录
+              和适用制度为准。
+            </span>
+          </div>
+          <div className="data-actions">
+            <a
+              className="secondary-button"
+              href={PRIVACY_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              隐私政策
+            </a>
+            <a
+              className="secondary-button"
+              href={SUPPORT_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              反馈与支持
+            </a>
           </div>
         </section>
       </div>

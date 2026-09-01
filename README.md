@@ -1,6 +1,8 @@
 # 循环班表
 
 专门为不按星期工作的人设计的个人循环班表。采用手机优先设计，可作为 PWA 添加到桌面使用。
+`ios/` 是同一款产品的 iOS 原生版（SwiftUI + Liquid Glass），与网页版共用同一套排班与
+工时规则，备份文件可以互相导入。
 
 ## 功能
 
@@ -23,7 +25,8 @@
 
 ## 数据说明
 
-当前版本的数据保存在浏览器本机，不会上传到服务器。数据结构版本为 v2；旧版 `day / night / rest` 数据会在首次打开时自动迁移。更换设备或清除浏览器数据前，请先在设置页导出 JSON 备份。
+当前版本的数据保存在设备本机，不会上传到服务器。网页版写入浏览器本机存储，
+iOS 版写入应用沙盒 Application Support 下的 `shift-ledger.json`。数据结构版本为 v2；旧版 `day / night / rest` 数据会在首次打开时自动迁移。更换设备或清除浏览器数据前，请先在设置页导出 JSON 备份。
 
 首次使用保持空日历，不会自动生成任何班次。可从循环排班模板开始，也可以逐日手动记录。
 
@@ -43,6 +46,23 @@ npm run build
 ```
 
 项目使用 Next.js 静态导出，Netlify 发布目录为 `out`。`main` 分支更新后，Netlify 会自动重新构建和发布。
+
+## iOS 版
+
+`ios/` 下是 SwiftUI 原生实现（XcodeGen 管理工程，`.xcodeproj` 不入库）：
+
+```bash
+cd ios
+brew install xcodegen
+./Scripts/bootstrap.sh --open
+```
+
+Bundle ID 为 `com.wenjinliu.shiftledger`，仅 iPhone、仅竖屏，最低 iOS 26。
+排班、工时、加班与节假日规则在 `ios/ShiftLedger/Rules/` 下逐条对应网页版
+`app/lib/`，单元测试照着 `tests/` 写，两端结论必须一致；JSON 备份可以互导。
+
+工程说明见 [`ios/README.md`](ios/README.md)，签名、元数据、审核与发版流程见
+[`docs/ios-release.md`](docs/ios-release.md)，隐私政策页面在 `/privacy/`。
 
 ## 免责声明
 
