@@ -3,10 +3,6 @@ name: iOS Screenshots
 # App Store 需要 6.9 英寸 iPhone 截图，这里在模拟器里跑一遍主要页面并导出，
 # 顺带充当界面自查：产物在 Actions 的 artifact 里下载。
 on:
-  # 合入 main 之前 workflow_dispatch 用不了，先让功能分支的推送也能触发；
-  # 合并后会收回，只留手动触发。
-  push:
-    branches: ["claude/**"]
   workflow_dispatch:
     inputs:
       device:

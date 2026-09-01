@@ -49,11 +49,14 @@ Xcode 里一次性配置：
    - 平台 iOS，名称「循环班表」（名称需全局唯一，被占用时可用「循环班表 · 倒班工时」等）
    - 主要语言：简体中文，Bundle ID 选上面的，SKU 可填 `shift-ledger`
 2. **归档上传**：两条路都行
+   - CI（推荐）：仓库 Actions → `TestFlight` → Run workflow，或推一个 `v*` tag。
+     归档阶段不签名，发布签名由导出阶段的 App Store Connect 密钥自动签发——
+     带自动签名归档会去申请「开发」描述文件，而它要求团队里注册过设备，CI 上必然失败。
    - 本地：Xcode → Product → Destination 选 `Any iOS Device` → Archive → Distribute App
-   - CI：仓库 Actions 里手动跑 `TestFlight` 工作流（需要下面的 Secrets）
 3. **填写元数据**（草稿见下节），上传截图：
    - 至少提供 6.9 英寸 iPhone 截图（1320×2868）3–10 张，其余尺寸 Apple 会自动缩放
-   - 可在模拟器（iPhone 16 Pro Max）用 ⌘S 截图
+   - 现成的：Actions → `iOS Screenshots` → Run workflow，跑完在 artifact 里下载，
+     也会推一份到 `ci/screenshots` 分支；尺寸正好是 1320×2868
 4. **App 隐私**：选择「不收集数据」；隐私政策 URL 填上面那个线上地址
 5. **App 审核信息**：无需登录账号，备注里写明「离线本地工具，无账号体系，无服务器」
 6. 先用 TestFlight 自测一轮，再提交审核
