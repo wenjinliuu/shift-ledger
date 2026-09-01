@@ -61,6 +61,21 @@ targets:
         CODE_SIGN_STYLE: Automatic
         CODE_SIGNING_ALLOWED: NO
 
+  ShiftLedgerUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/ShiftLedgerUITests
+    dependencies:
+      - target: ShiftLedger
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.wenjinliu.shiftledger.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGNING_ALLOWED: NO
+        TEST_TARGET_NAME: ShiftLedger
+
 schemes:
   ShiftLedger:
     build:
@@ -75,3 +90,16 @@ schemes:
       config: Debug
     archive:
       config: Release
+
+  # 截图专用：只跑 UI 测试，产物是 App Store 素材，不参与日常 CI
+  ShiftLedgerScreenshots:
+    build:
+      targets:
+        ShiftLedger: all
+        ShiftLedgerUITests: [test]
+    test:
+      targets:
+        - ShiftLedgerUITests
+      gatherCoverageData: false
+    run:
+      config: Debug

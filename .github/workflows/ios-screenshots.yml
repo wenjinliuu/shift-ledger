@@ -1,0 +1,90 @@
+name: iOS Screenshots
+
+# App Store 需要 6.9 英寸 iPhone 截图，这里在模拟器里跑一遍主要页面并导出，
+# 顺带充当界面自查：产物在 Actions 的 artifact 里下载。
+on:
+  # 合入 main 之前 workflow_dispatch 用不了，先让功能分支的推送也能触发；
+  # 合并后会收回，只留手动触发。
+  push:
+    branches: ["claude/**"]
+  workflow_dispatch:
+    inputs:
+      device:
+        description: "模拟器机型（留空自动挑最大的 Pro Max）"
+        required: false
+        type: string
+
+concurrency:
+  group: ios-screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: ios
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install tools
+        run: brew install xcodegen xcbeautify
+
+      - name: Generate project
+        run: xcodegen generate
+
+      # 优先挑 6.9 英寸的 Pro Max，挑不到再退回任意 iPhone
+      # 优先挑 6.9 英寸的 Pro Max，挑不到再退回任意可用 iPhone
+      - name: Pick simulator
+        id: sim
+        run: |
+          NAME="${{ inputs.device }}"
+          if [ -z "$NAME" ]; then
+            NAME=$(xcrun simctl list devices available \
+              | grep -oE "iPhone [0-9]+ Pro Max" | sort -V | tail -1)
+          fi
+          if [ -z "$NAME" ]; then
+            NAME=$(xcrun simctl list devices available \
+              | grep -oE "^ +iPhone [^(]+" | sed 's/^ *//;s/ *$//' | sort -V | tail -1)
+          fi
+          if [ -z "$NAME" ]; then echo "找不到可用的 iPhone 模拟器" >&2; exit 1; fi
+          echo "使用模拟器：$NAME"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Run screenshot UI tests
+        env:
+          NSUnbufferedIO: YES
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project ShiftLedger.xcodeproj \
+            -scheme ShiftLedgerScreenshots \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
+            -resultBundlePath build/Screenshots.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            clean test | xcbeautify --renderer github-actions
+
+      - name: Export screenshots
+        if: always()
+        run: |
+          mkdir -p build/screenshots
+          xcrun xcresulttool export attachments \
+            --path build/Screenshots.xcresult \
+            --output-path build/screenshots
+          ls -R build/screenshots || true
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ github.run_number }}
+          path: ios/build/screenshots
+          if-no-files-found: warn

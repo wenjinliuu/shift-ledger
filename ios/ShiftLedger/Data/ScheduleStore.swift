@@ -50,6 +50,12 @@ final class ScheduleStore {
     // MARK: - 读写
 
     func load() {
+        // 截图流程用示例数据启动，既不读也不写用户文件。
+        if DemoData.isEnabled {
+            document = DemoData.document()
+            isReady = false
+            return
+        }
         defer { isReady = true }
         guard let data = try? Data(contentsOf: fileURL) else { return }
         if let decoded = try? JSONDecoder().decode(ScheduleDocument.self, from: data) {
