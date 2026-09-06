@@ -159,6 +159,10 @@ struct StatsScreen: View {
         }
     }
 
+    /// 排了班的月份。没排班的月份不画计划线，否则会和基本工时线重合，
+    /// 看着像「计划工时正好等于基本工时」。
+    private var scheduledPoints: [MonthlyPoint] { monthlyPoints.filter { $0.planned > 0 } }
+
     /// 基本工时打底，加班量堆在它上面：两条线之间的面积就是这个年度里
     /// 每个月超出的部分，比并排的柱子更容易看出「哪几个月在往上顶」。
     private var hoursChartSection: some View {
@@ -180,7 +184,7 @@ struct StatsScreen: View {
 
                 if document.work.trackOvertime {
                     // 只填基本工时线以上的那一段
-                    ForEach(monthlyPoints) { point in
+                    ForEach(scheduledPoints) { point in
                         AreaMark(x: .value("月份", point.label),
                                  yStart: .value("基本工时", point.basic),
                                  yEnd: .value("计划工时", point.overtimeTop))
@@ -202,7 +206,7 @@ struct StatsScreen: View {
                 }
 
                 if document.work.trackOvertime {
-                    ForEach(monthlyPoints) { point in
+                    ForEach(scheduledPoints) { point in
                         LineMark(x: .value("月份", point.label),
                                  y: .value("计划工时", point.overtimeTop),
                                  series: .value("类型", "计划"))

@@ -208,11 +208,13 @@ private struct DayCell: View {
     /// 工时在左（这一格里最该看清的数字），标签用彩点在右，不抢位置。
     private var footerRow: some View {
         HStack(spacing: 2) {
-            if showsHours, let record, let shift {
+            if showsHours, let record {
+                // 工时是这一格最该看清的数字，用主文本色而不是班次色——
+                // 浅黄这类班次色压在浅底上对比度不够。
                 Text(HoursFormatter.hours(record.hours))
                     .font(.system(size: 10, weight: .semibold))
                     .monospacedDigit()
-                    .foregroundStyle(shift.tint)
+                    .foregroundStyle(.primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
             }
