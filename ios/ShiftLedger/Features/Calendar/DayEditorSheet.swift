@@ -90,9 +90,14 @@ struct DayEditorSheet: View {
         }
     }
 
+    /// 标题写「9月9日 周三」，是法定节假日再缀上名字。
     private var titleText: String {
+        guard let parts = ScheduleCalendar.components(from: date) else { return date }
+        let weekday = ScheduleCalendar.weekdaySymbols[ScheduleCalendar.weekdayIndex(date)]
+        var text = "\(parts.month + 1)月\(parts.day)日 周\(weekday)"
         let holiday = Holidays.name(of: date)
-        return holiday.isEmpty ? date : "\(date) · \(holiday)"
+        if !holiday.isEmpty { text += " · \(holiday)" }
+        return text
     }
 
     /// 不定时工时和手动记录制下才需要逐日登记加班。
@@ -138,10 +143,13 @@ struct ShiftPickerGrid: View {
                             Text(shift.name)
                                 .font(.footnote.weight(.semibold))
                                 .lineLimit(1)
-                            if !shift.compactRange.isEmpty {
-                                Text(shift.compactRange)
-                                    .font(.system(size: 9))
+                            if !shift.fullRange.isEmpty {
+                                Text(shift.fullRange)
+                                    .font(.system(size: 9.5))
+                                    .monospacedDigit()
                                     .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
                             }
                         }
                         Spacer(minLength: 0)

@@ -6,6 +6,7 @@ struct SettingsScreen: View {
     @Environment(AppPreferences.self) private var preferences
     @Environment(\.showToast) private var showToast
 
+    @State private var shiftPendingDeletion: ShiftDefinition?
     @State private var editingShift: ShiftDefinition?
     @State private var editingTag: DutyTag?
     @State private var isCreatingShift = false
@@ -16,10 +17,10 @@ struct SettingsScreen: View {
     var body: some View {
         NavigationStack {
             Form {
-                careerSection
+                workSection
                 shiftsSection
                 tagsSection
-                workSection
+                careerSection
                 displaySection
                 appearanceSection
 
@@ -52,7 +53,6 @@ struct SettingsScreen: View {
                     }
                 }
             }
-            .contentMargins(.bottom, 96, for: .scrollContent)
             .navigationTitle("设置")
             .sheet(item: $editingShift) { shift in
                 ShiftEditorView(shift: shift)
@@ -66,6 +66,19 @@ struct SettingsScreen: View {
             .sheet(isPresented: $isCreatingTag) {
                 TagEditorView(tag: nil)
             }
+            .confirmationDialog(deletionPrompt,
+                                isPresented: Binding(get: { shiftPendingDeletion != nil },
+                                                     set: { if !$0 { shiftPendingDeletion = nil } }),
+                                titleVisibility: .visible) {
+                Button("删除班次", role: .destructive) {
+                    guard let shift = shiftPendingDeletion else { return }
+                    store.deleteShift(shift)
+                    showToast("班次已删除", symbol: "trash")
+                    shiftPendingDeletion = nil
+                }
+                Button("取消", role: .cancel) { shiftPendingDeletion = nil }
+            }
+            .sensoryFeedback(.success, trigger: document.shifts.count)
         }
     }
 
@@ -116,6 +129,24 @@ struct SettingsScreen: View {
                 }
                 // 不加 .plain 的话整行会被按钮的强调色染蓝
                 .buttonStyle(.plain)
+                .contextMenu {
+                    Button { editingShift = shift } label: { Label("编辑班次", systemImage: "pencil") }
+                    Button { duplicate(shift) } label: { Label("复制一份", systemImage: "plus.square.on.square") }
+                    if shift.id != ShiftID.rest {
+                        Button(role: .destructive) { shiftPendingDeletion = shift } label: {
+                            Label("删除班次", systemImage: "trash")
+                        }
+                    }
+                }
+                .swipeActions(edge: .trailing) {
+                    if shift.id != ShiftID.rest {
+                        Button(role: .destructive) { shiftPendingDeletion = shift } label: {
+                            Label("删除", systemImage: "trash")
+                        }
+                    }
+                    Button { editingShift = shift } label: { Label("编辑", systemImage: "pencil") }
+                        .tint(Palette.blue)
+                }
             }
             Button {
                 isCreatingShift = true
@@ -127,6 +158,24 @@ struct SettingsScreen: View {
         } footer: {
             Text("名称、简称、颜色、时间、跨天、休息属性和默认工时都可以改。")
         }
+    }
+
+    private var deletionPrompt: String {
+        guard let shift = shiftPendingDeletion else { return "" }
+        let used = store.usageCount(of: shift)
+        return used > 0
+            ? "「\(shift.name)」已排了 \(used) 天，删除会一并清空这些天。"
+            : "删除「\(shift.name)」？"
+    }
+
+    /// 以现有班次为模板加一个新班次，比从空白开始快。
+    private func duplicate(_ shift: ShiftDefinition) {
+        var copy = shift
+        copy.id = ShiftCatalog.makeId("shift")
+        copy.name = "\(shift.name) 副本"
+        copy.legacyType = nil
+        store.saveShift(copy)
+        editingShift = copy
     }
 
     private func detail(for shift: ShiftDefinition) -> String {
@@ -162,6 +211,22 @@ struct SettingsScreen: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .contextMenu {
+                    Button { editingTag = tag } label: { Label("编辑标签", systemImage: "pencil") }
+                    Button(role: .destructive) { store.deleteTag(tag) } label: {
+                        Label("删除标签", systemImage: "trash")
+                    }
+                }
+                .swipeActions(edge: .trailing) {
+                    Button(role: .destructive) {
+                        store.deleteTag(tag)
+                        showToast("标签已删除", symbol: "trash")
+                    } label: {
+                        Label("删除", systemImage: "trash")
+                    }
+                    Button { editingTag = tag } label: { Label("编辑", systemImage: "pencil") }
+                        .tint(Palette.blue)
+                }
             }
             Button {
                 isCreatingTag = true
@@ -253,7 +318,7 @@ struct SettingsScreen: View {
         } header: {
             Text("工时与加班")
         } footer: {
-            Text("工时为个人预估，最终以公司考勤记录和适用制度为准。")
+            Text("改班次默认工时时，仍按旧默认值排的日子会一起更新；单独调过工时的那些天保持不变。工时为个人预估，最终以公司考勤记录和适用制度为准。")
         }
     }
 

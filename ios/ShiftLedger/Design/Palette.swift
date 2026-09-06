@@ -17,8 +17,11 @@ extension Color {
     }
 }
 
-/// 语义色与页面底色。色值与 web 版 `ACCENT_COLORS` 完全一致，
-/// 深浅两套由系统动态色提供，不再手写两份主题变量。
+/// 语义色与页面层次。
+///
+/// 底色、卡片、格子三层直接用系统的分组背景色，深浅两套由系统给，
+/// 和「设置」「健康」这些系统 App 是同一套灰度关系。
+/// 班次色沿用 web 版的强调色，只用在内容上，不参与背景层次。
 enum Palette {
     static let blue = Color(hexString: AccentHex.blue)
     static let green = Color(hexString: AccentHex.green)
@@ -30,26 +33,25 @@ enum Palette {
     static let cyan = Color(hexString: AccentHex.cyan)
     static let red = Color(hexString: AccentHex.red)
 
-    /// 法定节假日的标记色。
+    /// 法定节假日标记。
     static let holiday = Color(hexString: AccentHex.red)
 
-    /// 页面底色。液态玻璃需要底下有内容才好看，所以用一层极淡的辉光而不是纯色。
-    static func canvas(_ tint: Color = Palette.blue) -> some View {
-        ZStack {
-            Color(.systemGroupedBackground)
-            RadialGradient(colors: [tint.opacity(0.14), .clear],
-                           center: .init(x: 0.85, y: 0.05), startRadius: 0, endRadius: 420)
-            RadialGradient(colors: [Palette.purple.opacity(0.10), .clear],
-                           center: .init(x: 0.05, y: 0.98), startRadius: 0, endRadius: 380)
-        }
-        .ignoresSafeArea()
-    }
+    // MARK: - 背景层次
+
+    /// 页面底色。
+    static let canvas = Color(.systemGroupedBackground)
+    /// 卡片。
+    static let card = Color(.secondarySystemGroupedBackground)
+    /// 卡片里的格子、输入框这类更内层的面。
+    static let inset = Color(.tertiarySystemGroupedBackground)
+    /// 分隔线。
+    static let hairline = Color(.separator)
 }
 
 extension ShiftDefinition {
     var tint: Color { Color(hexString: color) }
 
-    /// 班次色块用的微渐变，和 web 版的 `--entity-color / --entity-color-2` 同一套。
+    /// 班次色块用的微渐变，只在色球与日历胶囊这种小面积上用。
     var gradient: LinearGradient {
         LinearGradient(colors: [Color(hexString: color),
                                 Color(hexString: AccentHex.gradientEnd(for: color))],

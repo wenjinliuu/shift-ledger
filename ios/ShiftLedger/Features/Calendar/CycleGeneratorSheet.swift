@@ -75,10 +75,10 @@ struct CycleGeneratorSheet: View {
                         CycleStrip(shiftIds: shiftIds, document: document, showsIndex: true)
                         HStack {
                             Button("删掉最后一天") { _ = shiftIds.popLast() }
-                                .buttonStyle(SecondaryGlassButton(tint: Palette.orange))
+                                .buttonStyle(SecondaryButton(tint: Palette.orange))
                             Spacer()
                             Button("清空") { shiftIds = [] }
-                                .buttonStyle(SecondaryGlassButton(tint: Palette.red))
+                                .buttonStyle(SecondaryButton(tint: Palette.red))
                         }
                     }
                     ShiftPickerGrid(shifts: document.orderedShifts, selection: "") { shift in

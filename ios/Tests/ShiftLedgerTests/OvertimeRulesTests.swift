@@ -95,6 +95,36 @@ final class OvertimeRulesTests: XCTestCase {
         XCTAssertEqual(WorkHours.monthlyTarget(document, year: 2026, month: 9), 152)
     }
 
+    /// 用户实测的口径：2026 年 9 月基本工时 168，排 20 个班、每班 11.5 小时，
+    /// 总工时 230，加班应当是 62 而不是按旧默认值算出来的 72。
+    func testComprehensiveOvertimeUsesTheShiftsCurrentHours() {
+        var document = ScheduleDocument.makeDefault()
+        document.work.system = .comprehensive
+        document.work.period = .month
+
+        let workdays = [2, 3, 4, 5, 8, 9, 10, 11, 14, 15, 16, 17, 20, 21, 22, 23, 26, 27, 28, 29]
+        document.records = workdays.map {
+            DayRecord(date: String(format: "2026-09-%02d", $0), shiftId: ShiftID.day,
+                      hours: 11.5, source: .cycle)
+        }
+
+        let months = [ReportingMonth(year: 2026, month: 8)]
+        XCTAssertEqual(WorkHours.target(document, months: months), 168)
+        XCTAssertEqual(document.records.reduce(0) { $0 + $1.hours }, 230)
+        XCTAssertEqual(WorkHours.periodOvertime(document, records: document.records, months: months), 62)
+    }
+
+    func testRestRecordsNeverCountTowardHours() {
+        var document = ScheduleDocument.makeDefault()
+        document.work.system = .comprehensive
+        document.records = [
+            DayRecord(date: "2026-09-02", shiftId: ShiftID.day, hours: 12, source: .cycle),
+            // 休息日即使误填了工时也不该进统计
+            DayRecord(date: "2026-09-03", shiftId: ShiftID.rest, hours: 8, source: .cycle),
+        ]
+        XCTAssertEqual(WorkHours.workRecords(document).count, 1)
+    }
+
     func testMonthlyOvertimeUsesEachMonthsOwnTarget() {
         var document = ScheduleDocument.makeDefault()
         document.work.system = .comprehensive
