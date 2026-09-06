@@ -100,7 +100,8 @@ struct CalendarScreen: View {
                         removal: .move(edge: slideEdge == .trailing ? .leading : .trailing).combined(with: .opacity)
                     ))
                     .offset(x: dragOffset)
-                    .gesture(monthDrag(width: proxy.size.width))
+                    // 和纵向滚动共存：手势自己判断方向，纵向的交回给 ScrollView
+                    .simultaneousGesture(monthDrag(width: proxy.size.width))
             }
             .frame(height: gridHeight)
             .clipped()
@@ -128,13 +129,16 @@ struct CalendarScreen: View {
     }
 
     private func monthDrag(width: CGFloat) -> some Gesture {
-        DragGesture(minimumDistance: 12)
+        DragGesture(minimumDistance: 14)
             .onChanged { value in
-                guard !batchMode else { return }
+                guard !batchMode, isHorizontal(value.translation) else { return }
                 dragOffset = rubberband(value.translation.width, limit: width)
             }
             .onEnded { value in
-                guard !batchMode else { return }
+                guard !batchMode, isHorizontal(value.translation) else {
+                    dragOffset = 0
+                    return
+                }
                 // 用速度把落点投影出去，快速轻扫也能切月
                 let projected = value.translation.width + value.velocity.width * 0.12
                 if projected < -width * 0.28 {
@@ -145,6 +149,11 @@ struct CalendarScreen: View {
                     withAnimation(.spring(response: 0.32, dampingFraction: 1)) { dragOffset = 0 }
                 }
             }
+    }
+
+    /// 明显偏水平才算切月，否则这一下是在纵向滚页面。
+    private func isHorizontal(_ translation: CGSize) -> Bool {
+        abs(translation.width) > abs(translation.height) * 1.4
     }
 
     /// 越界后递减跟手，靠近边界像被拉住而不是撞墙。

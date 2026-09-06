@@ -23,6 +23,8 @@ final class ScreenshotTests: XCTestCase {
 
         tapTab("统计")
         capture("02-stats")
+        scrollToBottom()
+        capture("02b-stats-chart")
 
         tapTab("设置")
         capture("03-settings")

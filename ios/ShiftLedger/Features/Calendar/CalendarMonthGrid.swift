@@ -68,13 +68,13 @@ struct CalendarMonthGrid: View {
 
 /// 格子里每一段信息的固定高度。
 enum DayCellMetrics {
-    static let date: CGFloat = 15
-    static let holiday: CGFloat = 11
-    static let time: CGFloat = 21
-    static let shift: CGFloat = 19
-    static let footer: CGFloat = 12
+    static let date: CGFloat = 14
+    static let holiday: CGFloat = 10
+    static let time: CGFloat = 19
+    static let shift: CGFloat = 18
+    static let footer: CGFloat = 11
     static let spacing: CGFloat = 2
-    static let verticalPadding: CGFloat = 5
+    static let verticalPadding: CGFloat = 4
 }
 
 private struct DayCell: View {
@@ -173,7 +173,7 @@ private struct DayCell: View {
             Text(shift?.startTime ?? " ")
             Text(shift?.endTime ?? " ")
         }
-        .font(.system(size: 9, weight: .medium))
+        .font(.system(size: 8.5, weight: .medium))
         .monospacedDigit()
         .foregroundStyle(.secondary)
         .lineLimit(1)
