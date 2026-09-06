@@ -110,6 +110,15 @@ final class ScheduleStore {
 
     var focusedMonthLabel: String { "\(focusedYear)年\(focusedMonth + 1)月" }
 
+    var focusedMonthKey: String { ScheduleCalendar.monthKey(year: focusedYear, month: focusedMonth) }
+
+    /// 当前查看的月份是否早于本月（决定「今天」按钮该往哪个方向滑）。
+    func isFocusedBefore(today: Bool = true) -> Bool {
+        let parts = ScheduleCalendar.calendar.dateComponents([.year, .month], from: Date())
+        let current = (parts.year ?? focusedYear) * 12 + (parts.month ?? 1) - 1
+        return focusedYear * 12 + focusedMonth < current
+    }
+
     func changeMonth(by delta: Int) {
         let absolute = focusedYear * 12 + focusedMonth + delta
         focusedYear = absolute / 12
@@ -221,14 +230,30 @@ final class ScheduleStore {
         }
     }
 
+    /// 保存班次。改了默认工时时，把还在用旧默认值的日子一起更新——
+    /// 否则「把白班从 12 小时改成 11.5」只会改设置页的数字，
+    /// 已经排出去的班还按旧工时算，统计和加班就对不上了。
+    /// 单独调整过工时的那些天保持原样。
     func saveShift(_ shift: ShiftDefinition) {
         update { document in
-            if let index = document.shifts.firstIndex(where: { $0.id == shift.id }) {
-                document.shifts[index] = shift
-            } else {
+            guard let index = document.shifts.firstIndex(where: { $0.id == shift.id }) else {
                 document.shifts.append(shift)
+                return
+            }
+            let previousHours = document.shifts[index].defaultHours
+            document.shifts[index] = shift
+            guard previousHours != shift.defaultHours else { return }
+            for recordIndex in document.records.indices
+            where document.records[recordIndex].shiftId == shift.id
+                && document.records[recordIndex].hours == previousHours {
+                document.records[recordIndex].hours = shift.defaultHours
             }
         }
+    }
+
+    /// 上一次保存班次时，跟着更新了多少天。供界面提示用。
+    func recordsMatchingDefaultHours(of shift: ShiftDefinition) -> Int {
+        document.records.filter { $0.shiftId == shift.id && $0.hours == shift.defaultHours }.count
     }
 
     /// 删除班次。已经排过这个班的日子会一并清掉，避免留下悬空引用。

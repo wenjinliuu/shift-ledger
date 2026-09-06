@@ -42,10 +42,16 @@ enum WorkHours {
         months.reduce(0) { $0 + monthlyTarget(document, month: $1) }
     }
 
+    /// 计入工时的记录。休息、备班这类不计工作的班次一律排除。
+    static func workRecords(_ document: ScheduleDocument, in records: [DayRecord]? = nil) -> [DayRecord] {
+        (records ?? document.records).filter { document.shift($0.shiftId)?.countsAsWork == true }
+    }
+
     /// 一段月份区间的加班合计。
     static func periodOvertime(_ document: ScheduleDocument,
-                               records: [DayRecord],
+                               records rawRecords: [DayRecord],
                                months: [ReportingMonth]) -> Double {
+        let records = workRecords(document, in: rawRecords)
         let work = document.work
 
         if work.system == .custom && work.customRule == .monthly {
@@ -116,7 +122,8 @@ enum WorkHours {
         if document.work.system == .comprehensive {
             return comprehensiveScope(document, year: year, month: month, today: today)
         }
-        let monthRecords = document.records.filter { $0.monthKey == ScheduleCalendar.monthKey(year: year, month: month) }
+        let monthKey = ScheduleCalendar.monthKey(year: year, month: month)
+        let monthRecords = workRecords(document).filter { $0.monthKey == monthKey }
         let target = monthlyTarget(document, year: year, month: month)
         return OvertimeSummary(
             label: "\(month + 1)月",
@@ -136,7 +143,7 @@ enum WorkHours {
 
         if document.work.period == .week {
             let monthKey = ScheduleCalendar.monthKey(year: year, month: month)
-            let monthRecords = document.records.filter { $0.monthKey == monthKey }
+            let monthRecords = workRecords(document).filter { $0.monthKey == monthKey }
             let settings = weeklySettings(document.work)
             return OvertimeSummary(
                 label: "\(month + 1)月各周",
@@ -168,7 +175,7 @@ enum WorkHours {
         }
 
         let keys = Set(scopeMonths.map(\.key))
-        let scoped = document.records.filter { keys.contains($0.monthKey) }
+        let scoped = workRecords(document).filter { keys.contains($0.monthKey) }
         let target = target(document, months: scopeMonths)
         return OvertimeSummary(
             label: label,

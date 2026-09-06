@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// 三个主页面：日历、统计、设置。
-/// 标签栏用系统原生的液态玻璃，向下滚动时自动收起。
+/// 标签栏常驻：这三页之间来回切换很频繁，滚动时把它收起来反而要多点一次。
 struct RootView: View {
     @Environment(ScheduleStore.self) private var store
 
@@ -20,7 +20,6 @@ struct RootView: View {
                 SettingsScreen()
             }
         }
-        .tabBarMinimizeBehavior(.onScrollDown)
         .environment(\.showToast, ShowToastAction { message in
             withAnimation(.spring(response: 0.36, dampingFraction: 0.8)) { toast = message }
         })
@@ -60,7 +59,7 @@ struct ToastBanner: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 12)
-        .glassPill(interactive: false)
+        .floatingPill(interactive: false)
         .shadow(color: .black.opacity(0.12), radius: 12, y: 4)
     }
 }

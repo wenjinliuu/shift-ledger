@@ -15,7 +15,7 @@ project.yml                     XcodeGen 工程定义（.xcodeproj 不入库）
 Scripts/bootstrap.sh            本地生成并打开工程
 ShiftLedger/
   App/                          入口、根标签栏、界面偏好
-  Design/                       Liquid Glass 封装、配色、班次色球
+  Design/                       表面与材质封装、配色、班次色球
   Models/                       班次、标签、循环模板、每日记录、工时设置、数据文档
   Rules/                        日期与年度周期、法定节假日、循环生成、加班判定、基本工时
   Data/                         数据门面、外部 JSON 清洗与迁移、职业预设、备份
@@ -34,11 +34,12 @@ brew install xcodegen
 
 `.xcodeproj` 是生成物，不进版本库。改了 `project.yml` 或增删文件后重新跑一次即可。
 
-## 液态玻璃写在哪里
+## 表面与材质写在哪里
 
-所有 iOS 26 的 Liquid Glass 系统 API 只出现在 `ShiftLedger/Design/LiquidGlass.swift`，
-页面代码一律走 `glassCard` / `glassPill` / `glassCircle` / `GlassGroup` 这些语义化封装。
-SDK 若调整签名，改动范围锁在这一个文件里。
+页面是系统分组灰底，内容分「底 → 卡片 → 格子」三层，靠系统分组背景色拉层次；
+玻璃只留给真正浮在内容之上的东西（轻提示、悬浮控件）。这些封装都在
+`ShiftLedger/Design/Surfaces.swift`：`card` / `insetSurface` / `floatingPill`，
+iOS 26 的 Liquid Glass 系统 API 也只出现在这一个文件里。
 
 ## 数据为什么存成一份文档
 

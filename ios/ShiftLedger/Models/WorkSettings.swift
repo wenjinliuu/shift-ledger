@@ -111,8 +111,8 @@ enum CareerPreset: String, Codable, Sendable, CaseIterable, Identifiable {
 struct CalendarDisplaySettings: Codable, Hashable, Sendable {
     var showShift: Bool = true
     var showTags: Bool = true
-    var showShiftTime: Bool = false
-    var showHours: Bool = false
+    var showShiftTime: Bool = true
+    var showHours: Bool = true
     var showHolidays: Bool = true
 }
 

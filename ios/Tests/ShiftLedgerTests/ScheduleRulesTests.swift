@@ -185,6 +185,28 @@ final class ScheduleRulesTests: XCTestCase {
         XCTAssertTrue(transport.tags.contains { $0.id == tagId })
     }
 
+    // MARK: - 改班次默认工时
+
+    @MainActor
+    func testChangingDefaultHoursUpdatesUntouchedRecords() throws {
+        var document = ScheduleDocument.makeDefault()
+        document.records = [
+            DayRecord(date: "2026-09-02", shiftId: ShiftID.day, hours: 12, source: .cycle),
+            DayRecord(date: "2026-09-03", shiftId: ShiftID.day, hours: 12, source: .cycle),
+            // 这一天单独调过工时，改默认值不该动它
+            DayRecord(date: "2026-09-04", shiftId: ShiftID.day, hours: 9, source: .manual),
+        ]
+        let store = ScheduleStore(fileURL: URL(fileURLWithPath: "/dev/null"), document: document)
+
+        var day = try XCTUnwrap(document.shift(ShiftID.day))
+        day.defaultHours = 11.5
+        store.saveShift(day)
+
+        XCTAssertEqual(store.document.record(on: "2026-09-02")?.hours, 11.5)
+        XCTAssertEqual(store.document.record(on: "2026-09-03")?.hours, 11.5)
+        XCTAssertEqual(store.document.record(on: "2026-09-04")?.hours, 9)
+    }
+
     // MARK: - 班次时长
 
     func testCompactRangeMatchesTheWebVersion() {
