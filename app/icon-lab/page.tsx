@@ -3,155 +3,134 @@
 import { useMemo, useState } from "react";
 import styles from "./styles.module.css";
 
-type Family = "all" | "daynight" | "calendar" | "cycle" | "minimal";
-
-type Concept = {
-  id: number;
-  name: string;
-  family: Exclude<Family, "all">;
-  note: string;
-  palette: [string, string, string, string];
-};
+type Family = "all" | "symbol" | "calendar" | "flat" | "expressive";
+type Concept = { id: number; name: string; family: Exclude<Family, "all">; note: string; tone: string };
 
 const concepts: Concept[] = [
-  { id: 1, name: "日夜双环", family: "daynight", note: "最接近原稿，压缩细节、强化循环", palette: ["#168CFF", "#3157F5", "#FFB000", "#7B4DFF"] },
-  { id: 2, name: "交班时刻", family: "daynight", note: "太阳与月亮围绕时针交接", palette: ["#08A4F7", "#513CF1", "#FFC21A", "#8B5CF6"] },
-  { id: 3, name: "昼夜转盘", family: "daynight", note: "把日历内页变成清晰的昼夜表盘", palette: ["#17B8F5", "#3546E8", "#FFB914", "#7651F4"] },
-  { id: 4, name: "晨昏轨道", family: "daynight", note: "地平线式日夜切换，安静耐看", palette: ["#2C9EF4", "#4F46E5", "#FFAF38", "#8B5CF6"] },
-  { id: 5, name: "班次三行", family: "calendar", note: "白班、夜班、休息直接落在日历里", palette: ["#179CFF", "#3154E8", "#FFB020", "#7C55EA"] },
-  { id: 6, name: "翻页循环", family: "calendar", note: "日历翻页与循环箭头合成一个动作", palette: ["#1597F2", "#3266E8", "#FF9E2D", "#7A4DEA"] },
-  { id: 7, name: "四格轮班", family: "calendar", note: "四格分别代表白、白、休、夜的节奏", palette: ["#00A8F0", "#3E52E8", "#FFB11C", "#8B4CEB"] },
-  { id: 8, name: "日期脉冲", family: "calendar", note: "用亮起的日期格表达周期正在运行", palette: ["#259AF2", "#4356DE", "#FFB42A", "#7B54F5"] },
-  { id: 9, name: "无尽交班", family: "cycle", note: "无限符号连接太阳与月亮", palette: ["#00A5F5", "#3C50E8", "#FFAD1F", "#7C4DFF"] },
-  { id: 10, name: "四拍循环", family: "cycle", note: "四段环形节奏，适合表达自定义班制", palette: ["#149EF2", "#315CE6", "#FFAB22", "#8051EF"] },
-  { id: 11, name: "循环跑道", family: "cycle", note: "一条连续轨道串联不同班次", palette: ["#03A5F5", "#3C55E8", "#FFB11F", "#7B4FEF"] },
-  { id: 12, name: "交替双箭", family: "cycle", note: "上下两段箭头，轮换含义最直接", palette: ["#2098F3", "#3B4FE3", "#FFAA29", "#8250F1"] },
-  { id: 13, name: "时间回环", family: "cycle", note: "时钟与回环合体，偏工具属性", palette: ["#159FF5", "#3B50E9", "#FFB020", "#7652ED"] },
-  { id: 14, name: "班次堆叠", family: "cycle", note: "三张班次卡依次轮转，层次鲜明", palette: ["#079EF4", "#3B55E7", "#FFAC26", "#8352EF"] },
-  { id: 15, name: "极简日轮", family: "minimal", note: "只保留日历、太阳和一段回转弧", palette: ["#168FF0", "#3555E5", "#FFB223", "#7E50EE"] },
-  { id: 16, name: "双色轮转", family: "minimal", note: "两个干净色块表达白夜交替", palette: ["#199EF3", "#3B4DE2", "#FFAE25", "#7652ED"] },
-  { id: 17, name: "循环字标", family: "minimal", note: "圆角 C 形回环，最适合小尺寸", palette: ["#0B9FF2", "#3655E7", "#FFAF23", "#7C50EF"] },
-  { id: 18, name: "四叶班表", family: "minimal", note: "四片叶瓣构成规律而柔和的循环", palette: ["#11A1F2", "#4050E5", "#FFAF22", "#8452F0"] },
-  { id: 19, name: "昼夜刻度", family: "minimal", note: "双弧加刻度，克制而有专业感", palette: ["#2299F2", "#3B50E1", "#FFB028", "#8050ED"] },
-  { id: 20, name: "原稿精修", family: "daynight", note: "保留原稿信息，重新校准比例与重心", palette: ["#169BFF", "#3151E9", "#FFB000", "#7C45EE"] },
+  { id: 1, name: "蓝橙交班", family: "symbol", note: "两枚箭头就是白班与夜班，清楚直接", tone: "扁平 · 白底" },
+  { id: 2, name: "午夜表盘", family: "symbol", note: "用 24 小时时钟表达倒班与时间", tone: "霓虹 · 深色" },
+  { id: 3, name: "无尽昼夜", family: "symbol", note: "太阳和月亮沿无限轨迹持续交替", tone: "柔和 · 天空色" },
+  { id: 4, name: "三班轨道", family: "symbol", note: "三条轨道对应早、中、夜三个班次", tone: "专业 · 黑底" },
+  { id: 5, name: "循环字标", family: "symbol", note: "把循环的 C 与四个班次节点合成字标", tone: "极简 · 纯白" },
+  { id: 6, name: "纸感班表", family: "calendar", note: "像一页真实班表，温和而有生活感", tone: "纸感 · 米白" },
+  { id: 7, name: "双页轮换", family: "calendar", note: "两张日历翻页，表达规律不断延续", tone: "活力 · 珊瑚橙" },
+  { id: 8, name: "彩色周期格", family: "calendar", note: "用日期色块直接呈现班次序列", tone: "系统感 · 浅灰" },
+  { id: 9, name: "月份堆栈", family: "calendar", note: "多个月份连续堆叠，突出长期排班", tone: "层叠 · 冰蓝" },
+  { id: 10, name: "极简月历", family: "calendar", note: "只有轮廓与一个重点日期，最克制", tone: "线性 · 黑白" },
+  { id: 11, name: "四拍转盘", family: "flat", note: "四段节拍代表工作与休息交替", tone: "几何 · 多彩" },
+  { id: 12, name: "班次胶囊", family: "flat", note: "四枚胶囊围绕中心轮换，现代轻快", tone: "扁平 · 钴蓝" },
+  { id: 13, name: "时间胶囊", family: "flat", note: "把完整一天压缩成一条昼夜时间轴", tone: "简洁 · 紫色" },
+  { id: 14, name: "双色磁贴", family: "flat", note: "白、夜、休、循环四格一眼看懂", tone: "图块 · 纯蓝" },
+  { id: 15, name: "日出下班", family: "flat", note: "晨昏越过地平线，强调交接时刻", tone: "插画 · 暖橙" },
+  { id: 16, name: "夜班窗口", family: "expressive", note: "从深夜窗口看到下一次日出", tone: "静谧 · 午夜蓝" },
+  { id: 17, name: "循环刻度", family: "expressive", note: "精密刻度与状态点，更偏效率工具", tone: "仪表 · 中性灰" },
+  { id: 18, name: "班次丝带", family: "expressive", note: "一条连续丝带折出白班、夜班和休息", tone: "品牌感 · 浅色" },
+  { id: 19, name: "翻页箭头", family: "expressive", note: "日历右上角翻起，形成自然循环箭头", tone: "清新 · 绿色" },
+  { id: 20, name: "液态日历", family: "expressive", note: "保留玻璃质感，但只用一个清晰主符号", tone: "玻璃 · 蓝紫" },
 ];
 
-const familyLabels: Record<Family, string> = {
-  all: "全部 20 款",
-  daynight: "日夜主题",
-  calendar: "日历结构",
-  cycle: "循环符号",
-  minimal: "极简识别",
-};
+const labels: Record<Family, string> = { all: "全部 20 款", symbol: "核心符号", calendar: "日历变化", flat: "扁平构图", expressive: "风格探索" };
 
-function Sun({ x, y, color, small = false }: { x: number; y: number; color: string; small?: boolean }) {
-  const r = small ? 7 : 11;
-  return <g><circle cx={x} cy={y} r={r} fill={color}/>{!small && [0,45,90,135].map((a)=><line key={a} x1={x-17*Math.cos(a*Math.PI/180)} y1={y-17*Math.sin(a*Math.PI/180)} x2={x+17*Math.cos(a*Math.PI/180)} y2={y+17*Math.sin(a*Math.PI/180)} stroke={color} strokeWidth="4" strokeLinecap="round"/>)}</g>;
+function Arrow({ x, y, angle, color, size = 10 }: { x:number; y:number; angle:number; color:string; size?:number }) {
+  return <path d={`M${x-size} ${y-size*.72}L${x+size} ${y}L${x-size} ${y+size*.72}Z`} fill={color} transform={`rotate(${angle} ${x} ${y})`}/>;
 }
 
-function Moon({ x, y, color, small = false }: { x: number; y: number; color: string; small?: boolean }) {
-  return <path d={small ? `M ${x+7} ${y-8} A 10 10 0 1 0 ${x+7} ${y+8} A 8 8 0 0 1 ${x+7} ${y-8}` : `M ${x+10} ${y-14} A 18 18 0 1 0 ${x+10} ${y+14} A 14 14 0 0 1 ${x+10} ${y-14}`} fill={color}/>;
+function Sun({ x, y, color = "#FFAF18", r = 10 }: { x:number; y:number; color?:string; r?:number }) {
+  return <g><circle cx={x} cy={y} r={r} fill={color}/>{[0,45,90,135].map(a => <line key={a} x1={x-(r+6)*Math.cos(a*Math.PI/180)} y1={y-(r+6)*Math.sin(a*Math.PI/180)} x2={x+(r+6)*Math.cos(a*Math.PI/180)} y2={y+(r+6)*Math.sin(a*Math.PI/180)} stroke={color} strokeWidth="3.5" strokeLinecap="round"/>)}</g>;
 }
 
-function ArrowHead({ x, y, rotate, color, size = 10 }: { x: number; y: number; rotate: number; color: string; size?: number }) {
-  return <path d={`M ${x-size} ${y-size*.72} L ${x+size} ${y} L ${x-size} ${y+size*.72} Z`} fill={color} transform={`rotate(${rotate} ${x} ${y})`}/>;
-}
-
-function CalendarShell({ accent, compact = false }: { accent: string; compact?: boolean }) {
-  return <g>
-    <rect x={compact ? 55 : 41} y={compact ? 51 : 45} width={compact ? 90 : 118} height={compact ? 103 : 120} rx="24" fill="url(#paper)" stroke="rgba(255,255,255,.78)" strokeWidth="2"/>
-    <path d={compact ? "M55 79H145" : "M41 78H159"} stroke={accent} strokeWidth="10" opacity=".95"/>
-    <rect x={compact ? 76 : 67} y="36" width="12" height="31" rx="6" fill="white"/>
-    <rect x={compact ? 112 : 121} y="36" width="12" height="31" rx="6" fill="white"/>
-  </g>;
+function Moon({ x, y, color = "#6D4AFF", r = 13, cut = "#fff" }: { x:number; y:number; color?:string; r?:number; cut?:string }) {
+  return <g><circle cx={x} cy={y} r={r} fill={color}/><circle cx={x+7} cy={y-5} r={r} fill={cut}/></g>;
 }
 
 function Artwork({ concept }: { concept: Concept }) {
-  const [cyan, blue, amber, violet] = concept.palette;
-  const i = concept.id;
-  const common = <>
-    <defs>
-      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stopColor={cyan}/><stop offset=".53" stopColor={blue}/><stop offset="1" stopColor={violet}/></linearGradient>
-      <linearGradient id="paper" x1="0" y1="0" x2=".85" y2="1"><stop stopColor="#FFFFFF"/><stop offset="1" stopColor="#EEF1FF"/></linearGradient>
-      <linearGradient id="warm" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#FFD53D"/><stop offset="1" stopColor={amber}/></linearGradient>
-      <linearGradient id="cool" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#9984FF"/><stop offset="1" stopColor={violet}/></linearGradient>
-      <filter id="shadow"><feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#17217A" floodOpacity=".25"/></filter>
-      <filter id="soft"><feGaussianBlur stdDeviation="7"/></filter>
-    </defs>
-    <rect width="200" height="200" rx="45" fill="url(#bg)"/>
-    <ellipse cx="58" cy="32" rx="68" ry="38" fill="white" opacity=".14" filter="url(#soft)"/>
-  </>;
-
+  const id = concept.id;
+  const shadow = `shadow-${id}`;
+  const glass = `glass-${id}`;
+  const warm = `warm-${id}`;
+  const cool = `cool-${id}`;
+  const defs = <defs>
+    <filter id={shadow} x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="7" stdDeviation="7" floodColor="#101938" floodOpacity=".22"/></filter>
+    <linearGradient id={glass} x1=".1" y1="0" x2=".9" y2="1"><stop stopColor="#FFFFFF" stopOpacity=".96"/><stop offset="1" stopColor="#DFE8FF" stopOpacity=".76"/></linearGradient>
+    <linearGradient id={warm} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#FFD53F"/><stop offset="1" stopColor="#FF7A21"/></linearGradient>
+    <linearGradient id={cool} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#27C4FF"/><stop offset=".5" stopColor="#3264F5"/><stop offset="1" stopColor="#8A45F5"/></linearGradient>
+  </defs>;
   let art: React.ReactNode;
-  switch (i) {
-    case 1: art = <><CalendarShell accent={cyan}/><g filter="url(#shadow)"><path d="M57 124A47 47 0 0 1 136 91" fill="none" stroke="url(#warm)" strokeWidth="17" strokeLinecap="round"/><ArrowHead x={139} y={94} rotate={40} color={amber}/><path d="M143 114A47 47 0 0 1 65 145" fill="none" stroke="url(#cool)" strokeWidth="17" strokeLinecap="round"/><ArrowHead x={61} y={143} rotate={205} color={violet}/></g><Sun x={86} y={120} color={amber} small/><Moon x={114} y={120} color={violet} small/></>;
-    case 2: art = <><CalendarShell accent={blue}/><circle cx="100" cy="121" r="38" fill="none" stroke="white" strokeWidth="8" opacity=".65"/><path d="M100 121V92M100 121L128 135" stroke={blue} strokeWidth="8" strokeLinecap="round"/><circle cx="100" cy="121" r="8" fill={blue}/><Sun x={76} y={100} color={amber} small/><Moon x={129} y={108} color={violet} small/><path d="M60 136A46 46 0 0 0 143 137" fill="none" stroke="url(#cool)" strokeWidth="9" strokeLinecap="round"/><ArrowHead x={143} y={137} rotate={20} color={violet} size={7}/></>;
-    case 3: art = <><CalendarShell accent={cyan}/><circle cx="100" cy="119" r="41" fill="#F8FAFF"/><path d="M100 78A41 41 0 0 0 100 160Z" fill="#FFF5D9"/><path d="M100 78A41 41 0 0 1 100 160Z" fill="#EEE9FF"/><Sun x={81} y={119} color={amber}/><Moon x={119} y={119} color={violet}/><path d="M62 113A40 40 0 0 1 133 91" fill="none" stroke={amber} strokeWidth="8" strokeLinecap="round"/><ArrowHead x={135} y={94} rotate={42} color={amber} size={7}/><path d="M138 126A40 40 0 0 1 68 148" fill="none" stroke={violet} strokeWidth="8" strokeLinecap="round"/><ArrowHead x={66} y={146} rotate={207} color={violet} size={7}/></>;
-    case 4: art = <><CalendarShell accent={blue}/><path d="M58 123H142" stroke="#DDE4FF" strokeWidth="3"/><path d="M65 123A35 35 0 0 1 135 123" fill="#FFF3CB"/><path d="M65 123A35 35 0 0 0 135 123" fill="#EEE7FF"/><Sun x={100} y={111} color={amber}/><Moon x={100} y={139} color={violet} small/><path d="M61 146A48 48 0 0 0 146 125" fill="none" stroke={violet} strokeWidth="9" strokeLinecap="round"/><ArrowHead x={145} y={125} rotate={-42} color={violet} size={7}/></>;
-    case 5: art = <><CalendarShell accent={cyan}/>{[[90,amber,46],[119,blue,65],[148,violet,38]].map(([y,c,w],n)=><g key={n}><rect x="57" y={Number(y)-7} width="86" height="15" rx="7.5" fill="#E7ECFA"/><rect x="57" y={Number(y)-7} width={Number(w)} height="15" rx="7.5" fill={String(c)}/></g>)}<path d="M137 139A21 21 0 0 1 119 157" fill="none" stroke={violet} strokeWidth="6" strokeLinecap="round"/><ArrowHead x={118} y={157} rotate={145} color={violet} size={5}/></>;
-    case 6: art = <><g filter="url(#shadow)"><rect x="39" y="48" width="122" height="112" rx="26" fill="url(#paper)"/><path d="M39 82H161" stroke={cyan} strokeWidth="12"/><path d="M58 103H101V145H58Z" fill="#FFF0C4"/><path d="M101 103H144V145H101Z" fill="#EEE8FF"/><path d="M101 103L144 145H101Z" fill={violet} opacity=".18"/></g><path d="M56 128A50 50 0 0 1 136 92" fill="none" stroke={amber} strokeWidth="11" strokeLinecap="round"/><ArrowHead x={139} y={95} rotate={42} color={amber} size={8}/><path d="M145 126A49 49 0 0 1 67 157" fill="none" stroke={violet} strokeWidth="11" strokeLinecap="round"/><ArrowHead x={64} y={155} rotate={205} color={violet} size={8}/></>;
-    case 7: art = <><CalendarShell accent={blue}/>{[[60,91,amber],[104,91,cyan],[60,129,violet],[104,129,blue]].map(([x,y,c],n)=><rect key={n} x={Number(x)} y={Number(y)} width="36" height="30" rx="10" fill={String(c)} opacity={n===1?.78:.96}/>)}<path d="M52 121A50 50 0 0 1 136 86" fill="none" stroke="white" strokeWidth="6" strokeLinecap="round" opacity=".9"/><ArrowHead x={138} y={88} rotate={40} color="white" size={6}/></>;
-    case 8: art = <><CalendarShell accent={cyan}/>{[0,1,2,3,4,5].map(n=><rect key={n} x={58+(n%3)*29} y={92+Math.floor(n/3)*33} width="22" height="22" rx="7" fill={n===0?amber:n===4?violet:"#DDE7F8"}/>) }<path d="M63 151C87 166 124 164 140 143" fill="none" stroke={violet} strokeWidth="8" strokeLinecap="round"/><ArrowHead x={140} y={142} rotate={-48} color={violet} size={6}/></>;
-    case 9: art = <><path d="M51 100C51 70 82 70 100 100S149 130 149 100 118 70 100 100 51 130 51 100" fill="none" stroke="white" strokeWidth="22" strokeLinecap="round" filter="url(#shadow)"/><path d="M51 100C51 70 82 70 100 100" fill="none" stroke="url(#warm)" strokeWidth="14" strokeLinecap="round"/><path d="M100 100C118 130 149 130 149 100" fill="none" stroke="url(#cool)" strokeWidth="14" strokeLinecap="round"/><Sun x={58} y={100} color={amber} small/><Moon x={142} y={100} color={violet} small/><rect x="76" y="139" width="48" height="28" rx="10" fill="white" opacity=".9"/><path d="M88 147V159M100 147V159M112 147V159" stroke={blue} strokeWidth="5" strokeLinecap="round"/></>;
-    case 10: art = <><circle cx="100" cy="104" r="55" fill="none" stroke="white" strokeWidth="18" opacity=".93" filter="url(#shadow)"/>{[[-45,cyan],[45,blue],[135,violet],[225,amber]].map(([a,c],n)=>{const rad=Number(a)*Math.PI/180;return <path key={n} d={`M ${100+55*Math.cos(rad-.55)} ${104+55*Math.sin(rad-.55)} A 55 55 0 0 1 ${100+55*Math.cos(rad+.55)} ${104+55*Math.sin(rad+.55)}`} fill="none" stroke={String(c)} strokeWidth="13" strokeLinecap="round"/>})}<circle cx="100" cy="104" r="28" fill="url(#paper)"/><path d="M100 104V87M100 104L115 113" stroke={blue} strokeWidth="6" strokeLinecap="round"/><circle cx="100" cy="104" r="6" fill={blue}/></>;
-    case 11: art = <><rect x="45" y="45" width="110" height="110" rx="42" fill="none" stroke="white" strokeWidth="22" opacity=".92" filter="url(#shadow)"/><path d="M72 45H128" stroke={amber} strokeWidth="14" strokeLinecap="round"/><path d="M155 72V128" stroke={violet} strokeWidth="14" strokeLinecap="round"/><path d="M128 155H72" stroke={blue} strokeWidth="14" strokeLinecap="round"/><path d="M45 128V72" stroke={cyan} strokeWidth="14" strokeLinecap="round"/>{[[72,45,amber],[155,72,violet],[128,155,blue],[45,128,cyan]].map(([x,y,c],n)=><circle key={n} cx={Number(x)} cy={Number(y)} r="8" fill={String(c)} stroke="white" strokeWidth="3"/>)}<CalendarShell accent={blue} compact/></>;
-    case 12: art = <><path d="M48 83A58 58 0 0 1 143 65" fill="none" stroke="url(#warm)" strokeWidth="19" strokeLinecap="round"/><ArrowHead x={146} y={68} rotate={43} color={amber}/><path d="M152 117A58 58 0 0 1 57 135" fill="none" stroke="url(#cool)" strokeWidth="19" strokeLinecap="round"/><ArrowHead x={54} y={132} rotate={223} color={violet}/><rect x="70" y="73" width="60" height="54" rx="17" fill="url(#paper)" filter="url(#shadow)"/><path d="M70 91H130" stroke={blue} strokeWidth="8"/><circle cx="89" cy="108" r="7" fill={amber}/><circle cx="111" cy="108" r="7" fill={violet}/></>;
-    case 13: art = <><circle cx="100" cy="101" r="60" fill="url(#paper)" filter="url(#shadow)"/><circle cx="100" cy="101" r="44" fill="none" stroke="#DCE5FA" strokeWidth="7"/><path d="M100 101V68M100 101L130 119" stroke={blue} strokeWidth="10" strokeLinecap="round"/><circle cx="100" cy="101" r="9" fill={blue}/><path d="M61 126A48 48 0 0 0 140 130" fill="none" stroke={violet} strokeWidth="10" strokeLinecap="round"/><ArrowHead x={140} y={129} rotate={-28} color={violet} size={7}/><Sun x={68} y={69} color={amber} small/></>;
-    case 14: art = <><g transform="rotate(-9 100 100)" filter="url(#shadow)"><rect x="48" y="74" width="104" height="67" rx="18" fill={violet}/><rect x="42" y="64" width="104" height="67" rx="18" fill={amber}/><rect x="36" y="54" width="104" height="67" rx="18" fill="url(#paper)"/><path d="M36 78H140" stroke={cyan} strokeWidth="9"/><circle cx="62" cy="98" r="8" fill={amber}/><rect x="78" y="91" width="44" height="14" rx="7" fill="#DDE5F8"/></g><path d="M57 148A61 61 0 0 0 153 116" fill="none" stroke="white" strokeWidth="8" strokeLinecap="round"/><ArrowHead x={153} y={115} rotate={-40} color="white" size={7}/></>;
-    case 15: art = <><CalendarShell accent={cyan}/><Sun x={91} y={119} color={amber}/><path d="M60 141A48 48 0 0 0 141 119" fill="none" stroke="url(#cool)" strokeWidth="14" strokeLinecap="round"/><ArrowHead x={141} y={118} rotate={-44} color={violet} size={9}/></>;
-    case 16: art = <><circle cx="100" cy="100" r="59" fill="url(#paper)" filter="url(#shadow)"/><path d="M100 48A52 52 0 0 0 100 152Z" fill="#FFF0C8"/><path d="M100 48A52 52 0 0 1 100 152Z" fill="#EAE5FF"/><path d="M58 71A52 52 0 0 1 137 64" fill="none" stroke={amber} strokeWidth="11" strokeLinecap="round"/><ArrowHead x={138} y={65} rotate={30} color={amber} size={7}/><path d="M142 129A52 52 0 0 1 63 136" fill="none" stroke={violet} strokeWidth="11" strokeLinecap="round"/><ArrowHead x={62} y={135} rotate={210} color={violet} size={7}/><Sun x={81} y={101} color={amber}/><Moon x={119} y={101} color={violet}/></>;
-    case 17: art = <><path d="M142 67A56 56 0 1 0 145 130" fill="none" stroke="white" strokeWidth="26" strokeLinecap="round" filter="url(#shadow)"/><path d="M142 67A56 56 0 0 0 69 55" fill="none" stroke="url(#warm)" strokeWidth="16" strokeLinecap="round"/><path d="M145 130A56 56 0 0 1 66 145" fill="none" stroke="url(#cool)" strokeWidth="16" strokeLinecap="round"/><ArrowHead x={145} y={130} rotate={-34} color={violet} size={12}/><rect x="79" y="77" width="50" height="50" rx="15" fill="url(#paper)"/><path d="M79 94H129" stroke={blue} strokeWidth="8"/></>;
-    case 18: art = <>{[[amber,0],[cyan,90],[violet,180],[blue,270]].map(([c,r],n)=><path key={n} d="M100 100C82 91 78 67 100 55C122 67 118 91 100 100Z" fill={String(c)} transform={`rotate(${r} 100 100)`} opacity=".96"/>)}<circle cx="100" cy="100" r="23" fill="url(#paper)" filter="url(#shadow)"/><path d="M100 100V86M100 100L112 108" stroke={blue} strokeWidth="6" strokeLinecap="round"/></>;
-    case 19: art = <><circle cx="100" cy="100" r="58" fill="url(#paper)" filter="url(#shadow)"/><path d="M55 111A47 47 0 0 1 135 66" fill="none" stroke={amber} strokeWidth="15" strokeLinecap="round"/><path d="M145 89A47 47 0 0 1 65 134" fill="none" stroke={violet} strokeWidth="15" strokeLinecap="round"/>{Array.from({length:8}).map((_,n)=>{const a=(-140+n*40)*Math.PI/180;return <line key={n} x1={100+31*Math.cos(a)} y1={100+31*Math.sin(a)} x2={100+38*Math.cos(a)} y2={100+38*Math.sin(a)} stroke={n<4?amber:violet} strokeWidth="4" strokeLinecap="round"/>})}<Sun x={83} y={99} color={amber} small/><Moon x={117} y={101} color={violet} small/></>;
-    default: art = <><CalendarShell accent={cyan}/><g filter="url(#shadow)"><path d="M55 126A50 50 0 0 1 137 89" fill="none" stroke="url(#warm)" strokeWidth="18" strokeLinecap="round"/><ArrowHead x={140} y={92} rotate={42} color={amber}/><path d="M145 117A50 50 0 0 1 63 151" fill="none" stroke="url(#cool)" strokeWidth="18" strokeLinecap="round"/><ArrowHead x={60} y={148} rotate={207} color={violet}/></g><path d="M100 89V149" stroke="#DCE2F3" strokeWidth="3"/><Sun x={83} y={120} color={amber}/><Moon x={117} y={120} color={violet}/></>;
+
+  switch (id) {
+    case 1:
+      art = <><rect width="200" height="200" rx="44" fill="#F7F9FC"/><circle cx="100" cy="100" r="58" fill="#fff" stroke="#E8ECF3" strokeWidth="2"/><path d="M54 96A48 48 0 0 1 133 63" fill="none" stroke="#168CFF" strokeWidth="19" strokeLinecap="round"/><Arrow x={139} y={68} angle={42} color="#168CFF"/><path d="M146 104A48 48 0 0 1 67 137" fill="none" stroke="#FF8A24" strokeWidth="19" strokeLinecap="round"/><Arrow x={61} y={132} angle={222} color="#FF8A24"/><circle cx="100" cy="100" r="22" fill="#F1F4F9"/><path d="M100 100V86M100 100L112 108" stroke="#20283A" strokeWidth="6" strokeLinecap="round"/></>;
+      break;
+    case 2:
+      art = <><rect width="200" height="200" rx="44" fill="#070B20"/><circle cx="100" cy="100" r="63" fill="#101735" stroke="#25315A" strokeWidth="2"/>{[0,1,2,3,4,5,6,7,8,9,10,11].map(n => {const a=(n*30-90)*Math.PI/180;return <line key={n} x1={100+48*Math.cos(a)} y1={100+48*Math.sin(a)} x2={100+55*Math.cos(a)} y2={100+55*Math.sin(a)} stroke={n<6?"#33D7FF":"#9B67FF"} strokeWidth="4" strokeLinecap="round"/>})}<path d="M100 100L100 61M100 100L129 119" stroke="#fff" strokeWidth="8" strokeLinecap="round"/><circle cx="100" cy="100" r="9" fill="#20CFFF"/><text x="100" y="154" textAnchor="middle" fill="#7F8AB2" fontSize="12" fontWeight="700">24H</text></>;
+      break;
+    case 3:
+      art = <><rect width="200" height="200" rx="44" fill="#E8F6FF"/><path d="M47 100C47 66 82 64 100 100S153 136 153 100 118 64 100 100 47 136 47 100" fill="none" stroke="#fff" strokeWidth="27" strokeLinecap="round" filter={`url(#${shadow})`}/><path d="M47 100C47 66 82 64 100 100" fill="none" stroke={`url(#${warm})`} strokeWidth="16" strokeLinecap="round"/><path d="M100 100C118 136 153 136 153 100" fill="none" stroke="#5C48DB" strokeWidth="16" strokeLinecap="round"/><Sun x={56} y={99} r={7}/><Moon x={144} y={100} r={10} cut="#5C48DB"/></>;
+      break;
+    case 4:
+      art = <><rect width="200" height="200" rx="44" fill="#11131A"/><circle cx="100" cy="100" r="61" fill="#191C25" stroke="#2E323E" strokeWidth="2"/><path d="M48 82A57 57 0 0 1 140 54" fill="none" stroke="#FFB11B" strokeWidth="10" strokeLinecap="round"/><path d="M151 76A57 57 0 0 1 130 145" fill="none" stroke="#36D0FF" strokeWidth="10" strokeLinecap="round"/><path d="M119 154A57 57 0 0 1 49 119" fill="none" stroke="#8A61FF" strokeWidth="10" strokeLinecap="round"/><circle cx="100" cy="100" r="30" fill="#F6F7FA"/><path d="M100 100V80M100 100L118 111" stroke="#151821" strokeWidth="7" strokeLinecap="round"/><circle cx="100" cy="100" r="7" fill="#151821"/></>;
+      break;
+    case 5:
+      art = <><rect width="200" height="200" rx="44" fill="#fff"/><path d="M142 59A59 59 0 1 0 144 139" fill="none" stroke="#176CF5" strokeWidth="28" strokeLinecap="round"/><Arrow x={145} y={139} angle={-33} color="#176CF5" size={14}/>{[[62,63,"#FFB21A"],[135,64,"#FF6B45"],[61,137,"#34C98F"],[137,136,"#7655E8"]].map(([x,y,c])=><circle key={String(x)+String(y)} cx={Number(x)} cy={Number(y)} r="9" fill={String(c)} stroke="#fff" strokeWidth="4"/>)}<text x="100" y="113" textAnchor="middle" fill="#17213A" fontSize="39" fontWeight="800" fontFamily="-apple-system,sans-serif">C</text></>;
+      break;
+    case 6:
+      art = <><rect width="200" height="200" rx="44" fill="#F4EBDD"/><rect x="39" y="38" width="122" height="130" rx="14" fill="#D9CBB7" transform="rotate(-4 100 103)"/><rect x="43" y="35" width="116" height="130" rx="14" fill="#FFFDF8" filter={`url(#${shadow})`}/><rect x="43" y="35" width="116" height="33" rx="14" fill="#E65E49"/><path d="M43 54H159" stroke="#E65E49" strokeWidth="28"/><text x="61" y="57" fill="#fff" fontSize="13" fontWeight="800">SHIFT</text>{[0,1,2,3,4,5,6,7,8].map(n=><rect key={n} x={59+(n%3)*29} y={82+Math.floor(n/3)*25} width="18" height="14" rx="5" fill={["#F3B54A","#7C92D9","#BFD1EF","#7C92D9","#E9DED0","#F3B54A","#BFD1EF","#BFD1EF","#7C92D9"][n]}/>)}</>;
+      break;
+    case 7:
+      art = <><rect width="200" height="200" rx="44" fill="#FF7B4D"/><rect x="57" y="49" width="97" height="106" rx="23" fill="#D84B38" transform="rotate(8 105 102)"/><rect x="43" y="43" width="101" height="108" rx="23" fill="#fff" filter={`url(#${shadow})`}/><rect x="43" y="43" width="101" height="31" rx="22" fill="#2478F4"/><path d="M43 61H144" stroke="#2478F4" strokeWidth="24"/><path d="M68 102H119M68 122H104" stroke="#CDD8EC" strokeWidth="11" strokeLinecap="round"/><path d="M113 139H137" stroke="#FFE39C" strokeWidth="8" strokeLinecap="round"/><Arrow x={139} y={139} angle={0} color="#FFE39C" size={6}/></>;
+      break;
+    case 8:
+      art = <><rect width="200" height="200" rx="44" fill="#EEF1F5"/><rect x="38" y="38" width="124" height="124" rx="30" fill="#fff" filter={`url(#${shadow})`}/>{[0,1,2,3,4,5,6,7,8,9,10,11].map(n=><rect key={n} x={55+(n%4)*24} y={56+Math.floor(n/4)*29} width="16" height="19" rx="6" fill={["#246EF0","#246EF0","#FFAA20","#E1E6EF","#E1E6EF","#7655E8","#7655E8","#7655E8","#42B889","#E1E6EF","#246EF0","#FFAA20"][n]}/>) }<path d="M57 148C82 161 124 160 144 140" fill="none" stroke="#222A3A" strokeWidth="7" strokeLinecap="round"/><Arrow x={144} y={140} angle={-47} color="#222A3A" size={6}/></>;
+      break;
+    case 9:
+      art = <><rect width="200" height="200" rx="44" fill="#DDEEFF"/><rect x="58" y="34" width="96" height="114" rx="23" fill="#70ABEE" transform="rotate(9 106 91)"/><rect x="48" y="43" width="103" height="114" rx="23" fill="#397FE8" transform="rotate(3 100 100)"/><rect x="39" y="51" width="110" height="116" rx="23" fill="#fff" filter={`url(#${shadow})`}/><rect x="39" y="51" width="110" height="31" rx="22" fill="#102E66"/><path d="M39 69H149" stroke="#102E66" strokeWidth="25"/><text x="58" y="73" fill="#fff" fontSize="13" fontWeight="800">SEP</text>{[0,1,2,3,4,5].map(n=><circle key={n} cx={62+(n%3)*31} cy={104+Math.floor(n/3)*31} r="8" fill={["#FFB323","#377EEE","#377EEE","#7652E5","#DCE4EF","#FFB323"][n]}/>)}</>;
+      break;
+    case 10:
+      art = <><rect width="200" height="200" rx="44" fill="#fff"/><path d="M55 64H145V151H55Z" fill="none" stroke="#171A20" strokeWidth="9" strokeLinejoin="round"/><path d="M55 87H145" stroke="#171A20" strokeWidth="9"/><path d="M76 48V73M124 48V73" stroke="#171A20" strokeWidth="10" strokeLinecap="round"/><rect x="73" y="104" width="22" height="22" rx="5" fill="#FF453A"/><path d="M107 111H129M107 129H129" stroke="#C5CAD3" strokeWidth="7" strokeLinecap="round"/></>;
+      break;
+    case 11:
+      art = <><rect width="200" height="200" rx="44" fill="#FAFAFC"/><g transform="rotate(-45 100 100)"><path d="M100 45A55 55 0 0 1 155 100L128 100A28 28 0 0 0 100 72Z" fill="#FFB11C"/><path d="M155 100A55 55 0 0 1 100 155L100 128A28 28 0 0 0 128 100Z" fill="#FF6854"/><path d="M100 155A55 55 0 0 1 45 100L72 100A28 28 0 0 0 100 128Z" fill="#7557E8"/><path d="M45 100A55 55 0 0 1 100 45L100 72A28 28 0 0 0 72 100Z" fill="#2385F4"/></g><circle cx="100" cy="100" r="16" fill="#fff"/><circle cx="100" cy="100" r="6" fill="#1D2433"/></>;
+      break;
+    case 12:
+      art = <><rect width="200" height="200" rx="44" fill="#145BE7"/><circle cx="100" cy="100" r="24" fill="#fff" opacity=".95"/><path d="M100 100V87M100 100L112 108" stroke="#145BE7" strokeWidth="6" strokeLinecap="round"/>{[[100,51,"#FFD34A",0],[149,100,"#51D6C3",90],[100,149,"#A886FF",180],[51,100,"#fff",270]].map(([x,y,c,a])=><g key={String(a)} transform={`rotate(${a} ${x} ${y})`}><rect x={Number(x)-21} y={Number(y)-10} width="42" height="20" rx="10" fill={String(c)}/><circle cx={Number(x)+11} cy={Number(y)} r="5" fill="#145BE7" opacity=".3"/></g>)}</>;
+      break;
+    case 13:
+      art = <><rect width="200" height="200" rx="44" fill="#7650E8"/><rect x="29" y="72" width="142" height="57" rx="28.5" fill="#fff" filter={`url(#${shadow})`}/><path d="M100 72V129" stroke="#E2E3EC" strokeWidth="2"/><circle cx="66" cy="100" r="18" fill="#FFF0B7"/><Sun x={66} y={100} r={7}/><circle cx="134" cy="100" r="18" fill="#EEE8FF"/><Moon x={134} y={100} r={10} cut="#EEE8FF"/><path d="M52 143H148" stroke="#A98FF2" strokeWidth="7" strokeLinecap="round"/><path d="M72 143H112" stroke="#FFD24A" strokeWidth="7" strokeLinecap="round"/></>;
+      break;
+    case 14:
+      art = <><rect width="200" height="200" rx="44" fill="#0875E8"/><g filter={`url(#${shadow})`}><rect x="38" y="38" width="55" height="55" rx="17" fill="#fff"/><rect x="107" y="38" width="55" height="55" rx="17" fill="#FFD13E"/><rect x="38" y="107" width="55" height="55" rx="17" fill="#94E2D0"/><rect x="107" y="107" width="55" height="55" rx="17" fill="#8367F3"/></g><Sun x={65} y={65} r={7} color="#FF9D1D"/><Moon x={134} y={65} r={10} color="#4230A5" cut="#FFD13E"/><text x="65" y="143" textAnchor="middle" fill="#176A60" fontSize="20" fontWeight="900">R</text><path d="M122 136A14 14 0 0 1 144 124" fill="none" stroke="#fff" strokeWidth="5" strokeLinecap="round"/><Arrow x={145} y={125} angle={35} color="#fff" size={4}/></>;
+      break;
+    case 15:
+      art = <><rect width="200" height="200" rx="44" fill="#FFF0D8"/><circle cx="100" cy="111" r="42" fill="#FFB323"/><path d="M0 111H200V156Q200 200 156 200H44Q0 200 0 156Z" fill="#F47745"/><path d="M0 111H200" stroke="#D95D37" strokeWidth="4"/><path d="M49 133C74 153 127 153 151 133" fill="none" stroke="#fff" strokeWidth="14" strokeLinecap="round"/><Arrow x={151} y={133} angle={-25} color="#fff" size={9}/><path d="M83 81V57M117 81V57" stroke="#D95D37" strokeWidth="8" strokeLinecap="round"/></>;
+      break;
+    case 16:
+      art = <><rect width="200" height="200" rx="44" fill="#071629"/><rect x="39" y="38" width="122" height="125" rx="33" fill="#0E2948" stroke="#244568" strokeWidth="3"/><path d="M100 39V162M40 101H160" stroke="#244568" strokeWidth="3"/><Moon x={119} y={79} r={22} color="#D8D2FF" cut="#0E2948"/><circle cx="65" cy="65" r="3" fill="#72B9FF"/><circle cx="81" cy="80" r="2" fill="#72B9FF"/><path d="M53 135C76 119 124 119 147 135" fill="none" stroke="#FF9D3E" strokeWidth="10" strokeLinecap="round"/><circle cx="100" cy="135" r="10" fill="#FFC44D"/></>;
+      break;
+    case 17:
+      art = <><rect width="200" height="200" rx="44" fill="#E8EAED"/><circle cx="100" cy="100" r="61" fill="#F8F9FA" stroke="#C7CBD2" strokeWidth="2"/>{Array.from({length:16}).map((_,n)=>{const a=(n*22.5-90)*Math.PI/180;return <line key={n} x1={100+48*Math.cos(a)} y1={100+48*Math.sin(a)} x2={100+55*Math.cos(a)} y2={100+55*Math.sin(a)} stroke={n<5?"#FF9F18":n<10?"#3478EB":n<13?"#7B5AE4":"#B9BEC7"} strokeWidth="5" strokeLinecap="round"/>})}<rect x="73" y="72" width="54" height="58" rx="14" fill="#242934"/><path d="M73 88H127" stroke="#4C90F4" strokeWidth="8"/><circle cx="90" cy="108" r="6" fill="#FFB020"/><circle cx="110" cy="108" r="6" fill="#7E61E8"/></>;
+      break;
+    case 18:
+      art = <><rect width="200" height="200" rx="44" fill="#F8F6FF"/><path d="M49 78C72 45 124 43 151 74L129 90C111 70 82 70 68 91Z" fill="#FFC83D"/><path d="M151 74C170 107 150 151 113 160L104 133C127 126 138 106 129 90Z" fill="#FF6F58"/><path d="M113 160C75 166 40 134 49 96L76 101C72 123 86 137 104 133Z" fill="#4D7EF3"/><path d="M49 96C40 89 41 84 49 78L68 91C64 96 62 99 76 101Z" fill="#7655E8"/><circle cx="100" cy="104" r="28" fill="#fff" filter={`url(#${shadow})`}/><path d="M100 104V89M100 104L113 112" stroke="#252B3C" strokeWidth="6" strokeLinecap="round"/></>;
+      break;
+    case 19:
+      art = <><rect width="200" height="200" rx="44" fill="#1C9B73"/><rect x="40" y="40" width="120" height="120" rx="29" fill="#fff" filter={`url(#${shadow})`}/><path d="M40 72H160" stroke="#0E654F" strokeWidth="12"/><path d="M70 32V58M130 32V58" stroke="#fff" strokeWidth="11" strokeLinecap="round"/><path d="M115 40H160V85Z" fill="#A9E4D2"/><path d="M115 40C132 55 145 69 160 85" fill="none" stroke="#0E654F" strokeWidth="7"/><Arrow x={160} y={85} angle={90} color="#0E654F" size={8}/><path d="M64 105H91M64 129H123" stroke="#C8D5D1" strokeWidth="11" strokeLinecap="round"/></>;
+      break;
+    default:
+      art = <><rect width="200" height="200" rx="44" fill={`url(#${cool})`}/><rect x="30" y="29" width="140" height="142" rx="43" fill="#fff" fillOpacity=".18" stroke="#fff" strokeOpacity=".58" strokeWidth="2" filter={`url(#${shadow})`}/><rect x="47" y="48" width="106" height="104" rx="31" fill={`url(#${glass})`}/><path d="M47 78H153" stroke="#fff" strokeWidth="4" opacity=".8"/><path d="M74 39V64M126 39V64" stroke="#fff" strokeWidth="12" strokeLinecap="round"/><path d="M69 117A35 35 0 0 1 124 92" fill="none" stroke="#FFB41E" strokeWidth="12" strokeLinecap="round"/><Arrow x={128} y={96} angle={42} color="#FF9A18" size={8}/><path d="M131 112A35 35 0 0 1 76 137" fill="none" stroke="#7254E8" strokeWidth="12" strokeLinecap="round"/><Arrow x={72} y={133} angle={220} color="#7254E8" size={8}/></>;
   }
-  return <svg viewBox="0 0 200 200" role="img" aria-label={`${concept.id} 号 ${concept.name}`}>{common}{art}<path d="M23 28C55 7 135 3 173 24" fill="none" stroke="white" strokeWidth="3" opacity=".22" strokeLinecap="round"/></svg>;
+  return <svg viewBox="0 0 200 200" role="img" aria-label={`${concept.id} 号 ${concept.name}`}>{defs}{art}</svg>;
 }
 
 export default function IconLabPage() {
   const [family, setFamily] = useState<Family>("all");
   const [selected, setSelected] = useState<number[]>([]);
   const visible = useMemo(() => concepts.filter(c => family === "all" || c.family === family), [family]);
-  const toggle = (id: number) => setSelected(s => s.includes(id) ? s.filter(x => x !== id) : s.length < 4 ? [...s, id] : [...s.slice(1), id]);
-
+  const toggle = (id:number) => setSelected(old => old.includes(id) ? old.filter(x => x !== id) : old.length < 4 ? [...old,id] : [...old.slice(1),id]);
   return <main className={styles.page}>
-    <header className={styles.hero}>
-      <div>
-        <p className={styles.eyebrow}>SHIFT LEDGER · APP ICON LAB</p>
-        <h1>循环班表 · 图标实验室</h1>
-        <p className={styles.intro}>以你现有的蓝色日历、昼夜与循环箭头为起点，统一用适合 Apple Liquid Glass 分层制作的几何结构重新探索。</p>
-      </div>
-      <div className={styles.principles}>
-        <span>主体视觉居中</span><span>小尺寸可辨</span><span>可拆分玻璃图层</span>
-      </div>
-    </header>
-
-    <nav className={styles.filters} aria-label="方案分类">
-      {(Object.keys(familyLabels) as Family[]).map(key => <button key={key} className={family === key ? styles.active : ""} onClick={() => setFamily(key)}>{familyLabels[key]}</button>)}
-    </nav>
-
-    {selected.length > 0 && <section className={styles.compare}>
-      <div><strong>对比区</strong><span>最多保留 4 个方向</span></div>
-      <div className={styles.compareItems}>{selected.map(id => { const c=concepts[id-1]; return <button key={id} onClick={()=>toggle(id)}><i><Artwork concept={c}/></i><span>{String(id).padStart(2,"0")} · {c.name}</span><b>×</b></button> })}</div>
-    </section>}
-
-    <section className={styles.grid}>
-      {visible.map(concept => {
-        const isSelected = selected.includes(concept.id);
-        return <article key={concept.id} className={`${styles.card} ${isSelected ? styles.chosen : ""}`}>
-          <button className={styles.artButton} onClick={() => toggle(concept.id)} aria-pressed={isSelected}>
-            <div className={styles.art}><Artwork concept={concept}/></div>
-            <span className={styles.selectMark}>{isSelected ? "已加入对比" : "加入对比"}</span>
-          </button>
-          <div className={styles.meta}>
-            <div className={styles.titleRow}><span>{String(concept.id).padStart(2,"0")}</span><h2>{concept.name}</h2></div>
-            <p>{concept.note}</p>
-            <div className={styles.micro}><span>小尺寸</span><i className={styles.s60}><Artwork concept={concept}/></i><i className={styles.s40}><Artwork concept={concept}/></i></div>
-          </div>
-        </article>;
-      })}
-    </section>
-
-    <footer className={styles.footer}><p>选中喜欢的 1–4 款后，把编号告诉我。下一步会精修构图并拆成 Apple Icon Composer 图层。</p></footer>
+    <header className={styles.hero}><p className={styles.eyebrow}>SHIFT LEDGER · SECOND EXPLORATION</p><h1>20 个真正不同的方向</h1><p className={styles.intro}>这轮不固定背景、配色或构图。每款先建立一个独立视觉概念，再检查它缩小到桌面尺寸后是否仍然成立。</p></header>
+    <nav className={styles.filters} aria-label="图标方案分类">{(Object.keys(labels) as Family[]).map(key => <button key={key} className={family===key?styles.active:""} onClick={()=>setFamily(key)}>{labels[key]}</button>)}</nav>
+    {selected.length>0 && <section className={styles.compare}><div><strong>正在对比</strong><span>点击移除，最多 4 款</span></div><div className={styles.compareItems}>{selected.map(id => {const c=concepts[id-1];return <button key={id} onClick={()=>toggle(id)}><i><Artwork concept={c}/></i><span>{String(id).padStart(2,"0")} · {c.name}</span><b>×</b></button>})}</div></section>}
+    <section className={styles.grid}>{visible.map(c => {const chosen=selected.includes(c.id);return <article key={c.id} className={`${styles.card} ${chosen?styles.chosen:""}`}><button className={styles.artButton} onClick={()=>toggle(c.id)} aria-pressed={chosen}><div className={styles.art}><Artwork concept={c}/></div><span className={styles.selectMark}>{chosen?"已加入对比":"加入对比"}</span></button><div className={styles.meta}><div className={styles.titleRow}><span>{String(c.id).padStart(2,"0")}</span><h2>{c.name}</h2></div><p>{c.note}</p><div className={styles.micro}><em>{c.tone}</em><i className={styles.s60}><Artwork concept={c}/></i><i className={styles.s40}><Artwork concept={c}/></i></div></div></article>})}</section>
+    <footer className={styles.footer}>这一步只选方向。告诉我你喜欢的编号，我再围绕入选方案做比例、材质与 Apple Liquid Glass 分层精修。</footer>
   </main>;
 }
